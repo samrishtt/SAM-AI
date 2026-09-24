@@ -1,0 +1,16 @@
+{
+  "id": "samrishb/sam-ai-r1-reasoning-grpo",
+  "title": "sam-ai-r1-reasoning-grpo",
+  "code_file": "kaggle_grpo_training.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": "true",
+  "enable_gpu": "false",
+  "enable_tpu": "true",
+  "enable_internet": "true",
+  "dataset_sources": [],
+  "competition_sources": [
+    "arc-prize-2026-arc-agi-3"
+  ],
+  "kernel_sources": []
+}
