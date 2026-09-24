@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAM-AI | Sovereign Frontier Intelligence & Autonomous OS Agency</title>
+    <meta name="description" content="Independent, vertically-integrated frontier AI company architecture. Native OS computer-use, DeepSeek-R1 GRPO reasoning, and zero third-party API dependencies.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #07090e;
+            --surface: rgba(16, 21, 35, 0.7);
+            --surface-hover: rgba(24, 32, 54, 0.85);
+            --border: rgba(255, 255, 255, 0.08);
+            --border-glow: rgba(99, 102, 241, 0.35);
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --primary: #6366f1;
+            --primary-glow: rgba(99, 102, 241, 0.4);
+            --secondary: #a855f7;
+            --emerald: #10b981;
+            --cyan: #06b6d4;
+            --gradient-accent: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+            --gradient-mesh: radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.18) 0px, transparent 50%),
+                             radial-gradient(at 100% 0%, rgba(168, 85, 247, 0.15) 0px, transparent 50%),
+                             radial-gradient(at 50% 100%, rgba(6, 182, 212, 0.12) 0px, transparent 50%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg);
+            background-image: var(--gradient-mesh);
+            color: var(--text-main);
+            font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+            min-height: 100vh;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Glassmorphism utility */
+        .glass-panel {
+            background: var(--surface);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+        }
+
+        /* Navigation Header */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            padding: 18px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(7, 9, 14, 0.75);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .brand-container {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .brand-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: var(--gradient-accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 20px;
+            color: white;
+            box-shadow: 0 0 25px var(--primary-glow);
+        }
+
+        .brand-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #fff 0%, #cbd5e1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .badge-live {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(16, 185, 129, 0.12);
+            color: var(--emerald);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 20px;
+            padding: 4px 10px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .pulse-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--emerald);
+            box-shadow: 0 0 8px var(--emerald);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(1.3); }
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .nav-link {
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-link:hover {
+            color: white;
+        }
+
+        .btn-github {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--border);
+            color: white;
+            padding: 8px 18px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-github:hover {
+            background: rgba(255, 255, 255, 0.14);
+            border-color: var(--primary);
+            box-shadow: 0 0 20px var(--primary-glow);
+            transform: translateY(-1px);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 160px 24px 80px;
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .pill-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid var(--border-glow);
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #a5b4fc;
+            margin-bottom: 24px;
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
+        }
+
+        .hero h1 {
+            font-size: 3.8rem;
+            font-weight: 800;
+            line-height: 1.15;
+            letter-spacing: -1.5px;
+            margin-bottom: 24px;
+            background: linear-gradient(180deg, #ffffff 0%, #cbd5e1 70%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-dim);
+            max-width: 820px;
+            margin: 0 auto 40px;
+            font-weight: 400;
+        }
+
+        .hero-actions {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 60px;
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--gradient-accent);
+            color: white;
+            padding: 14px 32px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            text-decoration: none;
+            box-shadow: 0 0 35px var(--primary-glow);
+            transition: all 0.3s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 50px rgba(168, 85, 247, 0.6);
+        }
+
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: white;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background: var(--surface-hover);
+            border-color: var(--border-glow);
+            transform: translateY(-2px);
+        }
+
+        /* Benchmark Stats Ribbon */
+        .stats-ribbon {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            max-width: 1100px;
+            margin: 0 auto 100px;
+        }
+
+        .stat-card {
+            padding: 24px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: 800;
+            background: var(--gradient-accent);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Architecture Matrix */
+        .section-header {
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto 60px;
+        }
+
+        .section-header h2 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 12px;
+        }
+
+        .section-header p {
+            color: var(--text-dim);
+            font-size: 1.05rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            max-width: 1200px;
+            margin: 0 auto 120px;
+            padding: 0 24px;
+        }
+
+        .feature-card {
+            padding: 32px 28px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--border-glow);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .feature-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            background: rgba(99, 102, 241, 0.12);
+            border: 1px solid var(--border-glow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .feature-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+
+        .feature-desc {
+            color: var(--text-dim);
+            font-size: 0.92rem;
+            line-height: 1.6;
+        }
+
+        /* Terminal Demo Window */
+        .terminal-container {
+            max-width: 1000px;
+            margin: 0 auto 120px;
+            padding: 0 24px;
+        }
+
+        .terminal-box {
+            background: #0b0f19;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 14px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            overflow: hidden;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .terminal-bar {
+            background: #111827;
+            padding: 12px 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .circle {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        .red { background: #ef4444; }
+        .yellow { background: #f59e0b; }
+        .green { background: #10b981; }
+
+        .terminal-title {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            margin-left: 10px;
+        }
+
+        .terminal-body {
+            padding: 24px;
+            font-size: 0.88rem;
+            line-height: 1.7;
+            color: #e2e8f0;
+        }
+
+        .prompt-symbol { color: #10b981; }
+        .code-keyword { color: #a855f7; }
+        .code-string { color: #38bdf8; }
+        .code-comment { color: #64748b; }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 60px 40px;
+            background: rgba(7, 9, 14, 0.9);
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+
+        .footer-brand {
+            font-weight: 700;
+            color: white;
+            margin-bottom: 8px;
+        }
+
+        @media (max-width: 900px) {
+            .hero h1 { font-size: 2.5rem; }
+            .features-grid { grid-template-columns: 1fr; }
+            .stats-ribbon { grid-template-columns: repeat(2, 1fr); }
+            header { padding: 16px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header>
+        <a href="#" class="brand-container">
+            <div class="brand-icon">S</div>
+            <div>
+                <div class="brand-title">SAM-AI</div>
+            </div>
+        </a>
+        <div class="nav-links">
+            <span class="badge-live"><span class="pulse-dot"></span> Sovereign Stack Active</span>
+            <a href="https://github.com/samrishtt/SAM-AI" target="_blank" class="btn-github">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+                </svg>
+                Star on GitHub
+            </a>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <main>
+        <section class="hero">
+            <div class="pill-badge">🚀 Zero Third-Party APIs • 100% Sovereign Foundation Stack</div>
+            <h1>Sovereign Frontier AI &<br>Native Operating System Agency</h1>
+            <p>
+                An independent, vertically-integrated frontier AI company architecture. Powered by proprietary neural transformers, DeepSeek-R1 style GRPO self-play, and native Windows desktop automation.
+            </p>
+            <div class="hero-actions">
+                <a href="https://github.com/samrishtt/SAM-AI" target="_blank" class="btn-primary">
+                    Explore Codebase on GitHub →
+                </a>
+                <a href="https://github.com/samrishtt/SAM-AI/blob/master/THE_SOVEREIGN_AI_FOUNDER_PLAYBOOK.md" target="_blank" class="btn-secondary">
+                    Read the Founder Playbook 📄
+                </a>
+            </div>
+
+            <!-- Stats Ribbon -->
+            <div class="stats-ribbon">
+                <div class="glass-panel stat-card">
+                    <div class="stat-value">50/50</div>
+                    <div class="stat-label">Automated Tests Green</div>
+                </div>
+                <div class="glass-panel stat-card">
+                    <div class="stat-value">$0</div>
+                    <div class="stat-label">Third-Party API Spend</div>
+                </div>
+                <div class="glass-panel stat-card">
+                    <div class="stat-value">GRPO</div>
+                    <div class="stat-label">Zero-Label Reinforcement</div>
+                </div>
+                <div class="glass-panel stat-card">
+                    <div class="stat-value">Win32</div>
+                    <div class="stat-label">Native OS Computer-Use</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Live Code Execution Terminal -->
+        <section class="terminal-container">
+            <div class="terminal-box">
+                <div class="terminal-bar">
+                    <div class="circle red"></div>
+                    <div class="circle yellow"></div>
+                    <div class="circle green"></div>
+                    <span class="terminal-title">SAM-AI Sovereign REST Gateway — port 8000</span>
+                </div>
+                <div class="terminal-body">
+                    <span class="code-comment"># Query SAM-AI using standard OpenAI SDK (100% self-hosted, no OpenAI key required)</span><br>
+                    <span class="code-keyword">from</span> openai <span class="code-keyword">import</span> OpenAI<br><br>
+                    client = OpenAI(base_url=<span class="code-string">"http://127.0.0.1:8000/v1"</span>, api_key=<span class="code-string">"sovereign-local"</span>)<br><br>
+                    response = client.chat.completions.create(<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;model=<span class="code-string">"sovereign-r1"</span>,<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;messages=[{<span class="code-string">"role"</span>: <span class="code-string">"user"</span>, <span class="code-string">"content"</span>: <span class="code-string">"Launch notepad and verify prime theorem."</span>}]<br>
+                    )<br><br>
+                    <span class="prompt-symbol">▶</span> <strong>System 2 PUCT Search:</strong> Simulated 35 paths (Entropy H = 1.42 bits)<br>
+                    <span class="prompt-symbol">▶</span> <strong>OS World Bridge:</strong> Dispatched Win32 User32.dll -> Notepad Launched (PID 14208) ✅<br>
+                    <span class="prompt-symbol">▶</span> <strong>Deterministic AST Sandbox:</strong> Evaluated in 1.42ms without memory violation.
+                </div>
+            </div>
+        </section>
+
+        <!-- Core Architectural Pillars -->
+        <section>
+            <div class="section-header">
+                <h2>The Sovereign Intelligence Stack</h2>
+                <p>Engineered from first principles to out-innovate trillion-dollar incumbents through algorithmic efficiency rather than brute-force spend.</p>
+            </div>
+
+            <div class="features-grid">
+                <!-- Card 1 -->
+                <div class="glass-panel feature-card">
+                    <div class="feature-icon">🧠</div>
+                    <h3 class="feature-title">Proprietary Transformer</h3>
+                    <p class="feature-desc">
+                        Vectorized autoregressive decoder with Multi-Head Attention, RMSNorm, GeLU, and AdamW backpropagation. Own the weights, own the future.
+                    </p>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="glass-panel feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3 class="feature-title">DeepSeek-R1 GRPO</h3>
+                    <p class="feature-desc">
+                        Group Relative Policy Optimization. Generates candidate groups, scores them via deterministic verifiers, and self-improves with zero human labelers.
+                    </p>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="glass-panel feature-card">
+                    <div class="feature-icon">🖥️</div>
+                    <h3 class="feature-title">Native OS Computer-Use</h3>
+                    <p class="feature-desc">
+                        Win32 API cursor positioning, synthetic clicks, keystrokes, and multi-window orchestration. AI that doesn't just chat, but operates your machine.
+                    </p>
+                </div>
+
+                <!-- Card 4 -->
+                <div class="glass-panel feature-card">
+                    <div class="feature-icon">🌐</div>
+                    <h3 class="feature-title">OpenAI-Compatible Gateway</h3>
+                    <p class="feature-desc">
+                        Drop-in commercial REST API server on port 8000. Serves <code>/v1/chat/completions</code> and embeddings to any frontend, SDK, or enterprise stack.
+                    </p>
+                </div>
+
+                <!-- Card 5 -->
+                <div class="glass-panel feature-card">
+                    <div class="feature-icon">🌲</div>
+                    <h3 class="feature-title">Dual-Process MCTS</h3>
+                    <p class="feature-desc">
+                        Kahneman System 1 intuitive proposal + System 2 deliberate PUCT tree search. Dynamically scales test-time compute using Shannon entropy.
+                    </p>
+                </div>
+
+                <!-- Card 6 -->
+                <div class="glass-panel feature-card">
+                    <div class="feature-icon">💾</div>
+                    <h3 class="feature-title">Lifelong CLS Memory</h3>
+                    <p class="feature-desc">
+                        Complementary Learning Systems: Hippocampal fast episodic vector store combined with Neocortical relational knowledge graphs and sleep consolidation.
+                    </p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-brand">SAM-AI Technologies</div>
+        <p>Independent Frontier Cognitive Lab • Built from First Principles ($0 Capital, Sovereign Intelligence)</p>
+        <p style="margin-top: 12px; font-size: 0.8rem; color: #64748b;">
+            Open Source under MIT License • Maintained by <a href="https://github.com/samrishtt" target="_blank" style="color:#a5b4fc; text-decoration:none;">@samrishtt</a>
+        </p>
+    </footer>
+
+</body>
+</html>
