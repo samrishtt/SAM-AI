@@ -28,13 +28,13 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 # ==============================================================================
 # Configuration: Foundation Model & Training Hyperparameters
 # ==============================================================================
-# Primary: DeepSeek-R1-Distill-Qwen-1.5B (The premier System 2 reasoning open weights)
-MODEL_NAME = "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"
-OUTPUT_DIR = "/kaggle/working/sam-ai-r1-trained"
+# Primary: DeepSeek-R1-Distill-Qwen-14B (SOTA 14-Billion Parameter Reasoning Engine)
+MODEL_NAME = "deepseek-ai/DeepSeek-R1-Distill-Qwen-14B"
+OUTPUT_DIR = "/kaggle/working/sam-ai-r1-14b-trained"
 NUM_TRAIN_EPOCHS = 3
 BATCH_SIZE = 2
-GROUP_SIZE = 6          # G rollouts per problem (GRPO exploration)
-MAX_NEW_TOKENS = 512    # Deep thinking token budget
+GROUP_SIZE = 4          # 4 rollouts per problem (optimal for 14B on 48GB VRAM)
+MAX_NEW_TOKENS = 1024   # Extended System 2 thinking budget for complex derivations
 LEARNING_RATE = 5e-6
 
 
