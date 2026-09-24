@@ -54,6 +54,24 @@ class OpenAICompatibleHandler(http.server.BaseHTTPRequestHandler):
                 "object": "list",
                 "data": [
                     {
+                        "id": "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B",
+                        "object": "model",
+                        "created": int(time.time()),
+                        "owned_by": "sam-ai-frontier",
+                        "permission": [],
+                        "root": "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B",
+                        "parent": None,
+                    },
+                    {
+                        "id": "sam-ai-r1-reasoning",
+                        "object": "model",
+                        "created": int(time.time()),
+                        "owned_by": "sam-ai-frontier",
+                        "permission": [],
+                        "root": "sam-ai-r1-reasoning",
+                        "parent": None,
+                    },
+                    {
                         "id": "hyper-astra-3.5",
                         "object": "model",
                         "created": int(time.time()),
