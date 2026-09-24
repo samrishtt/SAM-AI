@@ -32,12 +32,15 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 # ==============================================================================
 # CELL 2: Configuration
 # ==============================================================================
-MODEL_NAME = "Qwen/Qwen2.5-0.5B-Instruct"  # Small enough for free T4
-OUTPUT_DIR = "/kaggle/working/sam-ai-grpo-trained"
+# The top open-source System 2 reasoning model (fits directly on Kaggle T4 GPU with 4-bit)
+MODEL_NAME = "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"
+# Alternative ultra-light option: "Qwen/Qwen2.5-0.5B-Instruct"
+
+OUTPUT_DIR = "/kaggle/working/sam-ai-r1-trained"
 NUM_TRAIN_EPOCHS = 3
-BATCH_SIZE = 4
-GROUP_SIZE = 8  # Number of rollouts per prompt (GRPO G parameter)
-MAX_NEW_TOKENS = 256
+BATCH_SIZE = 2
+GROUP_SIZE = 6  # Rollouts per prompt (GRPO G parameter for reasoning exploration)
+MAX_NEW_TOKENS = 512  # Longer budget for <think> reasoning tokens
 LEARNING_RATE = 5e-6
 
 # ==============================================================================
@@ -146,21 +149,28 @@ def generate_code_dataset(n_samples=500):
 # CELL 4: Reward Functions (Deterministic Verifiers)
 # ==============================================================================
 def math_reward_fn(completions, answer, **kwargs):
-    """Reward function that checks if the model's answer matches the expected answer."""
+    """Reward function that checks if the model's answer matches the expected answer,
+    plus an RLVR format bonus for generating explicit <think>...</think> reasoning traces."""
     rewards = []
     for completion in completions:
         text = completion[0]["content"] if isinstance(completion, list) else str(completion)
-        # Extract numbers from the response
+        r = 0.0
+        
+        # DeepSeek-R1 Format Reward: incentivize System 2 thinking
+        if "<think>" in text and "</think>" in text:
+            think_content = text.split("</think>")[0].replace("<think>", "").strip()
+            if len(think_content) > 20:
+                r += 0.2  # Bonus for genuine multi-step thinking
+        
+        # Accuracy Reward: deterministic ground truth check
         numbers = re.findall(r'\b\d+\b', text)
         if answer in numbers:
-            # Give higher reward if the answer appears near the end (final answer)
             last_pos = text.rfind(answer)
-            if last_pos > len(text) * 0.5:
-                rewards.append(1.0)  # Answer at the end = good reasoning
+            if last_pos > len(text) * 0.4:
+                r += 1.0  # Full credit for concluding with the correct answer
             else:
-                rewards.append(0.5)  # Answer found but maybe not as final answer
-        else:
-            rewards.append(0.0)
+                r += 0.5
+        rewards.append(r)
     return rewards
 
 
