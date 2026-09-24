@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 380" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradients -->
+    <linearGradient id="bg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#05070d"/>
+      <stop offset="50%" stop-color="#090d1a"/>
+      <stop offset="100%" stop-color="#060810"/>
+    </linearGradient>
+
+    <!-- Accent Gradient -->
+    <linearGradient id="accent-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#6366f1"/>
+      <stop offset="50%" stop-color="#a855f7"/>
+      <stop offset="100%" stop-color="#ec4899"/>
+    </linearGradient>
+
+    <!-- Cyan/Emerald Gradient -->
+    <linearGradient id="emerald-cyan" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#06b6d4"/>
+    </linearGradient>
+
+    <!-- Glow Filters -->
+    <filter id="glow-primary" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="25" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+
+    <filter id="glow-subtle" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+
+    <!-- Grid Pattern -->
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255, 255, 255, 0.03)" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="380" fill="url(#bg-grad)" rx="16"/>
+  <rect width="1200" height="380" fill="url(#grid)" rx="16"/>
+
+  <!-- Radial Background Glows -->
+  <circle cx="200" cy="100" r="180" fill="#6366f1" opacity="0.18" filter="url(#glow-primary)"/>
+  <circle cx="1000" cy="280" r="200" fill="#a855f7" opacity="0.14" filter="url(#glow-primary)"/>
+  <circle cx="600" cy="190" r="120" fill="#06b6d4" opacity="0.08" filter="url(#glow-primary)"/>
+
+  <!-- Geometric Circuit Lines -->
+  <g stroke="rgba(99, 102, 241, 0.2)" stroke-width="1.5" fill="none">
+    <path d="M 80,190 L 220,190 L 260,150 L 380,150"/>
+    <circle cx="380" cy="150" r="4" fill="#6366f1"/>
+    <path d="M 1120,190 L 980,190 L 940,230 L 820,230"/>
+    <circle cx="820" cy="230" r="4" fill="#a855f7"/>
+    <path d="M 600,40 L 600,90 L 640,130"/>
+    <circle cx="640" cy="130" r="3" fill="#10b981"/>
+  </g>
+
+  <!-- Central Logo Box -->
+  <g transform="translate(600, 110)">
+    <!-- Outer Glow Square -->
+    <rect x="-42" y="-42" width="84" height="84" rx="22" fill="url(#accent-grad)" filter="url(#glow-subtle)"/>
+    <rect x="-38" y="-38" width="76" height="76" rx="18" fill="#0b0f19" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+    <!-- Logo Letter 'S' -->
+    <text x="0" y="16" font-family="'Plus Jakarta Sans', -apple-system, sans-serif" font-size="44" font-weight="900" fill="url(#accent-grad)" text-anchor="middle">S</text>
+  </g>
+
+  <!-- Typography -->
+  <!-- Brand Title -->
+  <text x="600" y="215" font-family="'Plus Jakarta Sans', -apple-system, sans-serif" font-size="48" font-weight="800" fill="#ffffff" letter-spacing="-1.5" text-anchor="middle">
+    SAM-AI
+  </text>
+
+  <!-- Subtitle Tagline -->
+  <text x="600" y="255" font-family="'Plus Jakarta Sans', -apple-system, sans-serif" font-size="18" font-weight="600" fill="#94a3b8" letter-spacing="0.2" text-anchor="middle">
+    SOVEREIGN FRONTIER REASONING &amp; AUTONOMOUS OS AGENCY
+  </text>
+
+  <!-- Pill Feature Tags -->
+  <g transform="translate(600, 310)">
+    <!-- Tag 1: System 2 Reasoning -->
+    <g transform="translate(-320, 0)">
+      <rect x="-95" y="-16" width="190" height="32" rx="16" fill="rgba(99, 102, 241, 0.12)" stroke="rgba(99, 102, 241, 0.35)" stroke-width="1"/>
+      <circle cx="-75" cy="0" r="4" fill="#6366f1"/>
+      <text x="-62" y="5" font-family="'JetBrains Mono', monospace" font-size="11.5" font-weight="600" fill="#c7d2fe">System 2 RLVR</text>
+    </g>
+
+    <!-- Tag 2: DeepSeek-R1 GRPO -->
+    <g transform="translate(-105, 0)">
+      <rect x="-95" y="-16" width="190" height="32" rx="16" fill="rgba(168, 85, 247, 0.12)" stroke="rgba(168, 85, 247, 0.35)" stroke-width="1"/>
+      <circle cx="-75" cy="0" r="4" fill="#a855f7"/>
+      <text x="-62" y="5" font-family="'JetBrains Mono', monospace" font-size="11.5" font-weight="600" fill="#e9d5ff">DeepSeek-R1 GRPO</text>
+    </g>
+
+    <!-- Tag 3: 14B Foundation -->
+    <g transform="translate(105, 0)">
+      <rect x="-95" y="-16" width="190" height="32" rx="16" fill="rgba(16, 185, 129, 0.12)" stroke="rgba(16, 185, 129, 0.35)" stroke-width="1"/>
+      <circle cx="-75" cy="0" r="4" fill="#10b981"/>
+      <text x="-62" y="5" font-family="'JetBrains Mono', monospace" font-size="11.5" font-weight="600" fill="#a7f3d0">14B Foundation</text>
+    </g>
+
+    <!-- Tag 4: Win32 Agency -->
+    <g transform="translate(320, 0)">
+      <rect x="-95" y="-16" width="190" height="32" rx="16" fill="rgba(6, 182, 212, 0.12)" stroke="rgba(6, 182, 212, 0.35)" stroke-width="1"/>
+      <circle cx="-75" cy="0" r="4" fill="#06b6d4"/>
+      <text x="-62" y="5" font-family="'JetBrains Mono', monospace" font-size="11.5" font-weight="600" fill="#a5f3fc">Win32 OS Agency</text>
+    </g>
+  </g>
+
+  <!-- Border Highlight -->
+  <rect x="0.5" y="0.5" width="1199" height="379" rx="16" fill="none" stroke="rgba(255, 255, 255, 0.08)" stroke-width="1"/>
+</svg>

@@ -1,57 +1,83 @@
-# SAM-AI: Sovereign Frontier Reasoning & Autonomous OS Agency
-*An Independent, Vertically-Integrated Frontier AI Lab Architecture ($0 Upfront Capital, Zero Third-Party API Dependencies)*
+<p align="center">
+  <img src="assets/sam_ai_banner.svg" alt="SAM-AI Banner" width="100%">
+</p>
 
-[![Python Version](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tests Passing](https://img.shields.io/badge/tests-50%20passed-brightgreen.svg)]()
-[![API Standard](https://img.shields.io/badge/API-OpenAI--Compatible-emerald.svg)](api_server.py)
-[![Reasoning](https://img.shields.io/badge/Reasoning-System%202%20RLVR%20%2B%20GRPO-purple.svg)](core/neural/grpo_trainer.py)
-[![OS Agency](https://img.shields.io/badge/Computer--Use-Native%20Win32-red.svg)](core/agent/computer_use.py)
-[![Cloud Training](https://img.shields.io/badge/Training-Kaggle%20RTX%206000%2048GB-orange.svg)](notebooks/kaggle_sam_ai_r1/)
+<p align="center">
+  <strong>An Independent, Vertically-Integrated Frontier AI Lab Architecture</strong><br>
+  <em>$0 Upfront Capital • Zero Third-Party API Rent • System 2 RLVR Reasoning • Native OS Agency</em>
+</p>
+
+<p align="center">
+  <a href="https://samrishtt.github.io/SAM-AI/"><img src="https://img.shields.io/badge/Live%20Website-GitHub%20Pages-6366f1?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Live Website"></a>
+  <a href="https://github.com/samrishtt/SAM-AI"><img src="https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub Repo"></a>
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge" alt="License: MIT"></a>
+  <a href="https://www.python.org/"><img src="https://img.shields.io/badge/Python-3.11%2B-blue?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.11+"></a>
+</p>
+
+<p align="center">
+  <a href="#-quickstart"><img src="https://img.shields.io/badge/API-OpenAI--Compatible-emerald.svg" alt="API Standard"></a>
+  <a href="core/neural/grpo_trainer.py"><img src="https://img.shields.io/badge/Reasoning-System%202%20RLVR%20%2B%20GRPO-purple.svg" alt="Reasoning"></a>
+  <a href="core/agent/computer_use.py"><img src="https://img.shields.io/badge/Computer--Use-Native%20Win32-red.svg" alt="OS Agency"></a>
+  <a href="notebooks/kaggle_sam_ai_r1/"><img src="https://img.shields.io/badge/Cloud%20Training-RTX%206000%2048GB-orange.svg" alt="Cloud Training"></a>
+  <a href="tests/"><img src="https://img.shields.io/badge/Tests-50%2F50%20Passed-brightgreen.svg" alt="Tests"></a>
+</p>
+
+---
+
+<p align="center">
+  <a href="https://samrishtt.github.io/SAM-AI/">🌐 <b>Live Landing Page</b></a> •
+  <a href="#-executive-vision-the-sovereign-ai-lab">🏛️ <b>Executive Vision</b></a> •
+  <a href="#-the-neural-evolution-119k--14b--32b">🧠 <b>Model Evolution</b></a> •
+  <a href="#-scientific-methodology-rlvr--grpo">🔬 <b>RLVR Methodology</b></a> •
+  <a href="#-quickstart">⚡ <b>Quickstart</b></a> •
+  <a href="#-roadmap-from-0-to-frontier-ai-lab">🗺️ <b>Frontier Roadmap</b></a>
+</p>
 
 ---
 
 ## 🏛️ Executive Vision: The Sovereign AI Lab
 
-Most modern AI applications are thin wrappers that pay rent on closed third-party APIs (OpenAI, Anthropic, Google). **SAM-AI** is built on the opposite thesis: **absolute architectural sovereignty**. 
+Most modern AI companies are thin wrappers that pay rent on closed third-party APIs (OpenAI, Anthropic, Google). **SAM-AI** is built on the opposite thesis: **absolute architectural sovereignty**. 
 
-Inspired by the trajectories of **OpenAI, Anthropic, Mistral, and DeepSeek**, SAM-AI delivers a complete, vertically integrated intelligence stack with:
-* **Zero Third-Party API dependencies** (we run and train our own models).
+Inspired by the founding trajectories of **OpenAI, Anthropic, Mistral, and DeepSeek**, SAM-AI delivers a complete, vertically integrated intelligence stack with:
+* **Zero Third-Party API dependencies** (we run, own, and train our own models).
 * **System 2 Reasoning with Test-Time Compute** (explicit `<think> ... </think>` derivations).
 * **Reinforcement Learning with Verifiable Rewards (RLVR)** via DeepSeek-R1 style **Group Relative Policy Optimization (GRPO)**.
 * **Deterministic Objective Verifiers** (AST Python sandboxes, code test assertion suites, and mathematical ground-truth solvers).
 * **Native Windows Computer-Use Agency** (controlling apps, clicks, typing, and desktop navigation).
 
+> *"The 2010s were about pre-training on human data. The frontier today is about test-time search and models learning through reinforcement learning in verifiable environments."*
+
 ---
 
-## 🧠 The Evolution of SAM-AI's Neural Intelligence
+## 🧠 The Neural Evolution: 119K → 14B → 32B
 
 ```
-┌───────────────────────────────────────────────┐
-│     PHASE 1: THE LABORATORY PROTOTYPE         │
-│  • 119,744 Parameters (Pure NumPy Scratch)    │
-│  • Proved analytical backprop & AdamW         │
-│  • Proved GRPO learning loop works            │
-│  • Loss dropped 5.59 -> 1.85 on math corpus   │
-└───────────────────────┬───────────────────────┘
-                        │
-                        ▼
-┌───────────────────────────────────────────────┐
-│     PHASE 2: SOTA 14B REASONING FOUNDATION     │
-│  • Target: DeepSeek-R1-Distill-Qwen-14B       │
-│  • 14 Billion Parameters (120,000x larger)    │
-│  • Native <think> reasoning tokens            │
-│  • 93.9% on MATH-500, 69.7% on AIME 2024      │
-│  • Trained via RLVR on RTX 6000 48GB GPU      │
-└───────────────────────┬───────────────────────┘
-                        │
-                        ▼
-┌───────────────────────────────────────────────┐
-│     PHASE 3: SCALE TO 32B & ENTERPRISE SOV.   │
-│  • DeepSeek-R1-Distill-Qwen-32B               │
-│  • Scaled via $350k+ Startup Compute Grants   │
-│  • On-premise enterprise sovereign deployment │
-└───────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│             PHASE 1: THE LABORATORY PROTOTYPE               │
+│  • 119,744 Parameters (Pure NumPy First Principles)         │
+│  • Proved analytical backprop & AdamW optimization          │
+│  • Proved GRPO learning loop works (Loss dropped 5.59->1.85)│
+│  • 100% Convergence on Pattern Replication Tasks            │
+└──────────────────────────────┬──────────────────────────────┘
+                               │
+                               ▼
+┌─────────────────────────────────────────────────────────────┐
+│          PHASE 2: SOTA 14B REASONING FOUNDATION (ACTIVE)    │
+│  • Target: deepseek-ai/DeepSeek-R1-Distill-Qwen-14B         │
+│  • 14 Billion Parameters (120,000x larger than prototype)   │
+│  • Native <think> reasoning tokens with emergent reflection │
+│  • 93.9% on MATH-500 • 69.7% on AIME 2024 (Beats GPT-4o)   │
+│  • Trained via RLVR on RTX 6000 48GB GPU (ARC-AGI 3 attached│
+└──────────────────────────────┬──────────────────────────────┘
+                               │
+                               ▼
+┌─────────────────────────────────────────────────────────────┐
+│             PHASE 3: SCALE TO 32B & ENTERPRISE SOVEREIGNTY  │
+│  • deepseek-ai/DeepSeek-R1-Distill-Qwen-32B                 │
+│  • Scaled via $350k+ Startup Compute Grants (Azure/GCP/NV)  │
+│  • On-premise enterprise sovereign deployment               │
+└─────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -109,18 +135,18 @@ flowchart TD
 
 ---
 
-## 🔬 Scientific Methodology: Reinforcement Learning with Verifiable Rewards (RLVR)
+## 🔬 Scientific Methodology: RLVR + GRPO
 
-Traditional AI labs hit a "data wall" by relying on human annotators (RLHF). SAM-AI uses **RLVR**—the breakthrough behind OpenAI o1 and DeepSeek-R1:
+Traditional AI labs hit a "data wall" by relying on human annotators (RLHF). SAM-AI uses **RLVR (Reinforcement Learning with Verifiable Rewards)**—the algorithmic paradigm behind OpenAI o1 and DeepSeek-R1:
 
-1. **Candidate Group Rollouts:** For each problem, the policy samples $G$ candidate reasoning paths with exploration temperature.
+1. **Candidate Group Rollouts:** For each problem, the policy samples $G=4$ to $8$ candidate reasoning paths with exploration temperature.
 2. **Deterministic Sandboxed Verification:**
    - **Coding:** The generated code is executed inside `core/execution/ast_sandbox.py` against unit tests. If assertions pass, Reward = `1.0`; if it fails, Reward = `0.0`.
    - **Mathematics:** Evaluated against exact symbolic/numeric ground truth.
-   - **System 2 Format Bonus:** Explicit reward bonus for generating structured `<think> ... </think>` intermediate self-checks.
+   - **System 2 Format Bonus:** Explicit reward bonus (+0.25) for generating structured `<think> ... </think>` intermediate self-checks.
 3. **GRPO Policy Updates:** Advantages are normalized within the group:
    $$A_i = \frac{R_i - \text{mean}(R)}{\text{std}(R) + \epsilon}$$
-   Eliminating the memory overhead of a separate Value/Critic network and enabling training on 48GB GPUs.
+   Eliminating the memory overhead of a separate Value/Critic network and enabling 14B training on 48GB GPUs.
 
 ---
 
@@ -134,6 +160,20 @@ In our verified local curriculum run ([`scripts/run_self_improvement_v2.py`](scr
 | **Echo / Pattern Replication** | 0% | **100% (15/15 Solved)** | ✅ Perfect convergence |
 | **Sequential Patterns** | 13.4% | **40.9% (+27.5%)** | ↗️ Rapid skill acquisition |
 | **Single-Digit Arithmetic** | 0% | **33.3% Solved** | ↗️ Emergent arithmetic |
+
+<details>
+<summary><b>🔍 View Model Samples: Before vs. After Training</b></summary>
+
+```text
+BEFORE TRAINING (Random Byte Guessing):
+'2+3=' -> '2+3=!!4 %'   (Unstructured noise)
+
+AFTER CURRICULUM TRAINING (Learned Structured Equation Patterns):
+'2+3=' -> '5+5=5'       (Learned digits, operators, and structural equation syntax)
+'5+4=' -> '5+5=5'       
+'7+8=' -> '5+5=7'
+```
+</details>
 
 ---
 
@@ -178,24 +218,24 @@ kaggle kernels push -p notebooks/kaggle_sam_ai_r1
 
 ```
 [ Phase 1: Prototype Engine (COMPLETED) ]
-• Built vectorized Transformer from scratch in NumPy
-• Implemented analytical AdamW backpropagation & full GRPO trainer
-• Verified 50/50 unit tests across memory, tools, and sandboxes
-• Installed local PyTorch CPU + Transformers ML stack
+✓ Built vectorized Transformer from scratch in NumPy
+✓ Implemented analytical AdamW backpropagation & full GRPO trainer
+✓ Verified 50/50 unit tests across memory, tools, and sandboxes
+✓ Installed local PyTorch CPU + Transformers ML stack
 
 [ Phase 2: 14B Cloud Self-Training (ACTIVE) ]
-• Configure DeepSeek-R1-Distill-14B on RTX 6000 48GB GPU
-• Attach ARC-AGI 3 competition dataset
-• Run GRPO loop with 1,024 thinking token budget across 2,000+ problems
+→ Configure DeepSeek-R1-Distill-14B on RTX 6000 48GB GPU
+→ Attach ARC-AGI 3 competition dataset
+→ Run GRPO loop with 1,024 thinking token budget across 2,000+ problems
 
 [ Phase 3: Hugging Face Release & Grants (NEXT) ]
-• Release SAM-AI-R1-14B weights on Hugging Face
-• Submit benchmarks to the Open LLM Leaderboard
-• Apply for $150k-$350k startup compute grants (Microsoft, Google, NVIDIA)
+→ Release SAM-AI-R1-14B weights on Hugging Face
+→ Submit benchmarks to the Open LLM Leaderboard
+→ Apply for $150k-$350k startup compute grants (Microsoft, Google, NVIDIA)
 
 [ Phase 4: 32B Frontier Scale & Enterprise Deployment ]
-• Scale training to DeepSeek-R1-Distill-32B on cloud H100 clusters
-• Deploy Sovereign on-premise AI for privacy-critical enterprise verticals
+→ Scale training to DeepSeek-R1-Distill-32B on cloud H100 clusters
+→ Deploy Sovereign on-premise AI for privacy-critical enterprise verticals
 ```
 
 ---
@@ -207,5 +247,6 @@ kaggle kernels push -p notebooks/kaggle_sam_ai_r1
 
 ---
 
-## 📜 License
-MIT License. Built by researchers, founders, and engineers committed to sovereign artificial intelligence.
+## 📜 License & Attribution
+Distributed under the **MIT License**. Free for commercial and research use.  
+Built by researchers, founders, and engineers committed to sovereign artificial intelligence.
