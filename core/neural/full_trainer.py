@@ -105,15 +105,46 @@ class FullParameterTrainer:
                     "v": np.zeros_like(w),
                 })
             
-            for wname in ["W1", "b1", "W2", "b2"]:
-                w = getattr(ffn, wname)
+            if hasattr(ffn, "experts"):
+                # MoEFeedForwardNetwork
+                w_r = ffn.W_router
                 self.params.append({
-                    "name": f"block{i}_ffn_{wname}",
-                    "ref": (lambda f, n: lambda: getattr(f, n))(ffn, wname),
-                    "set": (lambda f, n: lambda v: setattr(f, n, v))(ffn, wname),
-                    "m": np.zeros_like(w),
-                    "v": np.zeros_like(w),
+                    "name": f"block{i}_moe_router",
+                    "ref": (lambda f: lambda: f.W_router)(ffn),
+                    "set": (lambda f: lambda v: setattr(f, "W_router", v))(ffn),
+                    "m": np.zeros_like(w_r),
+                    "v": np.zeros_like(w_r),
                 })
+                for e_idx, expert in enumerate(ffn.experts):
+                    for wname in ["W1", "b1", "W2", "b2"]:
+                        w = getattr(expert, wname)
+                        self.params.append({
+                            "name": f"block{i}_moe_exp{e_idx}_{wname}",
+                            "ref": (lambda exp, n: lambda: getattr(exp, n))(expert, wname),
+                            "set": (lambda exp, n: lambda v: setattr(exp, n, v))(expert, wname),
+                            "m": np.zeros_like(w),
+                            "v": np.zeros_like(w),
+                        })
+                if ffn.shared_expert is not None:
+                    for wname in ["W1", "b1", "W2", "b2"]:
+                        w = getattr(ffn.shared_expert, wname)
+                        self.params.append({
+                            "name": f"block{i}_moe_shared_{wname}",
+                            "ref": (lambda exp, n: lambda: getattr(exp, n))(ffn.shared_expert, wname),
+                            "set": (lambda exp, n: lambda v: setattr(exp, n, v))(ffn.shared_expert, wname),
+                            "m": np.zeros_like(w),
+                            "v": np.zeros_like(w),
+                        })
+            else:
+                for wname in ["W1", "b1", "W2", "b2"]:
+                    w = getattr(ffn, wname)
+                    self.params.append({
+                        "name": f"block{i}_ffn_{wname}",
+                        "ref": (lambda f, n: lambda: getattr(f, n))(ffn, wname),
+                        "set": (lambda f, n: lambda v: setattr(f, n, v))(ffn, wname),
+                        "m": np.zeros_like(w),
+                        "v": np.zeros_like(w),
+                    })
             
             for nidx, norm in enumerate([block.norm1, block.norm2]):
                 self.params.append({
@@ -235,14 +266,14 @@ class FullParameterTrainer:
     
     def train_step_full(
         self,
-        text: str,
+        text: str | List[int],
         n_perturbation_dirs: int = 3,
         train_internal: bool = True,
     ) -> float:
         """Full-parameter training step.
         
         Args:
-            text: Training text
+            text: Training text string or list of token IDs
             n_perturbation_dirs: Number of random directions for perturbation gradients
             train_internal: If True, also train attention/FFN via perturbation.
                            If False, only train embeddings and lm_head (faster).
@@ -250,7 +281,10 @@ class FullParameterTrainer:
         Returns:
             Training loss
         """
-        token_ids = self.model.tokenizer.encode(text)
+        if isinstance(text, list):
+            token_ids = text
+        else:
+            token_ids = self.model.tokenizer.encode(text)
         if len(token_ids) < 2:
             return 0.0
         
@@ -275,6 +309,10 @@ class FullParameterTrainer:
         
         return loss
     
+    def train_step(self, text: str | List[int], **kwargs) -> float:
+        """Alias for train_step_full matching standard trainer interface."""
+        return self.train_step_full(text, **kwargs)
+
     def _apply_adamw(self, param_entry: Dict, grad: np.ndarray, t: int):
         """Apply AdamW without incrementing step counter."""
         param_entry["m"] = self.beta1 * param_entry["m"] + (1 - self.beta1) * grad

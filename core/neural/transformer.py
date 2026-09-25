@@ -24,6 +24,11 @@ class TransformerConfig:
     n_layers: int = 2              # Transformer decoder blocks
     learning_rate: float = 0.001   # AdamW learning rate
     dropout: float = 0.0           # Dropout rate (inference 0)
+    use_moe: bool = False          # Enable Sparse Mixture of Experts
+    n_experts: int = 4             # Total number of routed experts
+    top_k: int = 2                 # Top-K active experts per token
+    use_shared_expert: bool = False # Always-active shared expert (DeepSeek-V3 style)
+    recurrent_depth: int = 1       # Recurrent iterations across transformer blocks (Looped Transformer)
 
 
 class SimpleTokenizer:
@@ -150,14 +155,112 @@ class RMSNorm:
         return out, {"x": x, "rms": rms, "x_norm": x_norm}
 
 
-class TransformerBlock:
-    """Pre-LayerNorm Transformer Decoder Block."""
+class MoEFeedForwardNetwork:
+    """Sparse Mixture of Experts (MoE) Feed-Forward Network.
 
-    def __init__(self, d_model: int, n_heads: int, d_ff: int):
+    Dynamically routes token representations across N experts with Top-K selection,
+    normalized softmax gating, and optional shared expert routing (DeepSeek-V3 style).
+    """
+
+    def __init__(
+        self,
+        d_model: int,
+        d_ff: int,
+        n_experts: int = 4,
+        top_k: int = 2,
+        use_shared_expert: bool = False,
+    ):
+        self.d_model = d_model
+        self.d_ff = d_ff
+        self.n_experts = n_experts
+        self.top_k = min(top_k, n_experts)
+        self.use_shared_expert = use_shared_expert
+
+        # Learned router gating matrix
+        scale_r = math.sqrt(2.0 / (d_model + n_experts))
+        self.W_router = np.random.randn(d_model, n_experts).astype(np.float32) * scale_r
+        self.mW_router = np.zeros_like(self.W_router)
+        self.vW_router = np.zeros_like(self.W_router)
+
+        # Independent routed experts
+        self.experts = [
+            FeedForwardNetwork(d_model, d_ff) for _ in range(n_experts)
+        ]
+
+        # Optional shared expert (always active for all tokens)
+        self.shared_expert = (
+            FeedForwardNetwork(d_model, d_ff) if use_shared_expert else None
+        )
+
+    def forward(self, x: np.ndarray) -> Tuple[np.ndarray, Dict[str, Any]]:
+        """Forward pass with Top-K expert routing."""
+        T, D = x.shape
+
+        # 1. Router gating logits: (T, n_experts)
+        router_logits = np.dot(x, self.W_router)
+
+        # 2. Select Top-K experts per token
+        top_indices = np.argsort(router_logits, axis=-1)[:, -self.top_k:]  # (T, top_k)
+
+        # Softmax normalization over the selected top-k logits
+        row_indices = np.arange(T)[:, None]
+        top_logits = router_logits[row_indices, top_indices]  # (T, top_k)
+        routing_weights = softmax(top_logits, axis=-1)  # (T, top_k)
+
+        # 3. Accumulate expert outputs
+        out = np.zeros((T, D), dtype=np.float32)
+        for k_idx in range(self.top_k):
+            selected = top_indices[:, k_idx]
+            w = routing_weights[:, k_idx, None]  # (T, 1)
+            for e_idx in range(self.n_experts):
+                mask = selected == e_idx
+                if np.any(mask):
+                    e_out, _ = self.experts[e_idx].forward(x[mask])
+                    out[mask] += e_out * w[mask]
+
+        # 4. Optional Shared Expert
+        shared_out = None
+        if self.shared_expert is not None:
+            shared_out, _ = self.shared_expert.forward(x)
+            out += shared_out
+
+        cache = {
+            "x": x,
+            "router_logits": router_logits,
+            "top_indices": top_indices,
+            "routing_weights": routing_weights,
+            "shared_out": shared_out,
+        }
+        return out, cache
+
+
+class TransformerBlock:
+    """Pre-LayerNorm Transformer Decoder Block with Dense or MoE FFN."""
+
+    def __init__(
+        self,
+        d_model: int,
+        n_heads: int,
+        d_ff: int,
+        use_moe: bool = False,
+        n_experts: int = 4,
+        top_k: int = 2,
+        use_shared_expert: bool = False,
+    ):
         self.norm1 = RMSNorm(d_model)
         self.attn = MultiHeadCausalAttention(d_model, n_heads)
         self.norm2 = RMSNorm(d_model)
-        self.ffn = FeedForwardNetwork(d_model, d_ff)
+        self.use_moe = use_moe
+        if use_moe:
+            self.ffn = MoEFeedForwardNetwork(
+                d_model=d_model,
+                d_ff=d_ff,
+                n_experts=n_experts,
+                top_k=top_k,
+                use_shared_expert=use_shared_expert,
+            )
+        else:
+            self.ffn = FeedForwardNetwork(d_model, d_ff)
 
     def forward(self, x: np.ndarray) -> Tuple[np.ndarray, Dict[str, Any]]:
         # Residual 1: Multi-Head Attention
@@ -165,7 +268,7 @@ class TransformerBlock:
         attn_out, c_attn = self.attn.forward(norm1_out)
         x_res1 = x + attn_out
 
-        # Residual 2: Feed-Forward
+        # Residual 2: Feed-Forward (Dense or Sparse MoE)
         norm2_out, c_norm2 = self.norm2.forward(x_res1)
         ffn_out, c_ffn = self.ffn.forward(norm2_out)
         out = x_res1 + ffn_out
@@ -185,6 +288,7 @@ class SovereignNeuralTransformer:
     
     Complete neural foundation model architecture you can train, fine-tune,
     and deploy independently without cloud black-box dependencies.
+    Supports Sparse MoE and Recurrent Depth (Looped Transformers).
     """
 
     def __init__(self, config: Optional[TransformerConfig] = None):
@@ -199,9 +303,17 @@ class SovereignNeuralTransformer:
             self.config.seq_len, self.config.d_model
         ).astype(np.float32) * 0.02
 
-        # 2. Transformer Blocks
+        # 2. Transformer Blocks (Dense or MoE)
         self.blocks = [
-            TransformerBlock(self.config.d_model, self.config.n_heads, self.config.d_ff)
+            TransformerBlock(
+                d_model=self.config.d_model,
+                n_heads=self.config.n_heads,
+                d_ff=self.config.d_ff,
+                use_moe=self.config.use_moe,
+                n_experts=self.config.n_experts,
+                top_k=self.config.top_k,
+                use_shared_expert=self.config.use_shared_expert,
+            )
             for _ in range(self.config.n_layers)
         ]
 
@@ -219,13 +331,55 @@ class SovereignNeuralTransformer:
         for b in self.blocks:
             total += (
                 b.attn.W_q.size + b.attn.W_k.size + b.attn.W_v.size + b.attn.W_o.size
-                + b.ffn.W1.size + b.ffn.b1.size + b.ffn.W2.size + b.ffn.b2.size
                 + b.norm1.gamma.size + b.norm2.gamma.size
             )
+            if isinstance(b.ffn, MoEFeedForwardNetwork):
+                total += b.ffn.W_router.size
+                for exp in b.ffn.experts:
+                    total += exp.W1.size + exp.b1.size + exp.W2.size + exp.b2.size
+                if b.ffn.shared_expert is not None:
+                    total += (
+                        b.ffn.shared_expert.W1.size + b.ffn.shared_expert.b1.size
+                        + b.ffn.shared_expert.W2.size + b.ffn.shared_expert.b2.size
+                    )
+            else:
+                total += b.ffn.W1.size + b.ffn.b1.size + b.ffn.W2.size + b.ffn.b2.size
         total += self.final_norm.gamma.size
         return total
 
-    def forward(self, token_ids: List[int]) -> Tuple[np.ndarray, Dict[str, Any]]:
+    def count_active_parameters(self) -> int:
+        """Returns parameter count active per token forward pass (MoE Sparsity)."""
+        if not self.config.use_moe:
+            return self.count_parameters()
+
+        total = self.tok_embeddings.size + self.pos_embeddings.size + self.lm_head.size
+        for b in self.blocks:
+            total += (
+                b.attn.W_q.size + b.attn.W_k.size + b.attn.W_v.size + b.attn.W_o.size
+                + b.norm1.gamma.size + b.norm2.gamma.size
+            )
+            if isinstance(b.ffn, MoEFeedForwardNetwork):
+                total += b.ffn.W_router.size
+                single_exp_size = (
+                    b.ffn.experts[0].W1.size + b.ffn.experts[0].b1.size
+                    + b.ffn.experts[0].W2.size + b.ffn.experts[0].b2.size
+                )
+                total += single_exp_size * b.ffn.top_k
+                if b.ffn.shared_expert is not None:
+                    total += (
+                        b.ffn.shared_expert.W1.size + b.ffn.shared_expert.b1.size
+                        + b.ffn.shared_expert.W2.size + b.ffn.shared_expert.b2.size
+                    )
+            else:
+                total += b.ffn.W1.size + b.ffn.b1.size + b.ffn.W2.size + b.ffn.b2.size
+        total += self.final_norm.gamma.size
+        return total
+
+    def forward(
+        self,
+        token_ids: List[int],
+        recurrent_depth: Optional[int] = None,
+    ) -> Tuple[np.ndarray, Dict[str, Any]]:
         """Forward pass generating next-token logits over the vocabulary."""
         T = len(token_ids)
         if T > self.config.seq_len:
@@ -235,10 +389,14 @@ class SovereignNeuralTransformer:
         # Embed tokens and sum positional representations
         x = self.tok_embeddings[token_ids] + self.pos_embeddings[:T]
 
+        # Recurrent depth: loop through blocks R times (Looped Transformer / Recurrent Depth)
+        r_depth = recurrent_depth if recurrent_depth is not None else self.config.recurrent_depth
         block_caches = []
-        for block in self.blocks:
-            x, cache = block.forward(x)
-            block_caches.append(cache)
+        for r_iter in range(r_depth):
+            for block in self.blocks:
+                x, cache = block.forward(x)
+                cache["recurrent_iteration"] = r_iter
+                block_caches.append(cache)
 
         x_norm, norm_cache = self.final_norm.forward(x)
         logits = np.dot(x_norm, self.lm_head)  # (T, vocab_size)
@@ -248,9 +406,14 @@ class SovereignNeuralTransformer:
             "block_caches": block_caches,
             "norm_cache": norm_cache,
             "final_x": x_norm,
+            "recurrent_depth_applied": r_depth,
         }
 
-    def compute_loss(self, token_ids: List[int]) -> Tuple[float, np.ndarray]:
+    def compute_loss(
+        self,
+        token_ids: List[int],
+        recurrent_depth: Optional[int] = None,
+    ) -> Tuple[float, np.ndarray]:
         """Calculates standard Cross-Entropy Loss for next-token prediction."""
         if len(token_ids) < 2:
             return 0.0, np.zeros((1, self.config.vocab_size))
@@ -261,7 +424,7 @@ class SovereignNeuralTransformer:
         inputs = token_ids[:-1]
         targets = token_ids[1:]
 
-        logits, cache = self.forward(inputs)
+        logits, cache = self.forward(inputs, recurrent_depth=recurrent_depth)
         probs = softmax(logits, axis=-1)
 
         # Cross entropy loss over sequence
@@ -269,7 +432,12 @@ class SovereignNeuralTransformer:
         loss = -np.mean(np.log(probs[np.arange(T), targets] + 1e-9))
         return float(loss), logits
 
-    def train_step(self, text: str, lr: Optional[float] = None) -> float:
+    def train_step(
+        self,
+        text: str,
+        lr: Optional[float] = None,
+        recurrent_depth: Optional[int] = None,
+    ) -> float:
         """Executes a single pre-training step with AdamW parameter optimization."""
         learning_rate = lr or self.config.learning_rate
         token_ids = self.tokenizer.encode(text)
@@ -279,7 +447,7 @@ class SovereignNeuralTransformer:
         if len(token_ids) > self.config.seq_len + 1:
             token_ids = token_ids[-(self.config.seq_len + 1):]
 
-        loss, logits = self.compute_loss(token_ids)
+        loss, logits = self.compute_loss(token_ids, recurrent_depth=recurrent_depth)
         self.step_count += 1
 
         # Analytical gradient approximation and weight decay (AdamW)
@@ -292,7 +460,7 @@ class SovereignNeuralTransformer:
         d_logits = probs / T
 
         # Update language model head weights
-        final_x = self.forward(inputs)[1]["final_x"]
+        final_x = self.forward(inputs, recurrent_depth=recurrent_depth)[1]["final_x"]
         d_lm_head = np.dot(final_x.T, d_logits)
         self.lm_head -= learning_rate * (d_lm_head + 0.01 * self.lm_head)
 
@@ -304,6 +472,7 @@ class SovereignNeuralTransformer:
         max_new_tokens: int = 30,
         temperature: float = 0.8,
         top_k: int = 5,
+        recurrent_depth: Optional[int] = None,
     ) -> str:
         """Autoregressively generates text token by token."""
         tokens = self.tokenizer.encode(prompt)
@@ -312,7 +481,7 @@ class SovereignNeuralTransformer:
 
         for _ in range(max_new_tokens):
             context = tokens[-self.config.seq_len:]
-            logits, _ = self.forward(context)
+            logits, _ = self.forward(context, recurrent_depth=recurrent_depth)
             next_token_logits = logits[-1] / max(temperature, 1e-5)
 
             # Top-k filtering
