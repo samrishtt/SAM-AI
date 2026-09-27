@@ -1,0 +1,10 @@
+[
+  {
+    "id": "smt_scheduling_01",
+    "status": "VERIFIED_SAT"
+  },
+  {
+    "id": "sat_clause_02",
+    "status": "VERIFIED_SAT"
+  }
+]

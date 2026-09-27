@@ -1,0 +1,6 @@
+{
+  "poc_crash_reproduced": true,
+  "patch_eliminates_crash": true,
+  "regression_suite_clean": true,
+  "verified": true
+}

@@ -1,0 +1,13 @@
+{
+  "ground_truth": {
+    "Alice": 135,
+    "Bob": 50,
+    "Charlie": 15
+  },
+  "model_prediction": {
+    "Alice": 135,
+    "Bob": 50,
+    "Charlie": 15
+  },
+  "verified": true
+}

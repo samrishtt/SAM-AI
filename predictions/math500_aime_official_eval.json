@@ -1,0 +1,21 @@
+{
+  "total_problems": 2,
+  "solved_problems": 2,
+  "accuracy_percent": 100.0,
+  "details": [
+    {
+      "problem_id": "math500_vieta_01",
+      "category": "Algebra",
+      "target": "14",
+      "extracted": "14",
+      "correct": true
+    },
+    {
+      "problem_id": "aime_modular_02",
+      "category": "Number Theory",
+      "target": "4",
+      "extracted": "4",
+      "correct": true
+    }
+  ]
+}

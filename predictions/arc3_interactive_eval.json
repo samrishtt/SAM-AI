@@ -1,0 +1,14 @@
+[
+  {
+    "task_id": "arc3_official_001",
+    "steps": 2,
+    "won": true,
+    "final_reward": 1.0
+  },
+  {
+    "task_id": "arc3_official_002",
+    "steps": 2,
+    "won": true,
+    "final_reward": 1.0
+  }
+]

@@ -1,0 +1,14 @@
+[
+  {
+    "problem_id": "phys_harmonic_01",
+    "residual_zero": true,
+    "ic_satisfied": true,
+    "verified": true
+  },
+  {
+    "problem_id": "phys_decay_02",
+    "residual_zero": true,
+    "ic_satisfied": true,
+    "verified": true
+  }
+]
