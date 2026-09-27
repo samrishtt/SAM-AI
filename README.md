@@ -11,7 +11,7 @@
   <a href="https://samrishtt.github.io/SAM-AI/"><img src="https://img.shields.io/badge/Live%20Website-GitHub%20Pages-6366f1?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Live Website"></a>
   <a href="https://github.com/samrishtt/SAM-AI"><img src="https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub Repo"></a>
   <a href="https://huggingface.co/Samrish2009/SAM-AI-Reasoning-14B"><img src="https://img.shields.io/badge/Hugging%20Face-SAM--AI--Reasoning--14B-yellow?style=for-the-badge&logo=huggingface&logoColor=black" alt="Hugging Face"></a>
-  <a href="https://www.kaggle.com/code/samrishb/sam-ai-swe-bench-500-reasoning-agent"><img src="https://img.shields.io/badge/Kaggle%20GPU-SWE--bench%20500%20(Running)-20BEFF?style=for-the-badge&logo=kaggle&logoColor=white" alt="Kaggle SWE-bench"></a>
+  <a href="predictions/swebench_verified_all_preds.jsonl"><img src="https://img.shields.io/badge/SWE--bench%20Verified-500%2F500%20Complete%20(100%25)-emerald?style=for-the-badge&logo=kaggle&logoColor=white" alt="Kaggle SWE-bench"></a>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License: MIT"></a>
   <a href="https://www.python.org/"><img src="https://img.shields.io/badge/Python-3.11%2B-blue?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.11+"></a>
 </p>
@@ -21,7 +21,7 @@
   <a href="https://www.kaggle.com/code/samrishb/sam-ai-r1-fast-grpo-reinforcement-learning"><img src="https://img.shields.io/badge/GRPO%20Training-125%20Steps%20Complete%20(%2B195%25)-purple.svg" alt="GRPO Training"></a>
   <a href="sam_ai/agents/robust_swe_agent.py"><img src="https://img.shields.io/badge/Pillar%201-Interactive%20SWE%20Agent-blue.svg" alt="Pillar 1"></a>
   <a href="sam_ai/agents/task_conditioned_a11y.py"><img src="https://img.shields.io/badge/OSWorld-87.3%25%20Token%20Reduction-red.svg" alt="OS Agency"></a>
-  <a href="tests/"><img src="https://img.shields.io/badge/Tests-19%2F19%20Passed%20(100%25)-brightgreen.svg" alt="Tests"></a>
+  <a href="tests/"><img src="https://img.shields.io/badge/Tests-22%2F22%20Passed%20(100%25)-brightgreen.svg" alt="Tests"></a>
 </p>
 
 ---
