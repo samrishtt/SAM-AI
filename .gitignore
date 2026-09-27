@@ -26,3 +26,12 @@ Thumbs.db
 # Micro-AGI runtime outputs
 desktop_screen.png
 *.log
+kaggle_final_results/
+kaggle_logs_cancelled/
+kaggle_pulled/
+kaggle_arc3x_output/
+*.safetensors
+*.bin
+*.pt
+*.tar.gz
+*.zip

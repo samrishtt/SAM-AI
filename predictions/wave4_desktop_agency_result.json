@@ -1,0 +1,17 @@
+{
+  "benchmark": "OSWorld / Computer Use",
+  "task": "Export the financial report spreadsheet directly to PDF format.",
+  "raw_elements_count": 63,
+  "compressed_elements_count": 8,
+  "top_ranked_element": "Export Direct to PDF",
+  "executed_action": {
+    "target_id": 63,
+    "action": "click",
+    "coordinates": [
+      660,
+      90
+    ],
+    "rationale": "Fallback top-ranked grounded target"
+  },
+  "success": true
+}

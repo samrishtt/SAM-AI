@@ -1,9 +1,9 @@
 {
-  "id": "samrishb/sam-ai-r1-reasoning-grpo",
-  "title": "sam-ai-r1-reasoning-grpo",
-  "code_file": "kaggle_grpo_training.py",
+  "id": "samrishb/sam-ai-r1-arc-reasoning-grpo",
+  "title": "SAM-AI R1 ARC Reasoning GRPO",
+  "code_file": "sam-ai-arc-grpo-training.ipynb",
   "language": "python",
-  "kernel_type": "script",
+  "kernel_type": "notebook",
   "is_private": "true",
   "enable_gpu": "true",
   "enable_tpu": "false",

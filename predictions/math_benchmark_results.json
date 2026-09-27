@@ -1,0 +1,14 @@
+{
+  "total_problems": 1,
+  "solved_problems": 0,
+  "accuracy_percent": 0.0,
+  "details": [
+    {
+      "problem_id": "aime_sample_p1",
+      "category": "number_theory",
+      "target": "483",
+      "extracted": "3",
+      "correct": false
+    }
+  ]
+}

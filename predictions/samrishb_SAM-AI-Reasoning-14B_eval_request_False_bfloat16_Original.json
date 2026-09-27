@@ -1,0 +1,14 @@
+{
+  "model": "samrishb/SAM-AI-Reasoning-14B",
+  "base_model": "deepseek-ai/DeepSeek-R1-Distill-Qwen-14B",
+  "revision": "main",
+  "precision": "bfloat16",
+  "params": 14.7,
+  "architectures": "Qwen2ForCausalLM",
+  "weight_type": "Original",
+  "status": "PENDING",
+  "submitted_time": "2026-09-26T23:00:00Z",
+  "model_type": "fine-tuned",
+  "job_id": -1,
+  "job_start_time": null
+}

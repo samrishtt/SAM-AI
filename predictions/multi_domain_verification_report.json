@@ -1,0 +1,24 @@
+{
+  "math": {
+    "domain": "Mathematics (Olympiad Algebra)",
+    "correct": true,
+    "target": "14",
+    "extracted": "14",
+    "time_sec": 15.326761600008467,
+    "reasoning_sample": "Okay, so I have this problem here: Let P(x) = x\u00b3 - 6x\u00b2 + 11x - 6. I need to find the sum of the squares of the roots of P(x). Hmm, okay. I remember that for polynomials, there are these things called Vieta's formulas that relate the coefficients of the polynomial to sums and products of its roots. Maybe I can use that here.\n\nFirst, let me recall Vieta's formulas for a cubic polynomial. If I have a"
+  },
+  "swe": {
+    "domain": "Software Engineering (Code Repair)",
+    "correct": true,
+    "has_diff": true,
+    "has_value_error": true,
+    "time_sec": 5.219236100005219,
+    "patch_content": "\n\nTo fix the bug, we need to validate that both `base` and `height` are non-negative before calculating the area. If either is negative, a `ValueError` is raised with the appropriate message.\n\n```diff\ndiff --git a/math_utils/geometry.py b/math_utils/geometry.py\nindex 1234567..89abcde 100644\n--- a/math_utils/geometry.py\n+++ b/math_utils/geometry.py\n@@ -1,5 +1,8 @@\n def calculate_triangle_area(base,"
+  },
+  "arc": {
+    "domain": "Inductive Logic (ARC Pattern)",
+    "correct": true,
+    "time_sec": 14.453077500016661,
+    "reasoning_sample": "Alright, so I've got this problem where I need to figure out the transformation rule for a grid based on the examples provided. Let me try to break it down step by step.\n\nFirst, let's look at Example 1:\n\nInput:\n[[1, 0, 1],\n [0, 1, 0],\n [1, 0, 1]]\n \nOutput:\n[[2, 0, 2],\n [0, 2, 0],\n [2, 0, 2]]\n\nHmm, okay. So, looking at the input grid, I notice that it's a 3x3 grid with 1s and 0s. The output grid ha"
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "benchmark": "AIME / MATH-500",
+  "results": [
+    {
+      "problem_id": "aime_arithmetic_p1",
+      "target": "483",
+      "single_pass": {
+        "extracted": "15",
+        "correct": false,
+        "time_sec": 14.943712200009031
+      },
+      "mcts_search": {
+        "extracted": "...",
+        "correct": false,
+        "time_sec": 3.6894259999971837
+      }
+    },
+    {
+      "problem_id": "math500_algebra_p2",
+      "target": "110",
+      "single_pass": {
+        "extracted": "110",
+        "correct": true,
+        "time_sec": 14.446796200005338
+      },
+      "mcts_search": {
+        "extracted": "...",
+        "correct": false,
+        "time_sec": 3.780460200010566
+      }
+    }
+  ]
+}
