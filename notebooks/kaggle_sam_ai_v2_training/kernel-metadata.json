@@ -1,0 +1,14 @@
+{
+  "id": "samrish11/sam-ai-v2-autonomous-self-training-flywheel",
+  "title": "SAM-AI v2 Autonomous Self-Training Flywheel",
+  "code_file": "sam-ai-v2-training.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": "true",
+  "enable_gpu": "true",
+  "enable_tpu": "false",
+  "enable_internet": "true",
+  "dataset_sources": [],
+  "competition_sources": [],
+  "kernel_sources": []
+}
