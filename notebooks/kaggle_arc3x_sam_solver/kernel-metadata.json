@@ -1,0 +1,22 @@
+{
+  "id": "samrish11/sam-ai-arc3x-frontier-solver",
+  "title": "SAM-AI ARC3x Frontier Solver",
+  "code_file": "arc3x-sam-solver.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": "true",
+  "enable_gpu": "true",
+  "enable_tpu": "false",
+  "enable_internet": "false",
+  "dataset_sources": [
+    "jakobbrggen/taaf-kaggle-source-anim-20260807-anim",
+    "driessmit1/arc3-vllm-h100-wheelhouse-v3"
+  ],
+  "competition_sources": [
+    "arc-prize-2026-arc-agi-3"
+  ],
+  "kernel_sources": [],
+  "model_sources": [
+    "deepseek-ai/deepseek-r1/transformers/deepseek-r1-distill-qwen-32b/2"
+  ]
+}
