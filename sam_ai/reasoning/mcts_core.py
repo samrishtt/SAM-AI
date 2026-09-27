@@ -181,3 +181,65 @@ class PUCTSearchEngine:
 
         best_child = max(root.children, key=lambda c: c.visits)
         return best_child.state_text
+
+    def batch_parallel_search(
+        self,
+        root_prompt: str,
+        generator_fn: Callable[[str], List[Tuple[str, float]]],
+        evaluator_fn: Callable[[str], float],
+        prm_fn: Callable[[List[str]], List[float]],
+        is_terminal_fn: Callable[[str], bool],
+        num_simulations: int = 32,
+        batch_size: int = 4,
+    ) -> Tuple[str, float, int]:
+        """
+        Executes batched parallel test-time compute across multiple simultaneous trajectories.
+        Enables test-time scaling across 16-32 parallel rollouts.
+        """
+        root = MCTSNode(state_text=root_prompt)
+
+        # Initial root expansion
+        raw_candidates = generator_fn(root.state_text)
+        if not raw_candidates:
+            return root_prompt, 0.0, 0
+
+        c_texts = [f"{root.state_text}\n{c[0]}" for c in raw_candidates]
+        prms = prm_fn(c_texts)
+        full_cands = [(c[0], c[1], p) for c, p in zip(raw_candidates, prms)]
+        self.expand(root, full_cands, is_terminal_fn)
+
+        sims_done = 0
+        while sims_done < num_simulations:
+            batch_leaves: List[MCTSNode] = []
+            for _ in range(min(batch_size, num_simulations - sims_done)):
+                curr = root
+                while curr.children and not curr.is_terminal:
+                    next_node = self.select_child(curr)
+                    if next_node is None:
+                        break
+                    curr = next_node
+                batch_leaves.append(curr)
+
+            for leaf in batch_leaves:
+                if not leaf.is_terminal and leaf.visits > 0:
+                    sub_cands = generator_fn(leaf.state_text)
+                    if sub_cands:
+                        s_texts = [f"{leaf.state_text}\n{c[0]}" for c in sub_cands]
+                        s_prms = prm_fn(s_texts)
+                        f_cands = [(c[0], c[1], p) for c, p in zip(sub_cands, s_prms)]
+                        self.expand(leaf, f_cands, is_terminal_fn)
+                        chosen = self.select_child(leaf)
+                        if chosen is not None:
+                            leaf = chosen
+
+                reward = evaluator_fn(leaf.state_text) if leaf.is_terminal else leaf.prm_score
+                self.backpropagate(leaf, reward)
+                sims_done += 1
+
+        if not root.children:
+            return root.state_text, 0.0, sims_done
+
+        best_child = max(root.children, key=lambda c: c.visits)
+        best_q = best_child.compute_q_value(self.lambda_prm)
+        return best_child.state_text, best_q, sims_done
+

@@ -102,3 +102,40 @@ def test_mcts_search_convergence():
         iterations=15,
     )
     assert "Choose Correct Path" in best_path
+
+
+def test_mcts_batch_parallel_search():
+    """Verifies that batch parallel MCTS correctly scales across multiple simultaneous rollouts."""
+    engine = PUCTSearchEngine(c_puct=1.414, prune_threshold=0.2)
+
+    def generator(state: str):
+        if "Term" in state:
+            return []
+        return [
+            ("Branch_Alpha_Term", 0.6),
+            ("Branch_Beta_Term", 0.4),
+        ]
+
+    def prm(texts):
+        return [0.95 if "Alpha" in t else 0.3 for t in texts]
+
+    def terminal(text: str) -> bool:
+        return "Term" in text
+
+    def evaluator(text: str) -> float:
+        return 1.0 if "Alpha" in text else 0.1
+
+    best_state, best_q, sims_done = engine.batch_parallel_search(
+        root_prompt="InitState",
+        generator_fn=generator,
+        evaluator_fn=evaluator,
+        prm_fn=prm,
+        is_terminal_fn=terminal,
+        num_simulations=16,
+        batch_size=4,
+    )
+
+    assert "Branch_Alpha_Term" in best_state
+    assert best_q > 0.8
+    assert sims_done == 16
+

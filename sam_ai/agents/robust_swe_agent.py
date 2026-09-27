@@ -277,3 +277,16 @@ class RobustSWEAgent:
             "git_diff": final_diff,
             "history": history,
         }
+
+    def index_and_locate_context(self, issue_description: str, top_k: int = 3) -> str:
+        """Indexes repository with HierarchicalRepoMapper and returns localized context slices."""
+        from sam_ai.agents.hierarchical_mapper import HierarchicalRepoMapper
+
+        mapper = HierarchicalRepoMapper(self.repo_dir)
+        index = mapper.index_repository()
+        symbols = mapper.search_symbols(index, issue_description, top_k=top_k)
+        if not symbols:
+            return ""
+        contexts = [mapper.get_localized_context(s) for s in symbols]
+        return "\n\n".join(contexts)
+
