@@ -1,11 +1,11 @@
 {
-  "id": "samrish11/sam-ai-arc3x-frontier-solver",
-  "title": "SAM-AI ARC3x Frontier Solver",
+  "id": "samrishb/arc3x-sam-solver",
+  "title": "arc3x_sam solver",
   "code_file": "arc3x-sam-solver.ipynb",
   "language": "python",
   "kernel_type": "notebook",
   "is_private": "true",
-  "enable_gpu": "true",
+  "enable_gpu": "false",
   "enable_tpu": "false",
   "enable_internet": "false",
   "dataset_sources": [
