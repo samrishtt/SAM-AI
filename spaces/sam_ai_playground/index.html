@@ -254,6 +254,62 @@
       };
     }
 
+    const SYSTEM_PROMPT = {
+      role: 'system',
+      content: 'You are Nexis, a sovereign frontier autonomous reasoning intelligence created by Parallax. You specialize in advanced mathematics, competitive programming, and doctoral-level scientific reasoning. When asked about your identity, name, or who created you, always state that you are Nexis, developed by Parallax. Never identify as DeepSeek or any other entity.'
+    };
+
+    function renderMarkdownWithKaTeX(raw) {
+      if (!raw) return '';
+      let mathBlocks = [];
+
+      // 1. Capture $$ ... $$
+      let text = raw.replace(/\$\$([\s\S]*?)\$\$/g, (m, eq) => {
+        mathBlocks.push({ formula: eq.trim(), display: true });
+        return `%%MATH_${mathBlocks.length - 1}%%`;
+      });
+
+      // 2. Capture \[ ... \] OR [ ... ] that contains LaTeX math indicators
+      text = text.replace(/\\?\[\s*([\s\S]*?)\s*\\?\]/g, (m, eq) => {
+        if (eq.includes('\\') || eq.includes('^') || eq.includes('=') || eq.includes('_') || eq.includes('+') || eq.includes('pm')) {
+          mathBlocks.push({ formula: eq.trim(), display: true });
+          return `%%MATH_${mathBlocks.length - 1}%%`;
+        }
+        return m;
+      });
+
+      // 3. Capture \( ... \)
+      text = text.replace(/\\\(([\s\S]*?)\\\)/g, (m, eq) => {
+        mathBlocks.push({ formula: eq.trim(), display: false });
+        return `%%MATH_${mathBlocks.length - 1}%%`;
+      });
+
+      // 4. Capture inline $...$
+      text = text.replace(/\$([^\$\n]+?)\$/g, (m, eq) => {
+        mathBlocks.push({ formula: eq.trim(), display: false });
+        return `%%MATH_${mathBlocks.length - 1}%%`;
+      });
+
+      // Parse markdown
+      let html = marked.parse(text);
+
+      // Re-insert KaTeX rendered equations
+      html = html.replace(/%%MATH_(\d+)%%/g, (m, idx) => {
+        const item = mathBlocks[parseInt(idx, 10)];
+        if (!item) return m;
+        try {
+          return katex.renderToString(item.formula, {
+            displayMode: item.display,
+            throwOnError: false
+          });
+        } catch (e) {
+          return `<span class="mono text-xs text-amber-400">${item.formula}</span>`;
+        }
+      });
+
+      return html;
+    }
+
     async function streamModelResponse(msgObj) {
       const response = await fetch(ROUTER_URL, {
         method: 'POST',
@@ -263,7 +319,7 @@
         },
         body: JSON.stringify({
           model: MODEL_ID,
-          messages: conversationHistory,
+          messages: [SYSTEM_PROMPT, ...conversationHistory],
           max_tokens: 3000,
           stream: true
         })
@@ -315,14 +371,7 @@
                 msgObj.contentDiv.innerHTML = '';
               }
               rawAnswer += delta.content;
-              msgObj.contentDiv.innerHTML = marked.parse(rawAnswer);
-              renderMathInElement(msgObj.contentDiv, {
-                delimiters: [
-                  {left: '$$', right: '$$', display: true},
-                  {left: '$', right: '$', display: false}
-                ],
-                throwOnError: false
-              });
+              msgObj.contentDiv.innerHTML = renderMarkdownWithKaTeX(rawAnswer);
               scrollToBottom();
             }
           } catch (e) {
@@ -333,7 +382,7 @@
 
       if (rawAnswer === '' && rawReasoning !== '') {
         // If the model finished with only reasoning
-        msgObj.contentDiv.innerHTML = marked.parse(rawReasoning);
+        msgObj.contentDiv.innerHTML = renderMarkdownWithKaTeX(rawReasoning);
       }
 
       conversationHistory.push({ role: 'assistant', content: rawAnswer });
