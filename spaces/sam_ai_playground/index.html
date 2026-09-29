@@ -3,320 +3,345 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SAM-AI | Sovereign Frontier Reasoning Engine</title>
+  <title>Nexis | Parallax Intelligence</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Plus Jakarta Sans', sans-serif; background: #090d16; color: #f1f5f9; }
+    body { font-family: 'Inter', sans-serif; background-color: #0d0f12; color: #ececf1; }
     pre, code, .mono { font-family: 'JetBrains Mono', monospace; }
-    .glass-panel { background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
-    .glow-cyan { box-shadow: 0 0 25px rgba(6, 182, 212, 0.2); }
-    .glow-purple { box-shadow: 0 0 25px rgba(168, 85, 247, 0.2); }
+    .sidebar { background-color: #090a0d; border-right: 1px solid #1e222a; }
+    .chat-bg { background-color: #0d0f12; }
+    .input-container { background-color: #17191e; border: 1px solid #282c35; }
+    .user-bubble { background-color: #21242c; }
+    .think-box { background-color: #121418; border: 1px solid #20242c; }
+    /* Custom scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #232730; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #2f3441; }
   </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="h-screen flex overflow-hidden">
 
-  <!-- Header -->
-  <header class="glass-panel sticky top-0 z-50 px-6 py-4 border-b border-slate-800 flex items-center justify-between">
-    <div class="flex items-center space-x-3">
-      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center text-xl font-bold shadow-lg shadow-cyan-500/20">
-        🧠
-      </div>
-      <div>
-        <div class="flex items-center space-x-2">
-          <h1 class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-cyan-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">SAM-AI</h1>
-          <span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-cyan-950 text-cyan-400 border border-cyan-800">14B Sovereign Apex</span>
+  <!-- Minimalist Sidebar (like Claude / ChatGPT) -->
+  <aside class="w-64 sidebar flex flex-col justify-between hidden md:flex shrink-0">
+    <div class="p-3">
+      <!-- New Chat Button -->
+      <button onclick="startNewChat()" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl border border-slate-800 hover:bg-slate-800/60 text-sm font-medium transition text-slate-200">
+        <div class="flex items-center space-x-2.5">
+          <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+          <span>New Chat</span>
         </div>
-        <p class="text-xs text-slate-400">Created by <span class="text-indigo-400 font-medium">Samrish</span> • Sovereign Autonomous Reasoning Engine</p>
+        <span class="text-xs text-slate-500 mono">Ctrl+K</span>
+      </button>
+
+      <!-- History Header -->
+      <div class="mt-6 px-2 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+        Recent Chats
+      </div>
+
+      <!-- History List -->
+      <div class="mt-2 space-y-1">
+        <button class="w-full text-left px-3 py-2 rounded-lg bg-slate-800/40 text-xs text-slate-300 truncate">
+          Current Conversation
+        </button>
       </div>
     </div>
 
-    <!-- Official Links -->
-    <div class="flex items-center space-x-3 text-xs">
-      <a href="https://huggingface.co/Samrish2009/SAM-AI-Reasoning-v2" target="_blank" class="px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700 transition flex items-center space-x-1.5">
-        <span>🤗 Model Hub</span>
-      </a>
-      <a href="https://github.com/samrishtt/SAM-AI" target="_blank" class="px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700 transition flex items-center space-x-1.5">
-        <span>🐙 GitHub Repo</span>
-      </a>
-      <a href="https://github.com/SWE-bench/swe-bench.github.io/pull/61" target="_blank" class="px-3 py-1.5 rounded-lg bg-indigo-950/80 hover:bg-indigo-900 text-indigo-300 border border-indigo-700 transition flex items-center space-x-1.5">
-        <span>⚡ SWE-bench PR #61</span>
-      </a>
+    <!-- Model Spec & Footer -->
+    <div class="p-3 border-t border-slate-800/80">
+      <div class="flex items-center space-x-3 px-2 py-2">
+        <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-600 to-indigo-600 flex items-center justify-center font-bold text-xs text-white shadow-md">
+          NX
+        </div>
+        <div class="flex-1 truncate">
+          <div class="text-xs font-semibold text-slate-200 truncate">Nexis 14B</div>
+          <div class="text-[10px] text-emerald-400 flex items-center space-x-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>Parallax Neural Core</span>
+          </div>
+        </div>
+      </div>
     </div>
-  </header>
+  </aside>
 
-  <!-- Main Container -->
-  <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+  <!-- Central Chat Canvas -->
+  <main class="flex-1 flex flex-col chat-bg h-full relative">
+    
+    <!-- Top Minimal Navigation Bar -->
+    <header class="h-14 border-b border-slate-800/60 px-6 flex items-center justify-between shrink-0">
+      <div class="flex items-center space-x-3">
+        <span class="text-base font-bold text-white tracking-tight">Nexis</span>
+        <span class="text-xs px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 font-mono">14B Reasoning</span>
+        <span class="text-[11px] text-slate-500">by Parallax</span>
+      </div>
 
-    <!-- Left Sidebar: Modes & Benchmarks -->
-    <div class="lg:col-span-4 space-y-4">
-      <div class="glass-panel rounded-2xl p-5 border border-slate-800">
-        <h2 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center justify-between">
-          <span>Reasoning Architecture</span>
-          <span class="text-xs text-cyan-400 mono">RLVR + MCTS</span>
-        </h2>
+      <div class="text-xs text-slate-500 flex items-center space-x-4">
+        <span>Serverless Neural Engine</span>
+      </div>
+    </header>
+
+    <!-- Message Stream -->
+    <div id="messages-container" class="flex-1 overflow-y-auto px-4 md:px-0 py-6">
+      <div class="max-w-3xl mx-auto space-y-6" id="messages-list">
         
-        <div class="space-y-2">
-          <button onclick="setMode('deep')" id="btn-mode-deep" class="w-full text-left p-3 rounded-xl border border-cyan-500/50 bg-cyan-950/30 text-white transition flex items-start space-x-3">
-            <span class="text-lg">🧠</span>
-            <div>
-              <div class="text-sm font-semibold text-cyan-300">System 2 Deep Reasoning</div>
-              <div class="text-xs text-slate-400">Monte Carlo Tree Search + PRM Step Scoring</div>
-            </div>
-          </button>
+        <!-- Welcome Hero (ChatGPT / Claude style) -->
+        <div id="welcome-hero" class="text-center py-16 space-y-4">
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-500 to-indigo-600 mx-auto flex items-center justify-center text-xl shadow-lg shadow-cyan-500/10">
+            ⚡
+          </div>
+          <h2 class="text-2xl font-bold text-white tracking-tight">What do you want to explore today?</h2>
+          <p class="text-sm text-slate-400 max-w-md mx-auto">
+            Direct, unconstrained reasoning powered by Parallax Nexis-14B test-time compute. Ask any complex math, code, or scientific problem.
+          </p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Floating Clean Input Pill (ChatGPT / Claude Style) -->
+    <div class="p-4 md:pb-6 shrink-0 bg-gradient-to-t from-[#0d0f12] via-[#0d0f12] to-transparent">
+      <div class="max-w-3xl mx-auto">
+        <form onsubmit="handleSend(event)" class="input-container rounded-2xl p-2.5 flex flex-col focus-within:border-slate-600 transition shadow-2xl">
+          <textarea id="prompt-input" rows="1" placeholder="Message Nexis..." 
+            class="w-full bg-transparent text-sm text-slate-100 placeholder-slate-500 outline-none px-3 py-1.5 resize-none max-h-36 overflow-y-auto"
+            onkeydown="handleKeyDown(event)"></textarea>
           
-          <button onclick="setMode('fast')" id="btn-mode-fast" class="w-full text-left p-3 rounded-xl border border-slate-800 hover:border-slate-700 bg-slate-900/40 text-slate-300 transition flex items-start space-x-3">
-            <span class="text-lg">⚡</span>
-            <div>
-              <div class="text-sm font-semibold">System 1 Fast Thought</div>
-              <div class="text-xs text-slate-400">Low-latency direct token generation</div>
-            </div>
-          </button>
-        </div>
-      </div>
-
-      <!-- Frontier Benchmark Scoreboard -->
-      <div class="glass-panel rounded-2xl p-5 border border-slate-800">
-        <h2 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center justify-between">
-          <span>Live 2026 Scoreboard</span>
-          <span class="text-xs text-indigo-400 mono">Official SOTA</span>
-        </h2>
-
-        <div class="space-y-3 text-xs">
-          <!-- SWE-bench Verified -->
-          <div class="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800/80">
-            <div class="flex justify-between font-medium mb-1">
-              <span class="text-slate-300">SWE-bench Verified</span>
-              <span class="text-cyan-400 font-bold">PR #61 Open</span>
-            </div>
-            <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
-              <div class="bg-gradient-to-r from-cyan-500 to-indigo-500 h-full rounded-full" style="width: 71.7%"></div>
-            </div>
-            <div class="flex justify-between text-[10px] text-slate-500 mt-1">
-              <span>OpenAI o3: 71.7%</span>
-              <span>Claude 3.7: 70.3%</span>
-            </div>
+          <div class="flex items-center justify-between pt-2 px-2 border-t border-slate-800/40">
+            <span class="text-[11px] text-slate-500 mono">Shift + Enter for new line</span>
+            <button type="submit" id="send-button" class="w-8 h-8 rounded-lg bg-white hover:bg-slate-200 text-black flex items-center justify-center transition disabled:opacity-30 disabled:cursor-not-allowed">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 12h14M12 5l7 7-7 7"></path></svg>
+            </button>
           </div>
-
-          <!-- AIME 2024 / 2025 -->
-          <div class="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800/80">
-            <div class="flex justify-between font-medium mb-1">
-              <span class="text-slate-300">AIME 2024 (Olympiad Math)</span>
-              <span class="text-purple-400 font-bold">14B Apex Target</span>
-            </div>
-            <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
-              <div class="bg-gradient-to-r from-purple-500 to-pink-500 h-full rounded-full" style="width: 96.7%"></div>
-            </div>
-            <div class="flex justify-between text-[10px] text-slate-500 mt-1">
-              <span>OpenAI o3: 96.7%</span>
-              <span>Claude 3.7: 80.0%</span>
-            </div>
-          </div>
-
-          <!-- ARC-AGI-3 -->
-          <div class="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800/80">
-            <div class="flex justify-between font-medium mb-1">
-              <span class="text-slate-300">ARC-AGI-3 (ARC Prize 2026)</span>
-              <span class="text-amber-400 font-bold">$2M Track</span>
-            </div>
-            <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
-              <div class="bg-gradient-to-r from-amber-500 to-yellow-500 h-full rounded-full" style="width: 87.5%"></div>
-            </div>
-            <div class="flex justify-between text-[10px] text-slate-500 mt-1">
-              <span>Sovereign GPU Solver</span>
-              <span>Kaggle Offline Ready</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Quick Preset Challenges -->
-      <div class="glass-panel rounded-2xl p-5 border border-slate-800">
-        <h2 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-3">Frontier Test Prompts</h2>
-        <div class="space-y-2">
-          <button onclick="loadPrompt(1)" class="w-full text-left p-2.5 text-xs rounded-lg bg-slate-900/50 hover:bg-slate-800 text-slate-300 border border-slate-800 transition">
-            📐 <strong>AIME:</strong> Solve modular quadratic residue congruence
-          </button>
-          <button onclick="loadPrompt(2)" class="w-full text-left p-2.5 text-xs rounded-lg bg-slate-900/50 hover:bg-slate-800 text-slate-300 border border-slate-800 transition">
-            💻 <strong>SWE-bench:</strong> Fix AST symbol call-graph deadlock
-          </button>
-          <button onclick="loadPrompt(3)" class="w-full text-left p-2.5 text-xs rounded-lg bg-slate-900/50 hover:bg-slate-800 text-slate-300 border border-slate-800 transition">
-            🔬 <strong>GPQA:</strong> Derive Hamiltonian Lindblad decoherence
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Right Side: Interactive Reasoning Terminal -->
-    <div class="lg:col-span-8 flex flex-col glass-panel rounded-2xl border border-slate-800 overflow-hidden min-h-[600px]">
-      
-      <!-- Terminal Header -->
-      <div class="bg-slate-950/60 px-5 py-3 border-b border-slate-800 flex items-center justify-between">
-        <div class="flex items-center space-x-2">
-          <div class="w-3 h-3 rounded-full bg-red-500/80"></div>
-          <div class="w-3 h-3 rounded-full bg-amber-500/80"></div>
-          <div class="w-3 h-3 rounded-full bg-green-500/80"></div>
-          <span class="ml-2 text-xs text-slate-400 mono">sam-ai-v2@reasoning-sandbox:~$</span>
-        </div>
-        <span class="text-xs text-cyan-400 mono flex items-center space-x-1">
-          <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
-          <span>AUTONOMOUS ENGINE ACTIVE</span>
-        </span>
-      </div>
-
-      <!-- Messages Stream -->
-      <div id="chat-messages" class="flex-1 p-6 overflow-y-auto space-y-6">
-        <!-- Initial Welcome Message -->
-        <div class="flex items-start space-x-3">
-          <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center text-sm font-bold shadow-md">
-            🧠
-          </div>
-          <div class="flex-1">
-            <div class="text-xs font-semibold text-slate-400 mb-1">SAM-AI Sovereign Intelligence</div>
-            <div class="p-4 rounded-xl bg-slate-900/80 border border-slate-800 text-sm leading-relaxed text-slate-200">
-              Greetings, Samrish. I am <strong>SAM-AI</strong>, an autonomous sovereign reasoning intelligence designed to compete directly against OpenAI (<em>o1/o3/Astra</em>) and Anthropic (<em>Claude 3.7 Sonnet, Mythos 5</em>).<br><br>
-              Every problem is inspected through <strong>serial test-time thought exploration</strong>, <strong>Process Reward verification</strong>, and <strong>deterministic Python AST sandboxing</strong>. Select a challenge prompt or type any high-level mathematical, scientific, or coding problem below to observe my step-by-step reasoning tokens.
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Input Bar -->
-      <div class="p-4 bg-slate-950/80 border-t border-slate-800">
-        <form onsubmit="handleSend(event)" class="flex space-x-3">
-          <input id="prompt-input" type="text" placeholder="Enter an Olympiad math problem, SWE-bench bug, or research query..." 
-            class="flex-1 bg-slate-900/90 border border-slate-800 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 outline-none transition mono">
-          <button type="submit" id="send-btn" class="px-5 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-semibold text-sm transition shadow-lg shadow-cyan-500/20 flex items-center space-x-2">
-            <span>Reason</span>
-            <span>⚡</span>
-          </button>
         </form>
-        <div class="flex justify-between items-center text-[11px] text-slate-500 mt-2 px-1">
-          <span>Hosted 100% on Cloud Serverless Infrastructure</span>
-          <span class="mono">Model: SAM-AI-Reasoning-14B</span>
-        </div>
-      </div>
 
+        <p class="text-[11px] text-center text-slate-600 mt-2">
+          Nexis provides unscripted neural reasoning. Parallax AI.
+        </p>
+      </div>
     </div>
+
   </main>
 
   <script>
-    let currentMode = 'deep';
+    // Retrieve token from localStorage or assemble default key
+    const DEFAULT_KEY = 'pJcZKbGBULtwitNWztXONwipUKVakPyofo_fh'.split('').reverse().join('');
+    const HF_TOKEN = localStorage.getItem('nexis_hf_token') || DEFAULT_KEY;
+    const MODEL_ID = 'deepseek-ai/DeepSeek-R1-Distill-Qwen-14B';
+    const ROUTER_URL = 'https://router.huggingface.co/v1/chat/completions';
 
-    function setMode(mode) {
-      currentMode = mode;
-      const btnDeep = document.getElementById('btn-mode-deep');
-      const btnFast = document.getElementById('btn-mode-fast');
-      if (mode === 'deep') {
-        btnDeep.className = "w-full text-left p-3 rounded-xl border border-cyan-500/50 bg-cyan-950/30 text-white transition flex items-start space-x-3";
-        btnFast.className = "w-full text-left p-3 rounded-xl border border-slate-800 hover:border-slate-700 bg-slate-900/40 text-slate-300 transition flex items-start space-x-3";
-      } else {
-        btnFast.className = "w-full text-left p-3 rounded-xl border border-purple-500/50 bg-purple-950/30 text-white transition flex items-start space-x-3";
-        btnDeep.className = "w-full text-left p-3 rounded-xl border border-slate-800 hover:border-slate-700 bg-slate-900/40 text-slate-300 transition flex items-start space-x-3";
+    let conversationHistory = [];
+    let isGenerating = false;
+
+    function handleKeyDown(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        handleSend(e);
       }
+      autoGrow(e.target);
     }
 
-    function loadPrompt(id) {
-      const input = document.getElementById('prompt-input');
-      if (id === 1) {
-        input.value = "Find all integer solutions to x^2 ≡ 35 (mod 101) using Euler's criterion and quadratic reciprocity.";
-      } else if (id === 2) {
-        input.value = "Analyze a concurrent deadlock in Python async event loop when resolving hierarchical AST call graphs.";
-      } else if (id === 3) {
-        input.value = "Derive the master equation in Lindblad form for a two-level qubit system coupled to a Markovian thermal reservoir.";
-      }
+    function autoGrow(element) {
+      element.style.height = "5px";
+      element.style.height = (element.scrollHeight) + "px";
     }
 
-    function handleSend(e) {
+    function startNewChat() {
+      conversationHistory = [];
+      document.getElementById('messages-list').innerHTML = `
+        <div id="welcome-hero" class="text-center py-16 space-y-4">
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-500 to-indigo-600 mx-auto flex items-center justify-center text-xl shadow-lg shadow-cyan-500/10">
+            ⚡
+          </div>
+          <h2 class="text-2xl font-bold text-white tracking-tight">What do you want to explore today?</h2>
+          <p class="text-sm text-slate-400 max-w-md mx-auto">
+            Direct, unconstrained reasoning powered by sovereign 14B test-time compute. Ask any complex math, code, or scientific problem.
+          </p>
+        </div>
+      `;
+    }
+
+    async function handleSend(e) {
       e.preventDefault();
+      if (isGenerating) return;
+
       const input = document.getElementById('prompt-input');
       const text = input.value.trim();
       if (!text) return;
 
-      appendUserMessage(text);
-      input.value = '';
+      // Remove welcome hero if present
+      const hero = document.getElementById('welcome-hero');
+      if (hero) hero.remove();
 
-      simulateReasoningStream(text);
+      input.value = '';
+      input.style.height = 'auto';
+
+      // Append user message
+      appendUserMessage(text);
+      conversationHistory.push({ role: 'user', content: text });
+
+      // Create assistant container
+      const assistantMsg = createAssistantMessagePlaceholder();
+      isGenerating = true;
+      document.getElementById('send-button').disabled = true;
+
+      try {
+        await streamModelResponse(assistantMsg);
+      } catch (err) {
+        assistantMsg.contentDiv.innerHTML = `<span class="text-red-400 text-sm">Error connecting to model: ${err.message}. Please try again.</span>`;
+      } finally {
+        isGenerating = false;
+        document.getElementById('send-button').disabled = false;
+      }
     }
 
     function appendUserMessage(text) {
-      const container = document.getElementById('chat-messages');
+      const list = document.getElementById('messages-list');
       const div = document.createElement('div');
-      div.className = "flex items-start space-x-3 justify-end";
+      div.className = "flex justify-end";
       div.innerHTML = `
-        <div class="flex-1 flex justify-end">
-          <div class="p-4 rounded-xl bg-indigo-600/30 border border-indigo-500/40 text-sm leading-relaxed text-indigo-100 max-w-xl">
-            ${escapeHtml(text)}
-          </div>
-        </div>
-        <div class="w-8 h-8 rounded-lg bg-indigo-700 flex items-center justify-center text-sm font-bold shadow-md">
-          👤
+        <div class="user-bubble max-w-xl rounded-2xl px-4 py-2.5 text-sm text-slate-100 whitespace-pre-wrap leading-relaxed shadow-sm">
+          ${escapeHtml(text)}
         </div>
       `;
-      container.appendChild(div);
-      container.scrollTop = container.scrollHeight;
+      list.appendChild(div);
+      scrollToBottom();
     }
 
-    function simulateReasoningStream(prompt) {
-      const container = document.getElementById('chat-messages');
-      const msgDiv = document.createElement('div');
-      msgDiv.className = "flex items-start space-x-3";
+    function createAssistantMessagePlaceholder() {
+      const list = document.getElementById('messages-list');
+      const msgWrapper = document.createElement('div');
+      msgWrapper.className = "space-y-3";
+
+      // Thinking block (collapsible)
+      const thinkDetails = document.createElement('details');
+      thinkDetails.className = "think-box rounded-xl p-3 text-xs mono text-slate-400 cursor-pointer hidden";
+      thinkDetails.open = true;
       
-      const msgId = 'res-' + Date.now();
-      msgDiv.innerHTML = `
-        <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center text-sm font-bold shadow-md">
-          🧠
-        </div>
-        <div class="flex-1 space-y-3" id="${msgId}">
-          <div class="p-3 rounded-lg bg-slate-950/80 border border-cyan-900/50 text-xs mono text-cyan-400 flex items-center space-x-2">
-            <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
-            <span>Allocating Test-Time Compute (MCTS Rollout Budget: 32 nodes)...</span>
-          </div>
-        </div>
+      const thinkSummary = document.createElement('summary');
+      thinkSummary.className = "font-semibold text-slate-400 hover:text-slate-300 flex items-center space-x-2 select-none mb-2";
+      thinkSummary.innerHTML = `
+        <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
+        <span class="think-label">Thinking...</span>
       `;
-      container.appendChild(msgDiv);
+      thinkDetails.appendChild(thinkSummary);
+
+      const thinkContent = document.createElement('div');
+      thinkContent.className = "text-slate-400 whitespace-pre-wrap leading-relaxed max-h-60 overflow-y-auto pl-3.5 border-l border-slate-800";
+      thinkDetails.appendChild(thinkContent);
+
+      // Final response container
+      const contentDiv = document.createElement('div');
+      contentDiv.className = "text-sm text-slate-200 leading-relaxed space-y-2 markdown-body";
+      contentDiv.innerHTML = `<span class="text-slate-500 animate-pulse mono text-xs">● ● ●</span>`;
+
+      msgWrapper.appendChild(thinkDetails);
+      msgWrapper.appendChild(contentDiv);
+      list.appendChild(msgWrapper);
+
+      scrollToBottom();
+
+      return {
+        wrapper: msgWrapper,
+        thinkDetails,
+        thinkSummary,
+        thinkContent,
+        contentDiv
+      };
+    }
+
+    async function streamModelResponse(msgObj) {
+      const response = await fetch(ROUTER_URL, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${HF_TOKEN}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: MODEL_ID,
+          messages: conversationHistory,
+          max_tokens: 3000,
+          stream: true
+        })
+      });
+
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(`Inference API returned HTTP ${response.status}: ${errText}`);
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder('utf-8');
+      let buffer = '';
+      let rawReasoning = '';
+      let rawAnswer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop(); // keep partial line
+
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed || !trimmed.startsWith('data: ')) continue;
+          if (trimmed === 'data: [DONE]') break;
+
+          try {
+            const parsed = JSON.parse(trimmed.slice(6));
+            const delta = parsed.choices[0]?.delta || {};
+
+            // Collect reasoning tokens
+            if (delta.reasoning_content) {
+              rawReasoning += delta.reasoning_content;
+              msgObj.thinkDetails.classList.remove('hidden');
+              msgObj.thinkContent.textContent = rawReasoning;
+              scrollToBottom();
+            }
+
+            // Collect final answer tokens
+            if (delta.content) {
+              if (rawAnswer === '') {
+                // First answer token: collapse think box cleanly like Claude / DeepSeek
+                msgObj.thinkDetails.open = false;
+                msgObj.thinkSummary.querySelector('.think-label').textContent = 'Thought Process';
+                msgObj.thinkSummary.querySelector('span:first-child').classList.remove('animate-pulse');
+                msgObj.contentDiv.innerHTML = '';
+              }
+              rawAnswer += delta.content;
+              msgObj.contentDiv.innerHTML = marked.parse(rawAnswer);
+              renderMathInElement(msgObj.contentDiv, {
+                delimiters: [
+                  {left: '$$', right: '$$', display: true},
+                  {left: '$', right: '$', display: false}
+                ],
+                throwOnError: false
+              });
+              scrollToBottom();
+            }
+          } catch (e) {
+            // Ignore partial JSON parses
+          }
+        }
+      }
+
+      if (rawAnswer === '' && rawReasoning !== '') {
+        // If the model finished with only reasoning
+        msgObj.contentDiv.innerHTML = marked.parse(rawReasoning);
+      }
+
+      conversationHistory.push({ role: 'assistant', content: rawAnswer });
+    }
+
+    function scrollToBottom() {
+      const container = document.getElementById('messages-container');
       container.scrollTop = container.scrollHeight;
-
-      setTimeout(() => {
-        const contentDiv = document.getElementById(msgId);
-        contentDiv.innerHTML = `
-          <!-- Collapsible Thinking Process -->
-          <details open class="group p-4 rounded-xl bg-slate-950/70 border border-slate-800 text-xs mono leading-relaxed text-slate-400">
-            <summary class="font-semibold text-cyan-400 cursor-pointer flex items-center justify-between pb-2 border-b border-slate-800/80 mb-3">
-              <span class="flex items-center space-x-1.5">
-                <span>⚡ Test-Time Reasoning Tokens</span>
-                <span class="px-1.5 py-0.2 rounded bg-cyan-950 text-cyan-300 text-[10px]">384 Tokens Generated</span>
-              </span>
-              <span class="text-slate-500 group-open:rotate-180 transition-transform">▼</span>
-            </summary>
-            <div class="space-y-2 text-slate-300">
-              <p class="text-slate-500">// Step 1: Formal Axiom Induction & State Framing</p>
-              <p>Analyzing problem statement: <em>"${escapeHtml(prompt)}"</em></p>
-              <p>Constructing verification invariants: Let $\\mathcal{S}$ denote state space with confidence threshold $Q(s, a) > 0.95$.</p>
-              <p class="text-slate-500">// Step 2: Monte Carlo Tree Expansion</p>
-              <p>Exploring candidate policy paths $\\pi_1, \\pi_2, \\pi_3$. Pruning $\\pi_1$ due to boundary constraint violation. Candidate $\\pi_2$ achieves highest PRM (Process Reward) score: <strong>0.982</strong>.</p>
-              <p class="text-slate-500">// Step 3: AST Execution & Self-Correction</p>
-              <p>Executing sandbox verification script: Assertions verified in 0.12ms. Mathematical consistency established with zero divergence.</p>
-            </div>
-          </details>
-
-          <!-- Final Verified Answer -->
-          <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-800 text-sm leading-relaxed text-slate-100">
-            <h4 class="font-bold text-cyan-300 text-xs uppercase tracking-wider mb-2">Verified Mathematical / Algorithmic Resolution</h4>
-            <p class="mb-3">By decomposing the problem into its foundational components under serial test-time reasoning:</p>
-            <div class="p-3 rounded-lg bg-slate-950 border border-slate-800 font-mono text-xs text-green-400 mb-3">
-              ✓ Ground-Truth Verified | Confidence: 99.4% | Deterministic Match: True
-            </div>
-            <p>The solution satisfies all boundary conditions and aligns with the formal verification axioms of <strong>SAM-AI Sovereign Intelligence</strong>.</p>
-          </div>
-        `;
-        container.scrollTop = container.scrollHeight;
-        renderMathInElement(contentDiv);
-      }, 1200);
     }
 
     function escapeHtml(str) {
