@@ -1,53 +1,31 @@
-<p align="center">
-  <img src="assets/sam_ai_banner.svg" alt="SAM-AI Banner" width="100%">
-</p>
+# ⚡ Nexis — Parallax Frontier Autonomous Reasoning Intelligence
+
+**Parallax Intelligence Lab | Founded by Samrish**
+*An Independent, Vertically-Integrated Frontier AI Lab Architecture*  
+*$0 Upfront Capital • Zero Third-Party API Rent • System 2 RLVR Reasoning • Native OS Agency*
+
+---
 
 <p align="center">
-  <strong>An Independent, Vertically-Integrated Frontier AI Lab Architecture</strong><br>
-  <em>$0 Upfront Capital • Zero Third-Party API Rent • System 2 RLVR Reasoning • Native OS Agency</em>
-</p>
-
-<p align="center">
-  <a href="https://samrishtt.github.io/SAM-AI/"><img src="https://img.shields.io/badge/Live%20Website-GitHub%20Pages-6366f1?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Live Website"></a>
+  <a href="https://huggingface.co/spaces/Samrish2009/SAM-AI-Reasoning-Playground"><img src="https://img.shields.io/badge/Live%20Playground-Hugging%20Face%20Space-6366f1?style=for-the-badge&logo=huggingface&logoColor=white" alt="Live Playground"></a>
   <a href="https://github.com/samrishtt/SAM-AI"><img src="https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub Repo"></a>
-  <a href="https://huggingface.co/Samrish2009/SAM-AI-Reasoning-14B"><img src="https://img.shields.io/badge/Hugging%20Face-SAM--AI--Reasoning--14B-yellow?style=for-the-badge&logo=huggingface&logoColor=black" alt="Hugging Face"></a>
-  <a href="predictions/swebench_verified_all_preds.jsonl"><img src="https://img.shields.io/badge/SWE--bench%20Verified-500%2F500%20Complete%20(100%25)-emerald?style=for-the-badge&logo=kaggle&logoColor=white" alt="Kaggle SWE-bench"></a>
-  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License: MIT"></a>
-  <a href="https://www.python.org/"><img src="https://img.shields.io/badge/Python-3.11%2B-blue?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.11+"></a>
-</p>
-
-<p align="center">
-  <a href="#-quickstart"><img src="https://img.shields.io/badge/API-OpenAI--Compatible-emerald.svg" alt="API Standard"></a>
-  <a href="https://www.kaggle.com/code/samrishb/sam-ai-r1-fast-grpo-reinforcement-learning"><img src="https://img.shields.io/badge/GRPO%20Training-125%20Steps%20Complete%20(%2B195%25)-purple.svg" alt="GRPO Training"></a>
-  <a href="sam_ai/agents/robust_swe_agent.py"><img src="https://img.shields.io/badge/Pillar%201-Interactive%20SWE%20Agent-blue.svg" alt="Pillar 1"></a>
-  <a href="sam_ai/agents/task_conditioned_a11y.py"><img src="https://img.shields.io/badge/OSWorld-87.3%25%20Token%20Reduction-red.svg" alt="OS Agency"></a>
-  <a href="tests/"><img src="https://img.shields.io/badge/Tests-22%2F22%20Passed%20(100%25)-brightgreen.svg" alt="Tests"></a>
+  <a href="https://huggingface.co/Samrish2009/SAM-AI-Reasoning-14B"><img src="https://img.shields.io/badge/Hugging%20Face-Nexis--14B-yellow?style=for-the-badge&logo=huggingface&logoColor=black" alt="Hugging Face"></a>
+  <a href="https://github.com/SWE-bench/swe-bench.github.io/pull/61"><img src="https://img.shields.io/badge/SWE--bench%20Verified-PR%20%2361%20Open-emerald?style=for-the-badge&logo=github&logoColor=white" alt="SWE-bench PR"></a>
+  <a href="https://github.com/LiveCodeBench/livecodebench.github.io/pull/3"><img src="https://img.shields.io/badge/LiveCodeBench-PR%20%233%20Open-blue?style=for-the-badge&logo=github&logoColor=white" alt="LiveCodeBench PR"></a>
+  <a href="https://opensource.org/licenses/Apache-2.0"><img src="https://img.shields.io/badge/License-Apache%202.0-green?style=for-the-badge" alt="License"></a>
 </p>
 
 ---
 
-<p align="center">
-  <a href="https://samrishtt.github.io/SAM-AI/">🌐 <b>Live Landing Page</b></a> •
-  <a href="#-executive-vision-the-sovereign-ai-lab">🏛️ <b>Executive Vision</b></a> •
-  <a href="#-verified-multi-domain-intelligence-audit">🏆 <b>Verified Audit</b></a> •
-  <a href="#-the-6-architectural-pillars-of-sovereign-intelligence">🏛️ <b>The 6 Pillars</b></a> •
-  <a href="#-the-neural-evolution-119k--14b--32b">🧠 <b>Model Evolution</b></a> •
-  <a href="#-scientific-methodology-rlvr--grpo">🔬 <b>RLVR Methodology</b></a> •
-  <a href="#-quickstart">⚡ <b>Quickstart</b></a> •
-  <a href="#-roadmap-from-0-to-frontier-ai-lab">🗺️ <b>Frontier Roadmap</b></a>
-</p>
+## 🏛️ Executive Vision: Parallax & Nexis
 
----
+Most modern AI companies are thin wrappers that pay rent on closed third-party APIs (OpenAI, Anthropic, Google). **Parallax**, founded by **Samrish**, is built on the opposite thesis: **absolute architectural sovereignty**. 
 
-## 🏛️ Executive Vision: The Sovereign AI Lab
-
-Most modern AI companies are thin wrappers that pay rent on closed third-party APIs (OpenAI, Anthropic, Google). **SAM-AI** is built on the opposite thesis: **absolute architectural sovereignty**. 
-
-Inspired by the founding trajectories of **OpenAI, Anthropic, Mistral, and DeepSeek**, SAM-AI delivers a complete, vertically integrated intelligence stack with:
-* **Zero Third-Party API dependencies** (we run, own, and train our own models).
-* **System 2 Reasoning with Test-Time Compute** (explicit `<think> ... </think>` derivations).
+**Nexis** delivers a vertically integrated sovereign intelligence stack with:
+* **Zero Third-Party API dependencies** (we own, train, and run our own open-weight weights).
+* **System 2 Reasoning with Test-Time Compute** (serial `<think> ... </think>` derivations).
 * **Reinforcement Learning with Verifiable Rewards (RLVR)** via DeepSeek-R1 style **Group Relative Policy Optimization (GRPO)**.
-* **Deterministic Objective Verifiers** (AST Python sandboxes, code test assertion suites, and mathematical ground-truth solvers).
+* **Deterministic Objective Verifiers** (AST Python sandboxes, Microsoft Z3 SMT solver, and SymPy differential calculus).
 * **Native Windows Computer-Use Agency** (controlling apps, clicks, typing, and desktop navigation).
 
 > *"The 2010s were about pre-training on human data. The frontier today is about test-time search and models learning through reinforcement learning in verifiable environments."*
