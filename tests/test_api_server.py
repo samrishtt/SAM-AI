@@ -2,7 +2,11 @@
 
 import io
 import json
+import sys
+from pathlib import Path
 import pytest
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from api_server import OpenAICompatibleHandler, repl
 
 
@@ -45,12 +49,12 @@ def test_api_server_models_endpoint():
     raw = handler.wfile.getvalue().decode("utf-8")
     data = json.loads(raw)
     assert data["object"] == "list"
-    assert any(m["id"] == "hyper-astra-3.5" for m in data["data"])
+    assert any(m["id"] == "SAM-AI-Reasoning-14B" for m in data["data"])
 
 
 def test_api_server_chat_completions_endpoint():
     body = {
-        "model": "hyper-astra-3.5",
+        "model": "SAM-AI-Reasoning-14B",
         "messages": [{"role": "user", "content": "hello"}],
     }
     handler = DummyHandler("POST", "/v1/chat/completions", body=body)

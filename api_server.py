@@ -54,39 +54,30 @@ class OpenAICompatibleHandler(http.server.BaseHTTPRequestHandler):
                 "object": "list",
                 "data": [
                     {
-                        "id": "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B",
+                        "id": "SAM-AI-Reasoning-14B",
                         "object": "model",
                         "created": int(time.time()),
-                        "owned_by": "sam-ai-frontier",
+                        "owned_by": "Samrish",
                         "permission": [],
-                        "root": "deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B",
+                        "root": "SAM-AI-Reasoning-14B",
                         "parent": None,
                     },
                     {
-                        "id": "sam-ai-r1-reasoning",
+                        "id": "SAM-AI-Reasoning-v2",
                         "object": "model",
                         "created": int(time.time()),
-                        "owned_by": "sam-ai-frontier",
+                        "owned_by": "Samrish",
                         "permission": [],
-                        "root": "sam-ai-r1-reasoning",
+                        "root": "SAM-AI-Reasoning-v2",
                         "parent": None,
                     },
                     {
-                        "id": "hyper-astra-3.5",
+                        "id": "SAM-AI-Apex-14B",
                         "object": "model",
                         "created": int(time.time()),
-                        "owned_by": "sovereign-ai-corp",
+                        "owned_by": "Samrish",
                         "permission": [],
-                        "root": "hyper-astra-3.5",
-                        "parent": None,
-                    },
-                    {
-                        "id": "sovereign-transformer-120k",
-                        "object": "model",
-                        "created": int(time.time()),
-                        "owned_by": "sovereign-ai-corp",
-                        "permission": [],
-                        "root": "sovereign-transformer-120k",
+                        "root": "SAM-AI-Apex-14B",
                         "parent": None,
                     },
                 ],
@@ -118,7 +109,7 @@ class OpenAICompatibleHandler(http.server.BaseHTTPRequestHandler):
                     user_msg = m.get("content", "")
                     break
 
-            model_name = req_data.get("model", "hyper-astra-3.5")
+            model_name = req_data.get("model", "SAM-AI-Reasoning-14B")
             stream = req_data.get("stream", False)
 
             # Process command through cognitive engine

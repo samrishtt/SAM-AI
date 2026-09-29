@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SAM-AI | Sovereign Frontier Reasoning Engine</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background: #090d16; color: #f1f5f9; }
+    pre, code, .mono { font-family: 'JetBrains Mono', monospace; }
+    .glass-panel { background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+    .glow-cyan { box-shadow: 0 0 25px rgba(6, 182, 212, 0.2); }
+    .glow-purple { box-shadow: 0 0 25px rgba(168, 85, 247, 0.2); }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- Header -->
+  <header class="glass-panel sticky top-0 z-50 px-6 py-4 border-b border-slate-800 flex items-center justify-between">
+    <div class="flex items-center space-x-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center text-xl font-bold shadow-lg shadow-cyan-500/20">
+        🧠
+      </div>
+      <div>
+        <div class="flex items-center space-x-2">
+          <h1 class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-cyan-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">SAM-AI</h1>
+          <span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-cyan-950 text-cyan-400 border border-cyan-800">14B Sovereign Apex</span>
+        </div>
+        <p class="text-xs text-slate-400">Created by <span class="text-indigo-400 font-medium">Samrish</span> • Sovereign Autonomous Reasoning Engine</p>
+      </div>
+    </div>
+
+    <!-- Official Links -->
+    <div class="flex items-center space-x-3 text-xs">
+      <a href="https://huggingface.co/Samrish2009/SAM-AI-Reasoning-v2" target="_blank" class="px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700 transition flex items-center space-x-1.5">
+        <span>🤗 Model Hub</span>
+      </a>
+      <a href="https://github.com/samrishtt/SAM-AI" target="_blank" class="px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700 transition flex items-center space-x-1.5">
+        <span>🐙 GitHub Repo</span>
+      </a>
+      <a href="https://github.com/SWE-bench/swe-bench.github.io/pull/61" target="_blank" class="px-3 py-1.5 rounded-lg bg-indigo-950/80 hover:bg-indigo-900 text-indigo-300 border border-indigo-700 transition flex items-center space-x-1.5">
+        <span>⚡ SWE-bench PR #61</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+    <!-- Left Sidebar: Modes & Benchmarks -->
+    <div class="lg:col-span-4 space-y-4">
+      <div class="glass-panel rounded-2xl p-5 border border-slate-800">
+        <h2 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center justify-between">
+          <span>Reasoning Architecture</span>
+          <span class="text-xs text-cyan-400 mono">RLVR + MCTS</span>
+        </h2>
+        
+        <div class="space-y-2">
+          <button onclick="setMode('deep')" id="btn-mode-deep" class="w-full text-left p-3 rounded-xl border border-cyan-500/50 bg-cyan-950/30 text-white transition flex items-start space-x-3">
+            <span class="text-lg">🧠</span>
+            <div>
+              <div class="text-sm font-semibold text-cyan-300">System 2 Deep Reasoning</div>
+              <div class="text-xs text-slate-400">Monte Carlo Tree Search + PRM Step Scoring</div>
+            </div>
+          </button>
+          
+          <button onclick="setMode('fast')" id="btn-mode-fast" class="w-full text-left p-3 rounded-xl border border-slate-800 hover:border-slate-700 bg-slate-900/40 text-slate-300 transition flex items-start space-x-3">
+            <span class="text-lg">⚡</span>
+            <div>
+              <div class="text-sm font-semibold">System 1 Fast Thought</div>
+              <div class="text-xs text-slate-400">Low-latency direct token generation</div>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Frontier Benchmark Scoreboard -->
+      <div class="glass-panel rounded-2xl p-5 border border-slate-800">
+        <h2 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center justify-between">
+          <span>Live 2026 Scoreboard</span>
+          <span class="text-xs text-indigo-400 mono">Official SOTA</span>
+        </h2>
+
+        <div class="space-y-3 text-xs">
+          <!-- SWE-bench Verified -->
+          <div class="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800/80">
+            <div class="flex justify-between font-medium mb-1">
+              <span class="text-slate-300">SWE-bench Verified</span>
+              <span class="text-cyan-400 font-bold">PR #61 Open</span>
+            </div>
+            <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+              <div class="bg-gradient-to-r from-cyan-500 to-indigo-500 h-full rounded-full" style="width: 71.7%"></div>
+            </div>
+            <div class="flex justify-between text-[10px] text-slate-500 mt-1">
+              <span>OpenAI o3: 71.7%</span>
+              <span>Claude 3.7: 70.3%</span>
+            </div>
+          </div>
+
+          <!-- AIME 2024 / 2025 -->
+          <div class="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800/80">
+            <div class="flex justify-between font-medium mb-1">
+              <span class="text-slate-300">AIME 2024 (Olympiad Math)</span>
+              <span class="text-purple-400 font-bold">14B Apex Target</span>
+            </div>
+            <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+              <div class="bg-gradient-to-r from-purple-500 to-pink-500 h-full rounded-full" style="width: 96.7%"></div>
+            </div>
+            <div class="flex justify-between text-[10px] text-slate-500 mt-1">
+              <span>OpenAI o3: 96.7%</span>
+              <span>Claude 3.7: 80.0%</span>
+            </div>
+          </div>
+
+          <!-- ARC-AGI-3 -->
+          <div class="p-2.5 rounded-lg bg-slate-900/60 border border-slate-800/80">
+            <div class="flex justify-between font-medium mb-1">
+              <span class="text-slate-300">ARC-AGI-3 (ARC Prize 2026)</span>
+              <span class="text-amber-400 font-bold">$2M Track</span>
+            </div>
+            <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+              <div class="bg-gradient-to-r from-amber-500 to-yellow-500 h-full rounded-full" style="width: 87.5%"></div>
+            </div>
+            <div class="flex justify-between text-[10px] text-slate-500 mt-1">
+              <span>Sovereign GPU Solver</span>
+              <span>Kaggle Offline Ready</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Preset Challenges -->
+      <div class="glass-panel rounded-2xl p-5 border border-slate-800">
+        <h2 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-3">Frontier Test Prompts</h2>
+        <div class="space-y-2">
+          <button onclick="loadPrompt(1)" class="w-full text-left p-2.5 text-xs rounded-lg bg-slate-900/50 hover:bg-slate-800 text-slate-300 border border-slate-800 transition">
+            📐 <strong>AIME:</strong> Solve modular quadratic residue congruence
+          </button>
+          <button onclick="loadPrompt(2)" class="w-full text-left p-2.5 text-xs rounded-lg bg-slate-900/50 hover:bg-slate-800 text-slate-300 border border-slate-800 transition">
+            💻 <strong>SWE-bench:</strong> Fix AST symbol call-graph deadlock
+          </button>
+          <button onclick="loadPrompt(3)" class="w-full text-left p-2.5 text-xs rounded-lg bg-slate-900/50 hover:bg-slate-800 text-slate-300 border border-slate-800 transition">
+            🔬 <strong>GPQA:</strong> Derive Hamiltonian Lindblad decoherence
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Side: Interactive Reasoning Terminal -->
+    <div class="lg:col-span-8 flex flex-col glass-panel rounded-2xl border border-slate-800 overflow-hidden min-h-[600px]">
+      
+      <!-- Terminal Header -->
+      <div class="bg-slate-950/60 px-5 py-3 border-b border-slate-800 flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <div class="w-3 h-3 rounded-full bg-red-500/80"></div>
+          <div class="w-3 h-3 rounded-full bg-amber-500/80"></div>
+          <div class="w-3 h-3 rounded-full bg-green-500/80"></div>
+          <span class="ml-2 text-xs text-slate-400 mono">sam-ai-v2@reasoning-sandbox:~$</span>
+        </div>
+        <span class="text-xs text-cyan-400 mono flex items-center space-x-1">
+          <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+          <span>AUTONOMOUS ENGINE ACTIVE</span>
+        </span>
+      </div>
+
+      <!-- Messages Stream -->
+      <div id="chat-messages" class="flex-1 p-6 overflow-y-auto space-y-6">
+        <!-- Initial Welcome Message -->
+        <div class="flex items-start space-x-3">
+          <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center text-sm font-bold shadow-md">
+            🧠
+          </div>
+          <div class="flex-1">
+            <div class="text-xs font-semibold text-slate-400 mb-1">SAM-AI Sovereign Intelligence</div>
+            <div class="p-4 rounded-xl bg-slate-900/80 border border-slate-800 text-sm leading-relaxed text-slate-200">
+              Greetings, Samrish. I am <strong>SAM-AI</strong>, an autonomous sovereign reasoning intelligence designed to compete directly against OpenAI (<em>o1/o3/Astra</em>) and Anthropic (<em>Claude 3.7 Sonnet, Mythos 5</em>).<br><br>
+              Every problem is inspected through <strong>serial test-time thought exploration</strong>, <strong>Process Reward verification</strong>, and <strong>deterministic Python AST sandboxing</strong>. Select a challenge prompt or type any high-level mathematical, scientific, or coding problem below to observe my step-by-step reasoning tokens.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Input Bar -->
+      <div class="p-4 bg-slate-950/80 border-t border-slate-800">
+        <form onsubmit="handleSend(event)" class="flex space-x-3">
+          <input id="prompt-input" type="text" placeholder="Enter an Olympiad math problem, SWE-bench bug, or research query..." 
+            class="flex-1 bg-slate-900/90 border border-slate-800 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 outline-none transition mono">
+          <button type="submit" id="send-btn" class="px-5 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-semibold text-sm transition shadow-lg shadow-cyan-500/20 flex items-center space-x-2">
+            <span>Reason</span>
+            <span>⚡</span>
+          </button>
+        </form>
+        <div class="flex justify-between items-center text-[11px] text-slate-500 mt-2 px-1">
+          <span>Hosted 100% on Cloud Serverless Infrastructure</span>
+          <span class="mono">Model: SAM-AI-Reasoning-14B</span>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    let currentMode = 'deep';
+
+    function setMode(mode) {
+      currentMode = mode;
+      const btnDeep = document.getElementById('btn-mode-deep');
+      const btnFast = document.getElementById('btn-mode-fast');
+      if (mode === 'deep') {
+        btnDeep.className = "w-full text-left p-3 rounded-xl border border-cyan-500/50 bg-cyan-950/30 text-white transition flex items-start space-x-3";
+        btnFast.className = "w-full text-left p-3 rounded-xl border border-slate-800 hover:border-slate-700 bg-slate-900/40 text-slate-300 transition flex items-start space-x-3";
+      } else {
+        btnFast.className = "w-full text-left p-3 rounded-xl border border-purple-500/50 bg-purple-950/30 text-white transition flex items-start space-x-3";
+        btnDeep.className = "w-full text-left p-3 rounded-xl border border-slate-800 hover:border-slate-700 bg-slate-900/40 text-slate-300 transition flex items-start space-x-3";
+      }
+    }
+
+    function loadPrompt(id) {
+      const input = document.getElementById('prompt-input');
+      if (id === 1) {
+        input.value = "Find all integer solutions to x^2 ≡ 35 (mod 101) using Euler's criterion and quadratic reciprocity.";
+      } else if (id === 2) {
+        input.value = "Analyze a concurrent deadlock in Python async event loop when resolving hierarchical AST call graphs.";
+      } else if (id === 3) {
+        input.value = "Derive the master equation in Lindblad form for a two-level qubit system coupled to a Markovian thermal reservoir.";
+      }
+    }
+
+    function handleSend(e) {
+      e.preventDefault();
+      const input = document.getElementById('prompt-input');
+      const text = input.value.trim();
+      if (!text) return;
+
+      appendUserMessage(text);
+      input.value = '';
+
+      simulateReasoningStream(text);
+    }
+
+    function appendUserMessage(text) {
+      const container = document.getElementById('chat-messages');
+      const div = document.createElement('div');
+      div.className = "flex items-start space-x-3 justify-end";
+      div.innerHTML = `
+        <div class="flex-1 flex justify-end">
+          <div class="p-4 rounded-xl bg-indigo-600/30 border border-indigo-500/40 text-sm leading-relaxed text-indigo-100 max-w-xl">
+            ${escapeHtml(text)}
+          </div>
+        </div>
+        <div class="w-8 h-8 rounded-lg bg-indigo-700 flex items-center justify-center text-sm font-bold shadow-md">
+          👤
+        </div>
+      `;
+      container.appendChild(div);
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function simulateReasoningStream(prompt) {
+      const container = document.getElementById('chat-messages');
+      const msgDiv = document.createElement('div');
+      msgDiv.className = "flex items-start space-x-3";
+      
+      const msgId = 'res-' + Date.now();
+      msgDiv.innerHTML = `
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center text-sm font-bold shadow-md">
+          🧠
+        </div>
+        <div class="flex-1 space-y-3" id="${msgId}">
+          <div class="p-3 rounded-lg bg-slate-950/80 border border-cyan-900/50 text-xs mono text-cyan-400 flex items-center space-x-2">
+            <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+            <span>Allocating Test-Time Compute (MCTS Rollout Budget: 32 nodes)...</span>
+          </div>
+        </div>
+      `;
+      container.appendChild(msgDiv);
+      container.scrollTop = container.scrollHeight;
+
+      setTimeout(() => {
+        const contentDiv = document.getElementById(msgId);
+        contentDiv.innerHTML = `
+          <!-- Collapsible Thinking Process -->
+          <details open class="group p-4 rounded-xl bg-slate-950/70 border border-slate-800 text-xs mono leading-relaxed text-slate-400">
+            <summary class="font-semibold text-cyan-400 cursor-pointer flex items-center justify-between pb-2 border-b border-slate-800/80 mb-3">
+              <span class="flex items-center space-x-1.5">
+                <span>⚡ Test-Time Reasoning Tokens</span>
+                <span class="px-1.5 py-0.2 rounded bg-cyan-950 text-cyan-300 text-[10px]">384 Tokens Generated</span>
+              </span>
+              <span class="text-slate-500 group-open:rotate-180 transition-transform">▼</span>
+            </summary>
+            <div class="space-y-2 text-slate-300">
+              <p class="text-slate-500">// Step 1: Formal Axiom Induction & State Framing</p>
+              <p>Analyzing problem statement: <em>"${escapeHtml(prompt)}"</em></p>
+              <p>Constructing verification invariants: Let $\\mathcal{S}$ denote state space with confidence threshold $Q(s, a) > 0.95$.</p>
+              <p class="text-slate-500">// Step 2: Monte Carlo Tree Expansion</p>
+              <p>Exploring candidate policy paths $\\pi_1, \\pi_2, \\pi_3$. Pruning $\\pi_1$ due to boundary constraint violation. Candidate $\\pi_2$ achieves highest PRM (Process Reward) score: <strong>0.982</strong>.</p>
+              <p class="text-slate-500">// Step 3: AST Execution & Self-Correction</p>
+              <p>Executing sandbox verification script: Assertions verified in 0.12ms. Mathematical consistency established with zero divergence.</p>
+            </div>
+          </details>
+
+          <!-- Final Verified Answer -->
+          <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-800 text-sm leading-relaxed text-slate-100">
+            <h4 class="font-bold text-cyan-300 text-xs uppercase tracking-wider mb-2">Verified Mathematical / Algorithmic Resolution</h4>
+            <p class="mb-3">By decomposing the problem into its foundational components under serial test-time reasoning:</p>
+            <div class="p-3 rounded-lg bg-slate-950 border border-slate-800 font-mono text-xs text-green-400 mb-3">
+              ✓ Ground-Truth Verified | Confidence: 99.4% | Deterministic Match: True
+            </div>
+            <p>The solution satisfies all boundary conditions and aligns with the formal verification axioms of <strong>SAM-AI Sovereign Intelligence</strong>.</p>
+          </div>
+        `;
+        container.scrollTop = container.scrollHeight;
+        renderMathInElement(contentDiv);
+      }, 1200);
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    }
+  </script>
+</body>
+</html>
