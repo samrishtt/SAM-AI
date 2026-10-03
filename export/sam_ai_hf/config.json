@@ -1,0 +1,36 @@
+{
+  "architectures": [
+    "SAMForCausalLM"
+  ],
+  "attention_type": "mla",
+  "auto_map": {
+    "AutoConfig": "configuration_sam.SAMConfig",
+    "AutoModel": "modeling_sam.SAMModel",
+    "AutoModelForCausalLM": "modeling_sam.SAMForCausalLM"
+  },
+  "d_ff": 1408,
+  "d_latent_kv": 128,
+  "d_model": 512,
+  "dtype": "float32",
+  "head_dim": 64,
+  "initializer_range": 0.02,
+  "max_seq_len": 4096,
+  "mla_rope_dim": 64,
+  "model_type": "sam_ai",
+  "mtp_depth": 1,
+  "mtp_lambda": 0.3,
+  "n_heads": 8,
+  "n_kv_heads": 2,
+  "n_layers": 6,
+  "n_routed_experts": 8,
+  "n_shared_experts": 1,
+  "rms_norm_eps": 1e-06,
+  "tie_word_embeddings": false,
+  "top_k_experts": 2,
+  "transformers_version": "5.17.0",
+  "use_aux_free_lb": true,
+  "use_moe": false,
+  "use_mtp": true,
+  "vocab_size": 32000,
+  "window_size": 512
+}
