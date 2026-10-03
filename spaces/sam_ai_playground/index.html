@@ -189,6 +189,29 @@
       isGenerating = true;
       document.getElementById('send-button').disabled = true;
 
+      // Handle casual greetings and direct identity inquiries instantly
+      const greetingMatch = /^(hi|hello|hey|hey there|greetings|good morning|good afternoon|good evening|who are you|what is sam ai|what is sam-ai)[!.]*$/i.test(text.trim());
+      if (greetingMatch) {
+        setTimeout(() => {
+          assistantMsg.thinkDetails.classList.remove('hidden');
+          assistantMsg.thinkSummary.querySelector('.think-label').textContent = 'Identity Core';
+          assistantMsg.thinkSummary.querySelector('span:first-child').classList.remove('animate-pulse');
+          assistantMsg.thinkDetails.open = false;
+          assistantMsg.thinkContent.textContent = 'Direct greeting / identity dispatch from Parallax sovereign neural core.';
+          assistantMsg.contentDiv.innerHTML = renderMarkdownWithKaTeX(
+            'Hello! I am **SAM-AI**, a sovereign reasoning intelligence developed by **Parallax** (Founder: Samrish).\n\nMy core specializations include:\n- **Advanced Mathematics & Formal Proofs**\n- **Complex Software Engineering & Architecture**\n- **Spatial Abstraction & ARC-AGI Reasoning**\n- **Test-Time Compute Deliberation**\n\nHow can I assist you with your research or technical problem today?'
+          );
+          conversationHistory.push({
+            role: 'assistant',
+            content: 'Hello! I am SAM-AI, a sovereign reasoning intelligence developed by Parallax (Founder: Samrish). How can I assist you today?'
+          });
+          isGenerating = false;
+          document.getElementById('send-button').disabled = false;
+          scrollToBottom();
+        }, 300);
+        return;
+      }
+
       try {
         await streamModelResponse(assistantMsg);
       } catch (err) {
@@ -256,7 +279,7 @@
 
     const SYSTEM_PROMPT = {
       role: 'system',
-      content: 'You are SAM-AI, an advanced reasoning AI developed by Parallax (Founder: Samrish). When asked who you are, state that you are SAM-AI developed by Parallax. Answer user inquiries naturally, politely, and accurately, whether they are greeting you informally or asking complex technical questions.'
+      content: 'You are SAM-AI, a sovereign reasoning intelligence developed by Parallax (Founder: Samrish). Your core specializations are: 1. Advanced Mathematics & Proofs, 2. Complex Software Engineering & Algorithms, 3. Spatial Abstraction & ARC-AGI Reasoning, and 4. Test-Time Compute Deliberation. When asked about your identity or specializations, state these core strengths clearly while answering all user questions naturally and helpfully.'
     };
 
     function renderMarkdownWithKaTeX(raw) {
