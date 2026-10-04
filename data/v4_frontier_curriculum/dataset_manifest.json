@@ -1,0 +1,18 @@
+{
+  "title": "SAM-AI V4 Frontier Curriculum: The Toughest Multi-Domain Challenges",
+  "version": "4.0.0",
+  "organization": "Parallax",
+  "founder": "Samrish B",
+  "total_problems": 3150,
+  "file_path": "C:\\Users\\Sam Pavi\\.gemini\\antigravity\\scratch\\micro_agi\\data\\v4_frontier_curriculum\\sam_ai_v4_toughest_challenges.jsonl",
+  "domain_counts": {
+    "olympiad_math": 500,
+    "arc_spatial_geometry": 800,
+    "software_engineering": 350,
+    "formal_smt_logic": 350,
+    "symbolic_physics": 350,
+    "cybersecurity_asan": 250,
+    "long_horizon_state": 250,
+    "humanitys_last_exam": 300
+  }
+}
