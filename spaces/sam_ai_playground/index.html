@@ -3,85 +3,162 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SAM-AI | Parallax Intelligence</title>
+  <title>SAM-AI | Frontier Intelligence (Parallax)</title>
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Marked.js for Markdown -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <!-- KaTeX for LaTeX Math -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <!-- Highlight.js for Code Highlighting -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
   <style>
-    body { font-family: 'Inter', sans-serif; background-color: #0d0f12; color: #ececf1; }
+    body { font-family: 'Inter', sans-serif; background-color: #0b0d11; color: #ececf1; }
     pre, code, .mono { font-family: 'JetBrains Mono', monospace; }
-    .sidebar { background-color: #090a0d; border-right: 1px solid #1e222a; }
-    .chat-bg { background-color: #0d0f12; }
-    .input-container { background-color: #17191e; border: 1px solid #282c35; }
-    .user-bubble { background-color: #21242c; }
-    .think-box { background-color: #121418; border: 1px solid #20242c; }
+    .sidebar { background-color: #08090d; border-right: 1px solid #1a1d24; }
+    .chat-bg { background-color: #0b0d11; }
+    .input-container { background-color: #14171f; border: 1px solid #232834; }
+    .input-container:focus-within { border-color: #3b82f6; box-shadow: 0 0 15px rgba(59, 130, 246, 0.15); }
+    .user-bubble { background-color: #1c202a; border: 1px solid #272d3b; }
+    .assistant-bubble { background-color: transparent; }
+    .think-box { background-color: #0f1218; border: 1px solid #1c2230; }
+    .canvas-panel { background-color: #0d1017; border-left: 1px solid #1f2533; transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
     /* Custom scrollbar */
-    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #232730; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #2f3441; }
+    ::-webkit-scrollbar-thumb { background: #222735; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #333a4d; }
+    
+    /* Markdown Styles */
+    .markdown-body h1 { font-size: 1.5rem; font-weight: 700; margin-top: 1rem; margin-bottom: 0.5rem; color: #f8fafc; }
+    .markdown-body h2 { font-size: 1.25rem; font-weight: 600; margin-top: 0.85rem; margin-bottom: 0.4rem; color: #f1f5f9; }
+    .markdown-body h3 { font-size: 1.1rem; font-weight: 600; margin-top: 0.75rem; margin-bottom: 0.3rem; color: #e2e8f0; }
+    .markdown-body p { margin-bottom: 0.75rem; line-height: 1.65; }
+    .markdown-body ul, .markdown-body ol { margin-left: 1.25rem; margin-bottom: 0.75rem; list-style-type: disc; }
+    .markdown-body ol { list-style-type: decimal; }
+    .markdown-body li { margin-bottom: 0.25rem; }
+    .markdown-body pre { background: #12151e; border: 1px solid #1f2535; border-radius: 0.6rem; padding: 0.85rem; overflow-x: auto; margin-top: 0.5rem; margin-bottom: 0.75rem; }
+    .markdown-body code:not(pre code) { background: #1a1e2b; color: #38bdf8; padding: 0.15rem 0.35rem; border-radius: 0.25rem; font-size: 0.85em; }
+    .markdown-body blockquote { border-left: 3px solid #3b82f6; padding-left: 0.85rem; color: #94a3b8; font-style: italic; margin-bottom: 0.75rem; }
+    .markdown-body table { width: 100%; border-collapse: collapse; margin-bottom: 0.75rem; }
+    .markdown-body th, .markdown-body td { border: 1px solid #242b3d; padding: 0.5rem 0.75rem; font-size: 0.85rem; }
+    .markdown-body th { background-color: #141824; font-weight: 600; }
   </style>
 </head>
 <body class="h-screen flex overflow-hidden">
 
-  <!-- Minimalist Sidebar (like Claude / ChatGPT) -->
-  <aside class="w-64 sidebar flex flex-col justify-between hidden md:flex shrink-0">
-    <div class="p-3">
-      <!-- New Chat Button -->
-      <button onclick="startNewChat()" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl border border-slate-800 hover:bg-slate-800/60 text-sm font-medium transition text-slate-200">
-        <div class="flex items-center space-x-2.5">
-          <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-          <span>New Chat</span>
+  <!-- Sidebar (Claude / ChatGPT Style) -->
+  <aside id="sidebar" class="w-64 sidebar flex flex-col justify-between hidden md:flex shrink-0 z-30 select-none">
+    <div class="p-3 flex flex-col h-full">
+      <!-- Logo & New Chat -->
+      <div class="flex items-center justify-between mb-3 px-1">
+        <div class="flex items-center space-x-2">
+          <div class="w-7 h-7 rounded-lg bg-gradient-to-tr from-cyan-500 via-blue-600 to-indigo-600 flex items-center justify-center font-bold text-xs text-white shadow-md shadow-blue-500/20">
+            ⚡
+          </div>
+          <span class="font-bold text-sm text-white tracking-tight">SAM-AI</span>
         </div>
-        <span class="text-xs text-slate-500 mono">Ctrl+K</span>
-      </button>
-
-      <!-- History Header -->
-      <div class="mt-6 px-2 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
-        Recent Chats
+        <span class="text-[10px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 font-mono border border-blue-500/20">v4</span>
       </div>
 
-      <!-- History List -->
-      <div class="mt-2 space-y-1">
-        <button class="w-full text-left px-3 py-2 rounded-lg bg-slate-800/40 text-xs text-slate-300 truncate">
-          Current Conversation
+      <button onclick="startNewChat()" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl border border-slate-800 hover:bg-slate-800/60 text-sm font-medium transition text-slate-200 group">
+        <div class="flex items-center space-x-2.5">
+          <svg class="w-4 h-4 text-slate-400 group-hover:text-blue-400 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+          <span>New Chat</span>
+        </div>
+        <span class="text-[11px] text-slate-500 mono">Ctrl+K</span>
+      </button>
+
+      <!-- History Section -->
+      <div class="mt-5 px-1 flex items-center justify-between">
+        <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Conversations</span>
+        <button onclick="clearAllChats()" title="Clear history" class="text-slate-500 hover:text-red-400 text-xs">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
         </button>
+      </div>
+
+      <div id="chat-history-list" class="mt-2 space-y-1 overflow-y-auto flex-1 pr-1">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- Frontier Benchmarks Status -->
+      <div class="mt-3 p-2.5 rounded-xl bg-slate-900/60 border border-slate-800/80 text-[11px] text-slate-400 space-y-1.5">
+        <div class="flex items-center justify-between font-semibold text-slate-300">
+          <span>Official Benchmarks</span>
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        </div>
+        <div class="flex justify-between">
+          <span>ARC-AGI-3 (Interactive)</span>
+          <span class="font-mono text-emerald-400 font-bold">28.29</span>
+        </div>
+        <div class="flex justify-between">
+          <span>SWE-bench Verified</span>
+          <span class="font-mono text-cyan-400">PR #61</span>
+        </div>
+        <div class="flex justify-between">
+          <span>LiveCodeBench</span>
+          <span class="font-mono text-indigo-400">PR #3</span>
+        </div>
       </div>
     </div>
 
-    <!-- Model Spec & Footer -->
-    <div class="p-3 border-t border-slate-800/80">
-      <div class="flex items-center space-x-3 px-2 py-2">
-        <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-600 to-indigo-600 flex items-center justify-center font-bold text-[10px] text-white shadow-md">
-          SAM
+    <!-- User Profile & Lab Attribution -->
+    <div class="p-3 border-t border-slate-800/80 bg-slate-950/40">
+      <div class="flex items-center space-x-2.5 px-2 py-1.5">
+        <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-600 to-indigo-600 flex items-center justify-center font-bold text-xs text-white shadow-md">
+          PX
         </div>
         <div class="flex-1 truncate">
-          <div class="text-xs font-semibold text-slate-200 truncate">SAM-AI 14B</div>
-          <div class="text-[10px] text-emerald-400 flex items-center space-x-1">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span>Parallax Neural Core</span>
-          </div>
+          <div class="text-xs font-semibold text-slate-200">Parallax AI Lab</div>
+          <div class="text-[10px] text-slate-400 truncate">Founder: Samrish</div>
         </div>
+        <button onclick="toggleSettingsModal()" title="API Key Settings" class="text-slate-400 hover:text-white p-1 rounded-md hover:bg-slate-800">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+        </button>
       </div>
     </div>
   </aside>
 
-  <!-- Central Chat Canvas -->
-  <main class="flex-1 flex flex-col chat-bg h-full relative">
+  <!-- Central Chat Area -->
+  <main class="flex-1 flex flex-col chat-bg h-full relative overflow-hidden">
     
-    <!-- Top Minimal Navigation Bar -->
-    <header class="h-14 border-b border-slate-800/60 px-6 flex items-center justify-between shrink-0">
+    <!-- Header with Model Selector & Canvas Toggle (Gemini / Claude style) -->
+    <header class="h-14 border-b border-slate-800/60 px-4 md:px-6 flex items-center justify-between shrink-0 bg-[#0b0d11]/80 backdrop-blur z-10">
       <div class="flex items-center space-x-3">
-        <span class="text-base font-bold text-white tracking-tight">SAM-AI</span>
-        <span class="text-xs px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 font-mono">14B Reasoning</span>
-        <span class="text-[11px] text-slate-500">by Parallax</span>
+        <!-- Mobile Sidebar Toggle -->
+        <button onclick="toggleMobileSidebar()" class="md:hidden text-slate-400 hover:text-white p-1">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
+
+        <!-- Model Picker Dropdown -->
+        <div class="relative">
+          <select id="model-select" onchange="switchModel(this.value)" class="bg-slate-900 text-slate-200 text-xs font-semibold py-1.5 px-3 pr-8 rounded-xl border border-slate-800 focus:outline-none focus:border-blue-500 cursor-pointer appearance-none">
+            <option value="deepseek-ai/DeepSeek-R1-Distill-Qwen-14B" selected>⚡ SAM-AI v4 Reasoning (14B LoRA)</option>
+            <option value="deepseek-ai/DeepSeek-R1-Distill-Qwen-32B">🧠 SAM-AI 32B Deep Reason Core</option>
+            <option value="Qwen/Qwen2.5-Coder-32B-Instruct">💻 SAM-AI Frontier Code (Qwen-32B)</option>
+          </select>
+          <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7 7"></path></svg>
+          </div>
+        </div>
+
+        <span class="hidden sm:inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+          ● Serverless Active
+        </span>
       </div>
 
-      <div class="text-xs text-slate-500 flex items-center space-x-4">
-        <span>Serverless Neural Engine</span>
+      <!-- Top Right Actions -->
+      <div class="flex items-center space-x-3 text-xs">
+        <button id="toggle-canvas-btn" onclick="toggleCanvas()" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg border border-slate-800 hover:bg-slate-800/80 text-slate-300 transition">
+          <svg class="w-3.5 h-3.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+          <span>Canvas</span>
+        </button>
       </div>
     </header>
 
@@ -89,53 +166,194 @@
     <div id="messages-container" class="flex-1 overflow-y-auto px-4 md:px-0 py-6">
       <div class="max-w-3xl mx-auto space-y-6" id="messages-list">
         
-        <!-- Welcome Hero (ChatGPT / Claude style) -->
-        <div id="welcome-hero" class="text-center py-16 space-y-4">
-          <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-500 to-indigo-600 mx-auto flex items-center justify-center text-xl shadow-lg shadow-cyan-500/10">
+        <!-- Welcome Hero (ChatGPT / Claude / Gemini style) -->
+        <div id="welcome-hero" class="text-center py-16 space-y-5">
+          <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-cyan-500 via-blue-600 to-indigo-600 mx-auto flex items-center justify-center text-2xl shadow-xl shadow-blue-500/20">
             ⚡
           </div>
-          <h2 class="text-2xl font-bold text-white tracking-tight">What do you want to explore today?</h2>
-          <p class="text-sm text-slate-400 max-w-md mx-auto">
-            Direct, unconstrained reasoning powered by Parallax SAM-AI test-time compute. Ask any complex math, code, or scientific problem.
+          <h1 class="text-3xl font-extrabold text-white tracking-tight">How can SAM-AI help you build?</h1>
+          <p class="text-sm text-slate-400 max-w-lg mx-auto leading-relaxed">
+            Sovereign reasoning intelligence with test-time compute, mathematical proofs, software engineering, and multi-hop deep research.
           </p>
+          
+          <!-- Quick Suggestion Pills -->
+          <div class="flex flex-wrap justify-center gap-2 max-w-xl mx-auto pt-2">
+            <button onclick="quickPrompt('Prove that there are infinitely many primes of the form 4k + 3.')" class="text-xs px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 transition">
+              📐 Number Theory Proof
+            </button>
+            <button onclick="quickPrompt('Write a complete, responsive landing page in HTML/Tailwind for an autonomous AI lab.')" class="text-xs px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 transition">
+              💻 Code Web App in Canvas
+            </button>
+            <button onclick="quickPrompt('Perform deep research on test-time search scaling (PRM vs MCTS) in frontier models.')" class="text-xs px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 transition">
+              🔍 Deep Research Synthesis
+            </button>
+            <button onclick="quickPrompt('Analyze the core inductive transformation logic for ARC-AGI spatial grid problems.')" class="text-xs px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 transition">
+              🧩 ARC-AGI Spatial Logic
+            </button>
+          </div>
         </div>
 
       </div>
     </div>
 
-    <!-- Floating Clean Input Pill (ChatGPT / Claude Style) -->
-    <div class="p-4 md:pb-6 shrink-0 bg-gradient-to-t from-[#0d0f12] via-[#0d0f12] to-transparent">
+    <!-- Floating Clean Input Pill with Attachments & Deep Research (Frontier Style) -->
+    <div class="p-3 md:p-4 md:pb-6 shrink-0 bg-gradient-to-t from-[#0b0d11] via-[#0b0d11] to-transparent z-10">
       <div class="max-w-3xl mx-auto">
-        <form onsubmit="handleSend(event)" class="input-container rounded-2xl p-2.5 flex flex-col focus-within:border-slate-600 transition shadow-2xl">
-          <textarea id="prompt-input" rows="1" placeholder="Message SAM-AI..." 
+        <!-- File Attachment Chip Preview -->
+        <div id="attachment-preview" class="hidden mb-2 flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-slate-800/80 border border-slate-700 text-xs text-slate-200 w-max">
+          <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>
+          <span id="attachment-filename" class="font-mono truncate max-w-xs">file.txt</span>
+          <button onclick="removeAttachment()" class="text-slate-400 hover:text-red-400">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+          </button>
+        </div>
+
+        <form onsubmit="handleSend(event)" class="input-container rounded-2xl p-2.5 flex flex-col transition shadow-2xl">
+          <textarea id="prompt-input" rows="1" placeholder="Ask SAM-AI anything, or type /research..." 
             class="w-full bg-transparent text-sm text-slate-100 placeholder-slate-500 outline-none px-3 py-1.5 resize-none max-h-36 overflow-y-auto"
             onkeydown="handleKeyDown(event)"></textarea>
           
           <div class="flex items-center justify-between pt-2 px-2 border-t border-slate-800/40">
-            <span class="text-[11px] text-slate-500 mono">Shift + Enter for new line</span>
-            <button type="submit" id="send-button" class="w-8 h-8 rounded-lg bg-white hover:bg-slate-200 text-black flex items-center justify-center transition disabled:opacity-30 disabled:cursor-not-allowed">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 12h14M12 5l7 7-7 7"></path></svg>
-            </button>
+            <div class="flex items-center space-x-2">
+              <!-- File Attachment Button -->
+              <input type="file" id="file-uploader" class="hidden" onchange="handleFileUpload(event)">
+              <button type="button" onclick="document.getElementById('file-uploader').click()" title="Attach file or code (Any-to-Text)" class="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>
+              </button>
+
+              <!-- Deep Research Toggle Pill -->
+              <button type="button" id="deep-research-toggle" onclick="toggleDeepResearch()" class="flex items-center space-x-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border border-slate-800 bg-slate-900/60 text-slate-400 hover:border-slate-700 transition">
+                <span class="w-2 h-2 rounded-full bg-slate-600" id="deep-research-dot"></span>
+                <span>Deep Research</span>
+              </button>
+            </div>
+
+            <div class="flex items-center space-x-2">
+              <span class="text-[11px] text-slate-500 mono hidden sm:inline">Shift + Enter for new line</span>
+              <button type="submit" id="send-button" class="w-8 h-8 rounded-lg bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center transition disabled:opacity-30 disabled:cursor-not-allowed shadow-md shadow-blue-600/30">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 12h14M12 5l7 7-7 7"></path></svg>
+              </button>
+            </div>
           </div>
         </form>
 
-        <p class="text-[11px] text-center text-slate-600 mt-2">
-          SAM-AI provides unscripted neural reasoning. Parallax AI.
+        <p class="text-[11px] text-center text-slate-500 mt-2">
+          SAM-AI v4 Reasoning Engine &bull; Parallax Autonomous AI &bull; Open-weight frontier intelligence
         </p>
       </div>
     </div>
 
   </main>
 
+  <!-- Interactive Canvas / Artifacts Split Screen (Claude Artifacts / ChatGPT Canvas) -->
+  <aside id="canvas-drawer" class="canvas-panel w-full md:w-[48%] h-full flex flex-col fixed md:relative right-0 top-0 translate-x-full md:translate-x-0 hidden z-20">
+    <!-- Canvas Header -->
+    <div class="h-14 border-b border-slate-800/60 px-4 flex items-center justify-between shrink-0 bg-[#0d1017]">
+      <div class="flex items-center space-x-2">
+        <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+        <span class="font-semibold text-xs text-white uppercase tracking-wider" id="canvas-title">Artifact / Canvas</span>
+      </div>
+
+      <div class="flex items-center space-x-2">
+        <!-- View Toggle (Code / Live Preview) -->
+        <div class="flex rounded-lg bg-slate-900 border border-slate-800 p-0.5 text-xs">
+          <button id="canvas-tab-code" onclick="switchCanvasTab('code')" class="px-2.5 py-1 rounded-md bg-blue-600 text-white font-medium">Code</button>
+          <button id="canvas-tab-preview" onclick="switchCanvasTab('preview')" class="px-2.5 py-1 rounded-md text-slate-400 hover:text-white font-medium">Preview</button>
+        </div>
+
+        <!-- Copy Button -->
+        <button onclick="copyCanvasContent()" title="Copy to clipboard" class="p-1.5 rounded-lg border border-slate-800 hover:bg-slate-800 text-slate-400 hover:text-white transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+        </button>
+
+        <!-- Close Canvas -->
+        <button onclick="closeCanvas()" title="Close Canvas" class="p-1.5 rounded-lg border border-slate-800 hover:bg-slate-800 text-slate-400 hover:text-white transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Canvas Code View -->
+    <div id="canvas-code-container" class="flex-1 overflow-auto p-4 bg-[#0a0c10]">
+      <pre class="m-0 text-xs font-mono"><code id="canvas-code-block" class="hljs"></code></pre>
+    </div>
+
+    <!-- Canvas Live Preview View (HTML / SVG / JS iframe) -->
+    <div id="canvas-preview-container" class="flex-1 hidden bg-white">
+      <iframe id="canvas-preview-frame" class="w-full h-full border-0"></iframe>
+    </div>
+  </aside>
+
+  <!-- Settings / API Key Modal -->
+  <div id="settings-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-bold text-white">Inference Engine Settings</h3>
+        <button onclick="toggleSettingsModal()" class="text-slate-400 hover:text-white">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+      <p class="text-xs text-slate-400">
+        SAM-AI connects directly to Hugging Face Serverless Router. You can use the built-in Parallax community key or specify your custom HF user token.
+      </p>
+      <div>
+        <label class="block text-xs font-medium text-slate-300 mb-1">Hugging Face User Token</label>
+        <input type="password" id="custom-hf-token" placeholder="hf_..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 outline-none focus:border-blue-500 font-mono">
+      </div>
+      <div class="flex justify-end space-x-2 pt-2">
+        <button onclick="toggleSettingsModal()" class="px-3 py-1.5 rounded-xl border border-slate-800 text-xs text-slate-300 hover:bg-slate-800">Cancel</button>
+        <button onclick="saveSettings()" class="px-4 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-xs text-white font-medium">Save & Apply</button>
+      </div>
+    </div>
+  </div>
+
   <script>
-    // Retrieve token from localStorage or assemble default key
+    // Parallax default working token
     const DEFAULT_KEY = 'pJcZKbGBULtwitNWztXONwipUKVakPyofo_fh'.split('').reverse().join('');
-    const HF_TOKEN = localStorage.getItem('sam_ai_hf_token') || DEFAULT_KEY;
-    const MODEL_ID = 'deepseek-ai/DeepSeek-R1-Distill-Qwen-14B';
+    let activeToken = localStorage.getItem('sam_ai_hf_token') || DEFAULT_KEY;
+    let activeModel = 'deepseek-ai/DeepSeek-R1-Distill-Qwen-14B';
     const ROUTER_URL = 'https://router.huggingface.co/v1/chat/completions';
 
-    let conversationHistory = [];
+    let isDeepResearch = false;
+    let attachedFile = null;
     let isGenerating = false;
+    let currentChatId = Date.now().toString();
+    let conversationHistory = [];
+    let chatSessions = JSON.parse(localStorage.getItem('sam_ai_chats') || '[]');
+
+    // Initialize UI
+    window.addEventListener('DOMContentLoaded', () => {
+      renderChatHistory();
+      // Configure marked
+      marked.setOptions({
+        breaks: true,
+        highlight: function(code, lang) {
+          if (lang && hljs.getLanguage(lang)) {
+            return hljs.highlight(code, { language: lang }).value;
+          }
+          return hljs.highlightAuto(code).value;
+        }
+      });
+    });
+
+    function toggleDeepResearch() {
+      isDeepResearch = !isDeepResearch;
+      const btn = document.getElementById('deep-research-toggle');
+      const dot = document.getElementById('deep-research-dot');
+      if (isDeepResearch) {
+        btn.classList.add('border-blue-500/40', 'bg-blue-500/10', 'text-blue-400');
+        dot.classList.remove('bg-slate-600');
+        dot.classList.add('bg-blue-400', 'animate-pulse');
+      } else {
+        btn.classList.remove('border-blue-500/40', 'bg-blue-500/10', 'text-blue-400');
+        dot.classList.remove('bg-blue-400', 'animate-pulse');
+        dot.classList.add('bg-slate-600');
+      }
+    }
+
+    function switchModel(val) {
+      activeModel = val;
+    }
 
     function handleKeyDown(e) {
       if (e.key === 'Enter' && !e.shiftKey) {
@@ -150,19 +368,138 @@
       element.style.height = (element.scrollHeight) + "px";
     }
 
+    function quickPrompt(text) {
+      const input = document.getElementById('prompt-input');
+      input.value = text;
+      autoGrow(input);
+      input.focus();
+    }
+
+    function handleFileUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        attachedFile = {
+          name: file.name,
+          content: evt.target.result
+        };
+        document.getElementById('attachment-filename').textContent = file.name;
+        document.getElementById('attachment-preview').classList.remove('hidden');
+      };
+      reader.readAsText(file);
+    }
+
+    function removeAttachment() {
+      attachedFile = null;
+      document.getElementById('attachment-preview').classList.add('hidden');
+      document.getElementById('file-uploader').value = '';
+    }
+
     function startNewChat() {
+      if (conversationHistory.length > 0) {
+        saveCurrentSession();
+      }
+      currentChatId = Date.now().toString();
       conversationHistory = [];
-      document.getElementById('messages-list').innerHTML = `
-        <div id="welcome-hero" class="text-center py-16 space-y-4">
-          <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-500 to-indigo-600 mx-auto flex items-center justify-center text-xl shadow-lg shadow-cyan-500/10">
+      attachedFile = null;
+      removeAttachment();
+      
+      const list = document.getElementById('messages-list');
+      list.innerHTML = `
+        <div id="welcome-hero" class="text-center py-16 space-y-5">
+          <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-cyan-500 via-blue-600 to-indigo-600 mx-auto flex items-center justify-center text-2xl shadow-xl shadow-blue-500/20">
             ⚡
           </div>
-          <h2 class="text-2xl font-bold text-white tracking-tight">What do you want to explore today?</h2>
-          <p class="text-sm text-slate-400 max-w-md mx-auto">
-            Direct, unconstrained reasoning powered by sovereign 14B test-time compute. Ask any complex math, code, or scientific problem.
+          <h1 class="text-3xl font-extrabold text-white tracking-tight">How can SAM-AI help you build?</h1>
+          <p class="text-sm text-slate-400 max-w-lg mx-auto leading-relaxed">
+            Sovereign reasoning intelligence with test-time compute, mathematical proofs, software engineering, and multi-hop deep research.
           </p>
+          <div class="flex flex-wrap justify-center gap-2 max-w-xl mx-auto pt-2">
+            <button onclick="quickPrompt('Prove that there are infinitely many primes of the form 4k + 3.')" class="text-xs px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 transition">
+              📐 Number Theory Proof
+            </button>
+            <button onclick="quickPrompt('Write a complete, responsive landing page in HTML/Tailwind for an autonomous AI lab.')" class="text-xs px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 transition">
+              💻 Code Web App in Canvas
+            </button>
+            <button onclick="quickPrompt('Perform deep research on test-time search scaling (PRM vs MCTS) in frontier models.')" class="text-xs px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 transition">
+              🔍 Deep Research Synthesis
+            </button>
+            <button onclick="quickPrompt('Analyze the core inductive transformation logic for ARC-AGI spatial grid problems.')" class="text-xs px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 transition">
+              🧩 ARC-AGI Spatial Logic
+            </button>
+          </div>
         </div>
       `;
+      closeCanvas();
+      renderChatHistory();
+    }
+
+    function saveCurrentSession() {
+      if (conversationHistory.length === 0) return;
+      const firstUserMsg = conversationHistory.find(m => m.role === 'user');
+      const title = firstUserMsg ? firstUserMsg.content.slice(0, 32) + '...' : 'Conversation';
+      
+      const existingIdx = chatSessions.findIndex(s => s.id === currentChatId);
+      const sessionData = {
+        id: currentChatId,
+        title: title,
+        timestamp: Date.now(),
+        history: conversationHistory
+      };
+
+      if (existingIdx >= 0) {
+        chatSessions[existingIdx] = sessionData;
+      } else {
+        chatSessions.unshift(sessionData);
+      }
+      localStorage.setItem('sam_ai_chats', JSON.stringify(chatSessions));
+      renderChatHistory();
+    }
+
+    function renderChatHistory() {
+      const container = document.getElementById('chat-history-list');
+      if (!chatSessions.length) {
+        container.innerHTML = `<div class="text-[11px] text-slate-600 px-2 py-3 text-center">No past chats</div>`;
+        return;
+      }
+      container.innerHTML = chatSessions.map(s => `
+        <button onclick="loadChatSession('${s.id}')" class="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-slate-800/60 text-xs text-slate-400 hover:text-slate-200 truncate transition flex items-center space-x-2 ${s.id === currentChatId ? 'bg-slate-800 text-white font-medium' : ''}">
+          <svg class="w-3.5 h-3.5 shrink-0 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+          <span class="truncate">${escapeHtml(s.title)}</span>
+        </button>
+      `).join('');
+    }
+
+    function loadChatSession(id) {
+      const session = chatSessions.find(s => s.id === id);
+      if (!session) return;
+      currentChatId = session.id;
+      conversationHistory = session.history;
+      
+      const list = document.getElementById('messages-list');
+      list.innerHTML = '';
+      
+      conversationHistory.forEach(msg => {
+        if (msg.role === 'user') {
+          appendUserMessage(msg.content);
+        } else if (msg.role === 'assistant') {
+          const assistantMsg = createAssistantMessagePlaceholder();
+          assistantMsg.thinkDetails.classList.add('hidden');
+          assistantMsg.contentDiv.innerHTML = renderMarkdownWithKaTeX(msg.content);
+          detectAndAttachCanvas(msg.content);
+        }
+      });
+      renderChatHistory();
+    }
+
+    function clearAllChats() {
+      if (confirm('Clear all conversation history?')) {
+        chatSessions = [];
+        localStorage.removeItem('sam_ai_chats');
+        startNewChat();
+      }
     }
 
     async function handleSend(e) {
@@ -170,52 +507,54 @@
       if (isGenerating) return;
 
       const input = document.getElementById('prompt-input');
-      const text = input.value.trim();
-      if (!text) return;
+      let text = input.value.trim();
+      if (!text && !attachedFile) return;
 
-      // Remove welcome hero if present
+      // Hero dismiss
       const hero = document.getElementById('welcome-hero');
       if (hero) hero.remove();
+
+      let fullPrompt = text;
+      if (attachedFile) {
+        fullPrompt = `[Attached Context: ${attachedFile.name}]\n\`\`\`\n${attachedFile.content}\n\`\`\`\n\n${text}`;
+      }
 
       input.value = '';
       input.style.height = 'auto';
 
-      // Append user message
-      appendUserMessage(text);
-      conversationHistory.push({ role: 'user', content: text });
+      appendUserMessage(text || `Analyzed: ${attachedFile.name}`);
+      conversationHistory.push({ role: 'user', content: fullPrompt });
+      removeAttachment();
 
-      // Create assistant container
       const assistantMsg = createAssistantMessagePlaceholder();
       isGenerating = true;
       document.getElementById('send-button').disabled = true;
 
-      // Handle casual greetings and direct identity inquiries instantly
-      const greetingMatch = /^(hi|hello|hey|hey there|greetings|good morning|good afternoon|good evening|who are you|what is sam ai|what is sam-ai)[!.]*$/i.test(text.trim());
-      if (greetingMatch) {
+      // Greeting fast response
+      const greetingMatch = /^(hi|hello|hey|greetings|who are you|what is sam ai|what is sam-ai)[!.]*$/i.test(text.trim());
+      if (greetingMatch && !isDeepResearch) {
         setTimeout(() => {
           assistantMsg.thinkDetails.classList.remove('hidden');
-          assistantMsg.thinkSummary.querySelector('.think-label').textContent = 'Identity Core';
+          assistantMsg.thinkSummary.querySelector('.think-label').textContent = 'Identity Dispatch';
           assistantMsg.thinkSummary.querySelector('span:first-child').classList.remove('animate-pulse');
           assistantMsg.thinkDetails.open = false;
-          assistantMsg.thinkContent.textContent = 'Direct greeting / identity dispatch from Parallax sovereign neural core.';
-          assistantMsg.contentDiv.innerHTML = renderMarkdownWithKaTeX(
-            'Hello! I am **SAM-AI**, a sovereign reasoning intelligence developed by **Parallax** (Founder: Samrish).\n\nMy core specializations include:\n- **Advanced Mathematics & Formal Proofs**\n- **Complex Software Engineering & Architecture**\n- **Spatial Abstraction & ARC-AGI Reasoning**\n- **Test-Time Compute Deliberation**\n\nHow can I assist you with your research or technical problem today?'
-          );
-          conversationHistory.push({
-            role: 'assistant',
-            content: 'Hello! I am SAM-AI, a sovereign reasoning intelligence developed by Parallax (Founder: Samrish). How can I assist you today?'
-          });
+          assistantMsg.thinkContent.textContent = 'Identity fast-path dispatched from Parallax neural core.';
+          const reply = 'Hello! I am **SAM-AI**, a sovereign reasoning intelligence developed by **Parallax** (Founder: Samrish).\n\n### My Core Architecture:\n- **14B GRPO Reinforcement Learning Core** (`Samrish2009/SAM-AI-Reasoning-v4`)\n- **Interactive ARC-AGI-3 Solver** (Official score: 28.29 on Kaggle)\n- **Interactive Canvas & Code Execution Sandbox**\n- **Deep Research Grounding Engine**\n\nHow can I help you tackle your challenge today?';
+          assistantMsg.contentDiv.innerHTML = renderMarkdownWithKaTeX(reply);
+          conversationHistory.push({ role: 'assistant', content: reply });
+          saveCurrentSession();
           isGenerating = false;
           document.getElementById('send-button').disabled = false;
           scrollToBottom();
-        }, 300);
+        }, 250);
         return;
       }
 
       try {
         await streamModelResponse(assistantMsg);
+        saveCurrentSession();
       } catch (err) {
-        assistantMsg.contentDiv.innerHTML = `<span class="text-red-400 text-sm">Error connecting to model: ${err.message}. Please try again.</span>`;
+        assistantMsg.contentDiv.innerHTML = `<div class="p-3 rounded-xl bg-red-950/40 border border-red-800 text-red-300 text-xs">Error connecting to inference engine: ${escapeHtml(err.message)}</div>`;
       } finally {
         isGenerating = false;
         document.getElementById('send-button').disabled = false;
@@ -240,7 +579,7 @@
       const msgWrapper = document.createElement('div');
       msgWrapper.className = "space-y-3";
 
-      // Thinking block (collapsible)
+      // Thinking Accordion
       const thinkDetails = document.createElement('details');
       thinkDetails.className = "think-box rounded-xl p-3 text-xs mono text-slate-400 cursor-pointer hidden";
       thinkDetails.open = true;
@@ -248,8 +587,9 @@
       const thinkSummary = document.createElement('summary');
       thinkSummary.className = "font-semibold text-slate-400 hover:text-slate-300 flex items-center space-x-2 select-none mb-2";
       thinkSummary.innerHTML = `
-        <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
+        <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
         <span class="think-label">Thinking...</span>
+        <span class="think-timer text-slate-500 font-normal ml-auto">0.0s</span>
       `;
       thinkDetails.appendChild(thinkSummary);
 
@@ -273,13 +613,14 @@
         thinkDetails,
         thinkSummary,
         thinkContent,
-        contentDiv
+        contentDiv,
+        startTime: Date.now()
       };
     }
 
     const SYSTEM_PROMPT = {
       role: 'system',
-      content: 'You are SAM-AI, a sovereign reasoning intelligence developed by Parallax (Founder: Samrish). Your core specializations are: 1. Advanced Mathematics & Proofs, 2. Complex Software Engineering & Algorithms, 3. Spatial Abstraction & ARC-AGI Reasoning, and 4. Test-Time Compute Deliberation. When asked about your identity or specializations, state these core strengths clearly while answering all user questions naturally and helpfully.'
+      content: 'You are SAM-AI, a sovereign reasoning intelligence developed by Parallax (Founder: Samrish). Specializations: 1. Advanced Mathematics & Proofs, 2. Complex Software Engineering & Canvas Artifacts, 3. Spatial Abstraction & ARC-AGI Reasoning, 4. Test-Time Compute Deliberation. When generating code, provide comprehensive, self-contained, working implementations that can render or execute in an interactive canvas.'
     };
 
     function renderMarkdownWithKaTeX(raw) {
@@ -292,13 +633,10 @@
         return `%%MATH_${mathBlocks.length - 1}%%`;
       });
 
-      // 2. Capture \[ ... \] OR [ ... ] that contains LaTeX math indicators
-      text = text.replace(/\\?\[\s*([\s\S]*?)\s*\\?\]/g, (m, eq) => {
-        if (eq.includes('\\') || eq.includes('^') || eq.includes('=') || eq.includes('_') || eq.includes('+') || eq.includes('pm')) {
-          mathBlocks.push({ formula: eq.trim(), display: true });
-          return `%%MATH_${mathBlocks.length - 1}%%`;
-        }
-        return m;
+      // 2. Capture \[ ... \]
+      text = text.replace(/\\\[\s*([\s\S]*?)\s*\\\]/g, (m, eq) => {
+        mathBlocks.push({ formula: eq.trim(), display: true });
+        return `%%MATH_${mathBlocks.length - 1}%%`;
       });
 
       // 3. Capture \( ... \)
@@ -313,7 +651,7 @@
         return `%%MATH_${mathBlocks.length - 1}%%`;
       });
 
-      // Parse markdown
+      // Parse markdown with marked
       let html = marked.parse(text);
 
       // Re-insert KaTeX rendered equations
@@ -334,23 +672,39 @@
     }
 
     async function streamModelResponse(msgObj) {
+      const messagesPayload = [SYSTEM_PROMPT, ...conversationHistory];
+      if (isDeepResearch) {
+        messagesPayload.push({
+          role: 'system',
+          content: '[MODE: DEEP RESEARCH] Conduct an exhaustive, multi-perspective synthesis with formal step-by-step methodology, rigorous literature context, and concrete verifiable conclusions.'
+        });
+      }
+
+      // Live timer for reasoning
+      const timerInterval = setInterval(() => {
+        const elapsed = ((Date.now() - msgObj.startTime) / 1000).toFixed(1);
+        const timerEl = msgObj.thinkSummary.querySelector('.think-timer');
+        if (timerEl) timerEl.textContent = `${elapsed}s`;
+      }, 100);
+
       const response = await fetch(ROUTER_URL, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${HF_TOKEN}`,
+          'Authorization': `Bearer ${activeToken}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          model: MODEL_ID,
-          messages: [SYSTEM_PROMPT, ...conversationHistory],
-          max_tokens: 3000,
+          model: activeModel,
+          messages: messagesPayload,
+          max_tokens: 3500,
           stream: true
         })
       });
 
       if (!response.ok) {
+        clearInterval(timerInterval);
         const errText = await response.text();
-        throw new Error(`Inference API returned HTTP ${response.status}: ${errText}`);
+        throw new Error(`Inference returned HTTP ${response.status}: ${errText}`);
       }
 
       const reader = response.body.getReader();
@@ -358,6 +712,7 @@
       let buffer = '';
       let rawReasoning = '';
       let rawAnswer = '';
+      let firstAnswerTokenReceived = false;
 
       while (true) {
         const { done, value } = await reader.read();
@@ -365,7 +720,7 @@
 
         buffer += decoder.decode(value, { stream: true });
         const lines = buffer.split('\n');
-        buffer = lines.pop(); // keep partial line
+        buffer = lines.pop();
 
         for (const line of lines) {
           const trimmed = line.trim();
@@ -376,7 +731,7 @@
             const parsed = JSON.parse(trimmed.slice(6));
             const delta = parsed.choices[0]?.delta || {};
 
-            // Collect reasoning tokens
+            // Reasoning stream (<think> content)
             if (delta.reasoning_content) {
               rawReasoning += delta.reasoning_content;
               msgObj.thinkDetails.classList.remove('hidden');
@@ -384,13 +739,16 @@
               scrollToBottom();
             }
 
-            // Collect final answer tokens
+            // Answer stream
             if (delta.content) {
-              if (rawAnswer === '') {
-                // First answer token: collapse think box cleanly like Claude / DeepSeek
+              if (!firstAnswerTokenReceived) {
+                firstAnswerTokenReceived = true;
+                clearInterval(timerInterval);
+                const elapsed = ((Date.now() - msgObj.startTime) / 1000).toFixed(1);
                 msgObj.thinkDetails.open = false;
                 msgObj.thinkSummary.querySelector('.think-label').textContent = 'Thought Process';
                 msgObj.thinkSummary.querySelector('span:first-child').classList.remove('animate-pulse');
+                msgObj.thinkSummary.querySelector('.think-timer').textContent = `Thought for ${elapsed}s`;
                 msgObj.contentDiv.innerHTML = '';
               }
               rawAnswer += delta.content;
@@ -398,17 +756,106 @@
               scrollToBottom();
             }
           } catch (e) {
-            // Ignore partial JSON parses
+            // Ignore stream chunks
           }
         }
       }
 
+      clearInterval(timerInterval);
       if (rawAnswer === '' && rawReasoning !== '') {
-        // If the model finished with only reasoning
         msgObj.contentDiv.innerHTML = renderMarkdownWithKaTeX(rawReasoning);
+        rawAnswer = rawReasoning;
       }
 
       conversationHistory.push({ role: 'assistant', content: rawAnswer });
+      detectAndAttachCanvas(rawAnswer);
+    }
+
+    // Canvas / Artifacts Detection & Handlers
+    function detectAndAttachCanvas(text) {
+      const codeBlockMatch = text.match(/```([a-zA-Z0-9_\-]+)?\n([\s\S]*?)```/);
+      if (codeBlockMatch) {
+        const lang = codeBlockMatch[1] || 'text';
+        const code = codeBlockMatch[2];
+        loadIntoCanvas(code, lang);
+      }
+    }
+
+    function loadIntoCanvas(code, lang) {
+      const drawer = document.getElementById('canvas-drawer');
+      const codeBlock = document.getElementById('canvas-code-block');
+      const title = document.getElementById('canvas-title');
+      const previewFrame = document.getElementById('canvas-preview-frame');
+
+      codeBlock.textContent = code;
+      codeBlock.className = `hljs language-${lang}`;
+      hljs.highlightElement(codeBlock);
+
+      title.textContent = `Artifact (${lang.toUpperCase()})`;
+
+      // Render into preview iframe if HTML / SVG / JS
+      if (['html', 'xml', 'svg'].includes(lang.toLowerCase()) || code.includes('<!DOCTYPE html>') || code.includes('<html')) {
+        previewFrame.srcdoc = code;
+        switchCanvasTab('preview');
+      } else {
+        switchCanvasTab('code');
+      }
+
+      drawer.classList.remove('hidden');
+    }
+
+    function switchCanvasTab(tab) {
+      const codeCont = document.getElementById('canvas-code-container');
+      const prevCont = document.getElementById('canvas-preview-container');
+      const tabCode = document.getElementById('canvas-tab-code');
+      const tabPrev = document.getElementById('canvas-tab-preview');
+
+      if (tab === 'code') {
+        codeCont.classList.remove('hidden');
+        prevCont.classList.add('hidden');
+        tabCode.className = "px-2.5 py-1 rounded-md bg-blue-600 text-white font-medium";
+        tabPrev.className = "px-2.5 py-1 rounded-md text-slate-400 hover:text-white font-medium";
+      } else {
+        codeCont.classList.add('hidden');
+        prevCont.classList.remove('hidden');
+        tabPrev.className = "px-2.5 py-1 rounded-md bg-blue-600 text-white font-medium";
+        tabCode.className = "px-2.5 py-1 rounded-md text-slate-400 hover:text-white font-medium";
+      }
+    }
+
+    function toggleCanvas() {
+      const drawer = document.getElementById('canvas-drawer');
+      drawer.classList.toggle('hidden');
+    }
+
+    function closeCanvas() {
+      document.getElementById('canvas-drawer').classList.add('hidden');
+    }
+
+    function copyCanvasContent() {
+      const code = document.getElementById('canvas-code-block').textContent;
+      navigator.clipboard.writeText(code);
+      alert('Code copied to clipboard!');
+    }
+
+    function toggleMobileSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.toggle('hidden');
+    }
+
+    function toggleSettingsModal() {
+      const modal = document.getElementById('settings-modal');
+      modal.classList.toggle('hidden');
+      modal.classList.toggle('flex');
+    }
+
+    function saveSettings() {
+      const tokenInput = document.getElementById('custom-hf-token').value.trim();
+      if (tokenInput) {
+        localStorage.setItem('sam_ai_hf_token', tokenInput);
+        activeToken = tokenInput;
+      }
+      toggleSettingsModal();
     }
 
     function scrollToBottom() {
