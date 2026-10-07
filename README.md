@@ -1,53 +1,69 @@
-# ⚡ Nexis — Parallax Frontier Autonomous Reasoning Intelligence
-
+# ⚡ SAM-AI — Parallax Autonomous Reasoning Intelligence
 **Parallax Intelligence Lab | Founded by Samrish**
 *An Independent, Vertically-Integrated Frontier AI Lab Architecture*  
-*$0 Upfront Capital • Zero Third-Party API Rent • System 2 RLVR Reasoning • Native OS Agency*
+*$0 Upfront Capital • Open Weights • System 2 Test-Time Deliberation • Sovereign Tool Agency*
 
 ---
 
 <p align="center">
-  <a href="https://huggingface.co/spaces/Samrish2009/SAM-AI-Reasoning-Playground"><img src="https://img.shields.io/badge/Live%20Playground-Hugging%20Face%20Space-6366f1?style=for-the-badge&logo=huggingface&logoColor=white" alt="Live Playground"></a>
+  <a href="https://samrish2009-sam-ai-reasoning-playground.static.hf.space"><img src="https://img.shields.io/badge/Live%20Playground-Standalone%20Web%20App-6366f1?style=for-the-badge&logo=huggingface&logoColor=white" alt="Live Playground"></a>
   <a href="https://github.com/samrishtt/SAM-AI"><img src="https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub Repo"></a>
-  <a href="https://huggingface.co/Samrish2009/SAM-AI-Reasoning-14B"><img src="https://img.shields.io/badge/Hugging%20Face-Nexis--14B-yellow?style=for-the-badge&logo=huggingface&logoColor=black" alt="Hugging Face"></a>
-  <a href="https://github.com/SWE-bench/swe-bench.github.io/pull/61"><img src="https://img.shields.io/badge/SWE--bench%20Verified-PR%20%2361%20Open-emerald?style=for-the-badge&logo=github&logoColor=white" alt="SWE-bench PR"></a>
-  <a href="https://github.com/LiveCodeBench/livecodebench.github.io/pull/3"><img src="https://img.shields.io/badge/LiveCodeBench-PR%20%233%20Open-blue?style=for-the-badge&logo=github&logoColor=white" alt="LiveCodeBench PR"></a>
+  <a href="https://huggingface.co/Samrish2009/SAM-AI-Reasoning-v4"><img src="https://img.shields.io/badge/Hugging%20Face-SAM--AI--v4-yellow?style=for-the-badge&logo=huggingface&logoColor=black" alt="Hugging Face"></a>
+  <a href="EVIDENCE_REGISTRY.md"><img src="https://img.shields.io/badge/Evidence-Registry-red?style=for-the-badge&logo=googledocs&logoColor=white" alt="Evidence Registry"></a>
+  <a href="https://www.kaggle.com/competitions/arc-prize-2026-arc-agi-3"><img src="https://img.shields.io/badge/ARC%20Prize%202026-Participant-blue?style=for-the-badge&logo=kaggle&logoColor=white" alt="ARC Prize 2026"></a>
   <a href="https://opensource.org/licenses/Apache-2.0"><img src="https://img.shields.io/badge/License-Apache%202.0-green?style=for-the-badge" alt="License"></a>
 </p>
 
 ---
 
-## 🏛️ Executive Vision: Parallax & Nexis
+## 🏛️ Executive Vision: SAM-AI V5 Cognitive Architecture
 
-Most modern AI companies are thin wrappers that pay rent on closed third-party APIs (OpenAI, Anthropic, Google). **Parallax**, founded by **Samrish**, is built on the opposite thesis: **absolute architectural sovereignty**. 
+SAM-AI, developed by **Parallax Intelligence Lab** (Founder: **Samrish B**), is an independent AI systems project exploring cognitive architectures, test-time compute scaling, and verifiable reinforcement learning.
 
-**Nexis** delivers a vertically integrated sovereign intelligence stack with:
-* **Zero Third-Party API dependencies** (we own, train, and run our own open-weight weights).
-* **System 2 Reasoning with Test-Time Compute** (serial `<think> ... </think>` derivations).
-* **Reinforcement Learning with Verifiable Rewards (RLVR)** via DeepSeek-R1 style **Group Relative Policy Optimization (GRPO)**.
-* **Deterministic Objective Verifiers** (AST Python sandboxes, Microsoft Z3 SMT solver, and SymPy differential calculus).
-* **Native Windows Computer-Use Agency** (controlling apps, clicks, typing, and desktop navigation).
-
-> *"The 2010s were about pre-training on human data. The frontier today is about test-time search and models learning through reinforcement learning in verifiable environments."*
-
----
-
-## 🏆 Verified Multi-Domain Intelligence Audit
-
-To guarantee zero flaws and empirical validity before broad external submissions, SAM-AI was evaluated across four foundational frontier capabilities: hard mathematics, autonomous repository repair, inductive visual abstraction, and desktop computer agency.
-
-| Domain / Capability | Official Benchmark | Empirical Task | Execution / Verification Proof | Latency | Pass Rate | Status |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Frontier Mathematics** | **MATH-500 / AIME** | Roots of $x^2 - 4x + 1 = 0 \implies x_1^2 + x_2^2$ | Vieta's identity: $(x_1+x_2)^2 - 2x_1x_2 = 16 - 2 = 14$ verified inside `<think>` | 15.3s | **100%** | ✅ Verified Pass |
-| **Software Engineering** | **SWE-bench Verified** | Multi-file bug repair with test assertion | Unified git diff generated with exact `ValueError` test validation | 5.2s | **100%** | ✅ Verified Pass |
-| **Inductive Spatial Logic** | **ARC-AGI-1/2/3** | 2D Grid Matrix Transformation ($3 \times 3 \to 3 \times 3$) | Inferred color mapping rule (Green $\to$ Blue, Yellow $\to$ Red) | 14.4s | **100%** | ✅ Verified Pass |
-| **Autonomous OS Agency** | **OSWorld** | Window & UI Element Coordinate Grounding | Accessibility tree compressed by **87.3%**; exact click `[660, 90]` grounded | 0.05s | **100%** | ✅ Verified Pass |
-
-> *Audit execution generated via [`scripts/verify_model_multi_domain_intelligence.py`](scripts/verify_model_multi_domain_intelligence.py). Full audit report saved in [`predictions/multi_domain_verification_report.json`](predictions/multi_domain_verification_report.json).*
+Rather than competing purely on foundation pretraining parameter scale (such as 500B+ MoE models), SAM-AI implements a modular cognitive system:
+* **Neural Foundation:** Model-agnostic open-weight backbone (currently DeepSeek-R1-Distill-Qwen-14B: 48 layers, 40 Q heads, 8 KV heads with GQA).
+* **PEFT LoRA Core:** Trained with Group Relative Policy Optimization (GRPO) targeting all 7 projection matrices ($r=16, \alpha=32$, 68.81M parameters, 137.6 MB in fp16).
+* **Adaptive Reasoning Controller:** Dynamic compute allocation (Direct &rarr; Best-of-N &rarr; Predictor UCT Search) based on estimated problem difficulty.
+* **Objective Verifier Stack:** SymPy symbolic mathematics, Python unit-test execution, and exact environment state verification.
+* **Interactive World Model & Multi-Tier Memory:** Working, episodic, semantic, and failure memory to eliminate repetitive dead ends.
+* **Evidence Traceability:** All benchmark claims, unit tests, and prototype statuses are logged in [`EVIDENCE_REGISTRY.md`](EVIDENCE_REGISTRY.md).
 
 ---
 
-## 🏛️ The 6 Architectural Pillars of Sovereign Intelligence
+## 🔬 Claims & Empirical Verification Matrix
+
+To uphold rigorous scientific standards, all claims, benchmarks, and prototypes are formally classified below:
+
+| Dimension | Stated Component | Empirical Status | Verification Evidence / Reference |
+| :--- | :--- | :--- | :--- |
+| **Model Backbone** | DeepSeek-R1-Distill-Qwen-14B | ✅ **Verified** | 48 Layers, 8 KV Heads (GQA), 5120 hidden dim |
+| **LoRA v4 Weights** | PEFT Adapter (137.6 MB) | ✅ **Verified** | Rank $r=16$, $\alpha=32$, 68.81M trainable params on [Hugging Face Hub](https://huggingface.co/Samrish2009/SAM-AI-Reasoning-v4) |
+| **GRPO Training Core** | Group Relative Policy Optimization | ✅ **Verified** | Functional in `sam_ai/training/grpo_core.py` and Kaggle TRL trainer |
+| **MCTS Search Engine** | PUCT-based Tree Search | ⚠️ **Functional Prototype** | Engine implemented in `sam_ai/reasoning/mcts_core.py`; held-out ablation studies ongoing |
+| **Web Platform & Tools** | Pyodide Python + Canvas + Search | ✅ **Verified & Live** | Deployed on [Hugging Face Spaces](https://samrish2009-sam-ai-reasoning-playground.static.hf.space) |
+| **ARC-AGI-3 Kaggle** | Interactive Track Submissions | ⚠️ **Competition Participant** | Milestone run `56866777` scored 28.29; public baseline 3.62; RHAE metric |
+| **SWE-bench Verified** | Leaderboard Submission PR #61 | 🟡 **Open PR (Unreviewed)** | PR #61 on `swe-bench.github.io` submitted; formal Docker verification pending |
+| **LiveCodeBench** | Leaderboard Submission PR #3 | 🟡 **Open PR (Unreviewed)** | PR #3 on `livecodebench.github.io` submitted; formal verification pending |
+| **Internal Demo Tests** | 4 Handcrafted Verification Tasks | ℹ️ **Internal Smoke Tests Only** | 3 synthetic sanity tests in `scripts/verify_model_multi_domain_intelligence.py` (not standardized benchmark scores) |
+
+---
+
+## 🧪 Internal Integration & Scaffolding Smoke Tests
+
+To verify end-to-end pipeline functionality prior to large-scale evaluation, the repository contains internal regression checks in [`scripts/verify_model_multi_domain_intelligence.py`](scripts/verify_model_multi_domain_intelligence.py):
+
+| Task Category | Synthetic Test Description | Target Verification Logic | Status |
+| :--- | :--- | :--- | :--- |
+| **Symbolic Math** | Vieta's identity on $x^2 - 4x + 1 = 0 \implies x_1^2 + x_2^2$ | Verified $(x_1+x_2)^2 - 2x_1x_2 = 14$ inside `<think>` | ✅ Passed Internal Smoke Test |
+| **Code Modification** | Handcrafted multi-line function bug repair | Generated unified git diff passing test assertion | ✅ Passed Internal Smoke Test |
+| **Grid Transformation**| 3x3 color mapping substitution matrix | Verified consistent color translation mapping | ✅ Passed Internal Smoke Test |
+| **UI Grounding** | Accessibility tree coordinate extraction | Grounded button target coordinates `[660, 90]` | ✅ Passed Internal Smoke Test |
+
+*Note: These tests validate that the model formatting, parser, and execution loops operate without syntax errors. They do not constitute standardized benchmark evaluations (such as full MATH-500 or the 500-instance SWE-bench Verified).*
+
+---
+
+## 🏛️ The 6 Architectural Pillars of SAM-AI
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -55,266 +71,82 @@ To guarantee zero flaws and empirical validity before broad external submissions
 ├─────────────────────────────────────────────────────────────────────────────┤
 │ 1. Multi-Turn Interactive Execution Scaffold (Terminal + Atomic Rollback)   │
 │ 2. GRPO Self-Training Engine (RLVR with Verifiable Rewards)                 │
-│ 3. ARC-AGI-3 Interactive World Model & Step-Action Agent Engine             │
+│ 3. ARC-AGI-3 Interactive World Model & Macro-Action Engine                  │
 │ 4. Scaled Parallel Test-Time Compute (Batched PUCT MCTS + PRM Pruning)      │
-│ 5. 100k+ Line Hierarchical Repository Indexer & AST Symbol Call-Graph       │
-│ 6. Recursive Self-Improvement Flywheel & Autonomous Task Synthesizer        │
+│ 5. Hierarchical Repository Indexer & AST Symbol Call-Graph                  │
+│ 6. Model Context Protocol (MCP) & Autonomous Pair-Programming Agent         │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### Pillar 1: Multi-Turn Interactive Execution with Atomic Rollback & Reflection
-- **Autonomous Feedback Loop:** Interactively executes test commands, inspects `stdout`/`stderr` stack traces, and iteratively refines patches up to `max_turns`.
-- **Atomic Git Rollback:** If a candidate edit introduces a syntax regression or breaks previously passing tests, the agent automatically executes an atomic `git checkout` / rollback to preserve repo integrity.
-- **AST Syntax Guarding:** Every candidate modification is validated through Python `ast.parse()` prior to disk write, eliminating broken indentation or malformed token errors.
-- **Implementation:** [`sam_ai/agents/robust_swe_agent.py`](sam_ai/agents/robust_swe_agent.py) • 100% Unit Test Pass in [`tests/test_robust_swe_agent.py`](tests/test_robust_swe_agent.py).
+### Pillar 1: Multi-Turn Interactive Execution with Atomic Rollback
+- **Autonomous Feedback Loop:** Interactively executes test commands, inspects `stdout`/`stderr` stack traces, and iteratively refines patches.
+- **Atomic Git Rollback:** If a candidate edit introduces a syntax regression or breaks existing unit tests, the agent automatically executes an atomic `git checkout` / rollback.
+- **AST Syntax Guarding:** Candidate modifications are validated through Python `ast.parse()` prior to disk write, eliminating broken indentation or malformed token errors.
+- **Implementation:** [`scripts/sam_ai_agent.py`](scripts/sam_ai_agent.py) • ReAct loop with automated traceback feedback.
 
 ### Pillar 2: GRPO Self-Training Engine (RLVR)
 - **Group Relative Policy Optimization:** Eliminates separate critic/value networks by computing group-normalized advantage estimates across $G=4$ parallel rollouts:
   $$A_i = \frac{R_i - \text{mean}(\{R\})}{\text{std}(\{R\}) + \epsilon}$$
-- **Empirical Cloud Results:** 125 optimizer steps completed on Kaggle Tesla T4 GPU ([`samrishb/sam-ai-r1-fast-grpo-reinforcement-learning`](https://www.kaggle.com/code/samrishb/sam-ai-r1-fast-grpo-reinforcement-learning)). Average reward surged from 0.126 to 0.374 (+195% gain) with a 60% reduction in policy variance. Checkpoints uploaded to [Hugging Face Hub](https://huggingface.co/Samrish2009/SAM-AI-Reasoning-14B).
+- **Verifiable Reward Signals:** SymPy exact match, Python unit-test execution pass rate, and structured reasoning tags.
+- **Implementation:** [`sam_ai/training/grpo_core.py`](sam_ai/training/grpo_core.py) and Kaggle fine-tuning notebooks.
 
-### Pillar 3: ARC-AGI-3 Interactive World Model & Step-Action Agent Engine
-- **Turn-Based Dynamic Simulation:** Supports the official ARC Prize 2026 interactive track, modeling state transitions over $64 \times 64$ grids and 16-color states.
-- **Standardized Action Space:** Discrete `RESET`, `MOVE` (UP/DOWN/LEFT/RIGHT), `CLICK` coordinate targeting, and contextual interactions.
-- **Hypothesis-Testing Deliberation:** Dynamically tracks object position deltas and derives winning rules without demonstrations or labels.
-- **Implementation:** [`sam_ai/benchmarks/arc_agi3_agent.py`](sam_ai/benchmarks/arc_agi3_agent.py) • 100% Unit Test Pass in [`tests/test_arc_agi3_agent.py`](tests/test_arc_agi3_agent.py).
+### Pillar 3: ARC-AGI-3 Macro-Action Search Engine
+- **Turn-Based Dynamic Simulation:** Supports ARC Prize 2026 interactive track, modeling state transitions over dynamic game grids.
+- **Macro-Action Formulation:** Groups low-level pixel movements into goal-directed primitives (e.g. `MOVE_UNTIL_OBSTACLE`), reducing search graph depth from $D=50$ to $D=6$.
+- **Differential State Tracking:** Isolates dynamic entities by computing frame deltas $\Delta S_t = S_t \ominus S_{t-1}$.
+- **Implementation:** [`notebooks/samrish_solver_v8/`](notebooks/samrish_solver_v8/) and [`scripts/build_sam_ai_v8_arc3_solver.py`](scripts/build_sam_ai_v8_arc3_solver.py).
 
 ### Pillar 4: Scaled Parallel Test-Time Compute (Batched PUCT MCTS)
-- **AlphaZero PUCT Tree Search:** Balances exploration and exploitation during reasoning:
+- **AlphaZero PUCT Tree Search:** Predictor Upper Confidence bounds for Trees balances prior policy probabilities with empirical visit statistics:
   $$U(s, a) = c_{\text{puct}} \cdot P(a|s) \cdot \frac{\sqrt{\sum_b N(s, b)}}{1 + N(s, a)}$$
-- **Batched Parallel Rollouts:** Scales test-time search across 16–32 parallel candidate trajectories simultaneously (`batch_parallel_search`).
-- **Process Reward Model (PRM):** Scores individual intermediate reasoning steps $s_t$, pruning flawed dead-ends early.
-- **Implementation:** [`sam_ai/reasoning/mcts_core.py`](sam_ai/reasoning/mcts_core.py) • 100% Unit Test Pass in [`tests/test_mcts_core.py`](tests/test_mcts_core.py).
+- **Batched Parallel Rollouts:** Scales test-time search across parallel candidate trajectories (`batch_parallel_search`).
+- **Process Reward Model (PRM):** Scores intermediate reasoning steps, pruning dead-ends early.
+- **Implementation:** [`sam_ai/reasoning/mcts_core.py`](sam_ai/reasoning/mcts_core.py).
 
-### Pillar 5: 100k+ Line Hierarchical Repository Indexer & AST Mapper
-- **Sub-Millisecond Symbol Indexing:** Uses native Python `ast` to parse hundreds of source files into compact symbol maps (classes, methods, functions, docstrings, and called functions) in < 0.1 seconds.
-- **Inverted Index Querying:** Natural language queries from SWE-bench issue descriptions instantly resolve to the exact file and line number.
-- **Windowed Localized Context:** Extracts the 50–100 relevant lines surrounding bug sites, eliminating context overflow.
-- **Implementation:** [`sam_ai/agents/hierarchical_mapper.py`](sam_ai/agents/hierarchical_mapper.py) • 100% Unit Test Pass in [`tests/test_hierarchical_mapper.py`](tests/test_hierarchical_mapper.py).
+### Pillar 5: Hierarchical Repository Indexer & AST Mapper
+- **Symbol Indexing:** Uses native Python `ast` to parse source files into compact symbol maps (classes, methods, functions, docstrings).
+- **Localized Context:** Extracts the 50–100 relevant lines surrounding bug sites, eliminating context window saturation.
+- **Implementation:** [`sam_ai/agents/hierarchical_mapper.py`](sam_ai/agents/hierarchical_mapper.py).
 
-### Pillar 6: Recursive Self-Improvement Flywheel & Autonomous Task Synthesizer
-- **Self-Play Problem Generation:** Procedurally synthesizes verified reasoning challenges across Math (polynomials, Vieta's formulas, modular congruences), Coding (algorithmic problems with unit test assertions), and ARC spatial logic.
-- **Deterministic AST Verifier:** Automatically validates problems and filters tasks for the zone of proximal development ($0 < \text{variance}(R) < 1$).
-- **Kaggle Training Exporter:** Packages 1,000 to 10,000 verified challenges into JSONL datasets ready for GRPO training of **SAM-AI-v2**.
-- **Implementation:** [`sam_ai/training/self_improvement_flywheel.py`](sam_ai/training/self_improvement_flywheel.py) • 100% Unit Test Pass in [`tests/test_self_improvement_flywheel.py`](tests/test_self_improvement_flywheel.py).
-
----
-
-## 🧠 The Neural Evolution: 119K → 14B → 32B
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│             PHASE 1: THE LABORATORY PROTOTYPE               │
-│  • 119,744 Parameters (Pure NumPy First Principles)         │
-│  • Proved analytical backprop & AdamW optimization          │
-│  • Proved GRPO learning loop works (Loss dropped 5.59->1.85)│
-│  • 100% Convergence on Pattern Replication Tasks            │
-└──────────────────────────────┬──────────────────────────────┘
-                               │
-                               ▼
-┌─────────────────────────────────────────────────────────────┐
-│          PHASE 2: SOTA 14B REASONING FOUNDATION (ACTIVE)    │
-│  • Target: deepseek-ai/DeepSeek-R1-Distill-Qwen-14B         │
-│  • 14 Billion Parameters (120,000x larger than prototype)   │
-│  • Native <think> reasoning tokens with emergent reflection │
-│  • 93.9% on MATH-500 • 69.7% on AIME 2024 (Beats GPT-4o)   │
-│  • Trained via RLVR on RTX 6000 48GB GPU (ARC-AGI 3 attached│
-└──────────────────────────────┬──────────────────────────────┘
-                               │
-                               ▼
-┌─────────────────────────────────────────────────────────────┐
-│             PHASE 3: SCALE TO 32B & ENTERPRISE SOVEREIGNTY  │
-│  • deepseek-ai/DeepSeek-R1-Distill-Qwen-32B                 │
-│  • Scaled via $350k+ Startup Compute Grants (Azure/GCP/NV)  │
-│  • On-premise enterprise sovereign deployment               │
-└─────────────────────────────────────────────────────────────┘
-```
-
----
-
-## 📐 System Architecture
-
-```mermaid
-flowchart TD
-    subgraph ClientSurfaces ["Client & Integration Surfaces"]
-        WebStudio["Glassmorphic Web Studio (Port 8765)"]
-        APIGateway["OpenAI-Compatible REST API (Port 8000)"]
-        CLITerminal["Interactive Terminal REPL (micro_agi_cli.py)"]
-    end
-
-    subgraph ReasoningCore ["System 2 Reasoning & Verification Engine"]
-        ThinkGenerator["DeepSeek-R1 Reasoning Generator (<think>)"]
-        ASTVerifier["Python AST Sandbox (Unit Test Clearance)"]
-        MathVerifier["Deterministic Symbolic Math Solver"]
-        ActionVerifier["Windows OS Action Verifier (Win32)"]
-        
-        ThinkGenerator --> ASTVerifier
-        ThinkGenerator --> MathVerifier
-        ThinkGenerator --> ActionVerifier
-    end
-
-    subgraph RLVRPipeline ["Autonomous RLVR / GRPO Training Pipeline"]
-        RolloutEngine["Rollout Sampler (Group Size G=4..8)"]
-        AdvantageCalc["Group Advantage Normalizer: A = (R - μ) / σ"]
-        GRPOUpdate["Clipped Surrogate Policy Optimizer"]
-        
-        RolloutEngine --> AdvantageCalc --> GRPOUpdate
-    end
-
-    subgraph LocalStack ["Local Execution Layer (Intel Laptop)"]
-        PyTorchCPU["PyTorch 2.14.0+cpu Engine"]
-        Transformers["Hugging Face Transformers 5.17.0"]
-        LocalRunner["core/neural/foundation_runner.py"]
-        
-        PyTorchCPU --> Transformers --> LocalRunner
-    end
-
-    subgraph CloudCluster ["Cloud Training Cluster (Kaggle / RTX 6000 48GB)"]
-        KaggleRunner["notebooks/kaggle_sam_ai_r1/"]
-        ARCDataset["ARC-AGI 3 Competition Attachment"]
-        QLoRA["14B 4-bit QLoRA Adapter Engine"]
-        
-        ARCDataset --> KaggleRunner --> QLoRA
-    end
-
-    ClientSurfaces <--> LocalRunner
-    LocalRunner <--> ReasoningCore
-    ReasoningCore <--> RLVRPipeline
-    RLVRPipeline <--> CloudCluster
-```
-
----
-
-## 🔬 Scientific Methodology: RLVR + GRPO
-
-Traditional AI labs hit a "data wall" by relying on human annotators (RLHF). SAM-AI uses **RLVR (Reinforcement Learning with Verifiable Rewards)**—the algorithmic paradigm behind OpenAI o1 and DeepSeek-R1:
-
-1. **Candidate Group Rollouts:** For each problem, the policy samples $G=4$ to $8$ candidate reasoning paths with exploration temperature.
-2. **Deterministic Sandboxed Verification:**
-   - **Coding:** The generated code is executed inside `core/execution/ast_sandbox.py` against unit tests. If assertions pass, Reward = `1.0`; if it fails, Reward = `0.0`.
-   - **Mathematics:** Evaluated against exact symbolic/numeric ground truth.
-   - **System 2 Format Bonus:** Explicit reward bonus (+0.25) for generating structured `<think> ... </think>` intermediate self-checks.
-3. **GRPO Policy Updates:** Advantages are normalized within the group:
-   $$A_i = \frac{R_i - \text{mean}(R)}{\text{std}(R) + \epsilon}$$
-   Eliminating the memory overhead of a separate Value/Critic network and enabling 14B training on 48GB GPUs.
-
----
-
-## 📊 Proof-of-Concept Empirical Results
-
-In our verified local curriculum run ([`scripts/run_self_improvement_v2.py`](scripts/run_self_improvement_v2.py)):
-
-| Metric | Before Training | After Pre-training + GRPO | Result |
-| :--- | :--- | :--- | :--- |
-| **Next-Token Loss** | 5.5902 | **1.8536** | **↓ 67% Error Reduction** |
-| **Echo / Pattern Replication** | 0% | **100% (15/15 Solved)** | ✅ Perfect convergence |
-| **Sequential Patterns** | 13.4% | **40.9% (+27.5%)** | ↗️ Rapid skill acquisition |
-| **Single-Digit Arithmetic** | 0% | **33.3% Solved** | ↗️ Emergent arithmetic |
-
-<details>
-<summary><b>🔍 View Model Samples: Before vs. After Training</b></summary>
-
-```text
-BEFORE TRAINING (Random Byte Guessing):
-'2+3=' -> '2+3=!!4 %'   (Unstructured noise)
-
-AFTER CURRICULUM TRAINING (Learned Structured Equation Patterns):
-'2+3=' -> '5+5=5'       (Learned digits, operators, and structural equation syntax)
-'5+4=' -> '5+5=5'       
-'7+8=' -> '5+5=7'
-```
-</details>
+### Pillar 6: Model Context Protocol (MCP) Standard Server
+- **Anthropic Standard JSON-RPC 2.0:** Exposes 7 tools (`sam_ai_reason`, `sam_ai_execute_command`, `sam_ai_file_reader`, `sam_ai_file_writer`, `sam_ai_web_search`, `sam_ai_arc_solver`, `sam_ai_code_interpreter`).
+- **IDE Compatibility:** Directly callable from OpenCode, Cursor, and Claude Desktop.
+- **Implementation:** [`scripts/sam_ai_mcp_server.py`](scripts/sam_ai_mcp_server.py).
 
 ---
 
 ## ⚡ Quickstart
 
-### 1. Launch the Interactive Web Studio
+### 1. Interact on the Live Web Platform
+Open the public standalone web application:
+👉 [**https://samrish2009-sam-ai-reasoning-playground.static.hf.space**](https://samrish2009-sam-ai-reasoning-playground.static.hf.space)
+
+Includes:
+- 🐍 Client-side Python Code Interpreter (Pyodide Wasm)
+- 🎨 Interactive Canvas & Artifacts Studio (HTML/JS/CSS live preview & downloads)
+- 🌐 Live Web Search Grounding with citations
+- 🧠 `<think>` Deliberation Accordion
+
+### 2. Run the Autonomous ReAct Agent Loop Locally
 ```bash
-python web_chat_server.py
-```
-Open **`http://127.0.0.1:8765`** in your browser for the full glassmorphic reasoning studio.
-
-### 2. Connect via OpenAI-Compatible REST API
-```bash
-python api_server.py
-```
-Send standard requests to **`http://127.0.0.1:8000/v1/chat/completions`**:
-```python
-from openai import OpenAI
-
-client = OpenAI(base_url="http://127.0.0.1:8000/v1", api_key="sovereign-local")
-
-response = client.chat.completions.create(
-    model="deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B",
-    messages=[{"role": "user", "content": "Write a python function to check if a number is prime and verify it."}],
-)
-print(response.choices[0].message.content)
+python scripts/sam_ai_agent.py "Create an interactive dashboard in apps/dashboard/index.html"
 ```
 
-### 3. Run the Foundation Reasoning Runner Locally
-```bash
-python core/neural/foundation_runner.py
+### 3. Connect via Universal MCP Server
+Add to your OpenCode or Claude Desktop `mcpServers` configuration:
+```json
+{
+  "mcpServers": {
+    "sam-ai": {
+      "command": "python",
+      "args": ["scripts/sam_ai_mcp_server.py"]
+    }
+  }
+}
 ```
-
-### 4. Push Cloud Training to Kaggle
-```bash
-kaggle kernels push -p notebooks/kaggle_sam_ai_r1
-```
-
----
-
-## ☁️ Live Cloud Training & Official Benchmark Hub
-
-| Component / Task | Cloud Environment | Hardware / Profile | Live Tracking Link | Status |
-| :--- | :--- | :--- | :--- | :--- |
-| **SWE-bench Verified 500 Batch** | Kaggle Cloud Kernel | Tesla T4 GPU (4-bit NF4) | [samrishb/sam-ai-swe-bench-500-reasoning-agent](https://www.kaggle.com/code/samrishb/sam-ai-swe-bench-500-reasoning-agent) | 🟡 **RUNNING (Active Execution)** |
-| **GRPO Reinforcement Learning** | Kaggle Cloud Kernel | Tesla T4 GPU (trl GRPOTrainer) | [samrishb/sam-ai-r1-fast-grpo-reinforcement-learning](https://www.kaggle.com/code/samrishb/sam-ai-r1-fast-grpo-reinforcement-learning) | 🟢 **COMPLETED (125 Steps, +195% Reward)** |
-| **ARC-AGI-3 Interactive Solver** | Kaggle Competition | Tesla T4 / P100 GPU | [samrishb/arc3x-sam-solver](https://www.kaggle.com/code/samrishb/arc3x-sam-solver) | 🟢 **Ready for Live Evaluation** |
-| **Model & LoRA Checkpoints** | Hugging Face Model Hub | PEFT LoRA Adapters | [Samrish2009/SAM-AI-Reasoning-14B](https://huggingface.co/Samrish2009/SAM-AI-Reasoning-14B) | 🟢 **Live on Hugging Face** |
-
----
-
-## 🗺️ Roadmap: From $0 to Frontier AI Lab
-
-```
-[ Phase 1: GRPO Self-Training & Checkpoints (COMPLETED) ]
-✓ Completed 125 optimizer steps on Kaggle Tesla T4 GPU
-✓ Reward tripled (+195% gain: 0.126 -> 0.374), variance reduced by 60%
-✓ 5 checkpoints & LoRA adapters uploaded to Hugging Face Hub:
-  https://huggingface.co/Samrish2009/SAM-AI-Reasoning-14B
-
-[ Phase 2: SWE-bench Verified 500 Batch Execution (RUNNING ON KAGGLE) ]
-✓ Implemented RobustSWEAgent with AST syntax validation & git diff generation
-✓ Kaggle 500-task execution kernel actively running:
-  https://www.kaggle.com/code/samrishb/sam-ai-swe-bench-500-reasoning-agent
-✓ Periodic checkpointing every 25 tasks to swebench_verified_all_preds.jsonl
-
-[ Phase 3: Deliberative Test-Time Compute & MCTS Search (COMPLETED) ]
-✓ AlphaZero-style PUCT tree search engine implemented (sam_ai/reasoning/mcts_core.py)
-✓ Process Reward Model (PRM) step scoring & early pruning
-✓ Verified on MATH-500 algebra and Olympiad reasoning
-
-[ Phase 4: Autonomous Desktop Agency - OSWorld Scaffold (COMPLETED) ]
-✓ Task-conditioned accessibility tree compressor (87.3% token reduction)
-✓ Coordinate grounding and action primitive formulation (click, type, key_combo)
-✓ Validated on multi-window application environments
-
-[ Pillar 1: Multi-Turn Interactive Execution Scaffold (COMPLETED) ]
-✓ Terminal execution + stdout/stderr reflection loop
-✓ Atomic git rollback to prevent cascading syntax regressions
-✓ All 12 core mathematical, benchmark, and agent unit tests passing (100%)
-```
-
----
-
-## 📄 Core Documents & Whitepapers
-* [`INDEPENDENT_AI_LAB_MANIFESTO.md`](INDEPENDENT_AI_LAB_MANIFESTO.md): Foundational manifesto on building an independent frontier lab.
-* [`AI_COMPANY_PITCH_DECK.md`](AI_COMPANY_PITCH_DECK.md): Seed pitch deck and technical moat presentation.
-* [`THE_SOVEREIGN_AI_FOUNDER_PLAYBOOK.md`](THE_SOVEREIGN_AI_FOUNDER_PLAYBOOK.md): Strategic analysis of OpenAI, Anthropic, and DeepSeek founding playbooks.
 
 ---
 
 ## 📜 License & Attribution
-Distributed under the **MIT License**. Free for commercial and research use.  
-Built by researchers, founders, and engineers committed to sovereign artificial intelligence.
+Distributed under the **Apache-2.0 License**. Free for commercial and research use.  
+Built by Parallax Intelligence Lab (Founder: Samrish).

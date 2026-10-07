@@ -2,11 +2,13 @@
 Deploy updated SAM-AI UI to Hugging Face Space Samrish2009/SAM-AI-Reasoning-Playground.
 """
 
+import os
+import sys
 from pathlib import Path
 from huggingface_hub import HfApi
 
 SPACE_DIR = Path(__file__).resolve().parent.parent / "spaces" / "sam_ai_playground"
-TOKEN = "pJcZKbGBULtwitNWztXONwipUKVakPyofo_fh"[::-1]
+TOKEN = sys.argv[1] if len(sys.argv) > 1 else os.environ.get('HF_TOKEN', '')
 REPO_ID = "Samrish2009/SAM-AI-Reasoning-Playground"
 
 
@@ -22,7 +24,7 @@ def deploy():
             folder_path=str(SPACE_DIR),
             repo_id=REPO_ID,
             repo_type="space",
-            commit_message="Rebrand UI from Nexis to SAM-AI across all elements",
+            commit_message="Deploy SAM-AI frontier tools, Pyodide Python code interpreter, live web search, and interactive canvas",
         )
         print("\n" + "=" * 70)
         print(f"[SUCCESS] HUGGING FACE SPACE UPDATED TO SAM-AI!")
