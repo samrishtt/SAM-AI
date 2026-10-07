@@ -3,7 +3,7 @@
     "tasks_evaluated": 50,
     "solved": 0,
     "accuracy": 0.0,
-    "latency_seconds": 0.002,
+    "latency_seconds": 0.0,
     "verifier_calls": 0,
     "failures": {
       "dimension_mismatch": 15,
@@ -15,7 +15,7 @@
     "tasks_evaluated": 50,
     "solved": 0,
     "accuracy": 0.0,
-    "latency_seconds": 0.007,
+    "latency_seconds": 0.008,
     "verifier_calls": 400,
     "failures": {
       "dimension_mismatch": 15,
@@ -39,8 +39,20 @@
     "tasks_evaluated": 50,
     "solved": 0,
     "accuracy": 0.0,
-    "latency_seconds": 0.013,
+    "latency_seconds": 0.006,
     "verifier_calls": 895,
+    "failures": {
+      "dimension_mismatch": 15,
+      "color_mismatch": 35,
+      "pattern_unrecognized": 0
+    }
+  },
+  "5. SAM-AI Compositional Engine": {
+    "tasks_evaluated": 50,
+    "solved": 0,
+    "accuracy": 0.0,
+    "latency_seconds": 0.143,
+    "verifier_calls": 1208,
     "failures": {
       "dimension_mismatch": 15,
       "color_mismatch": 35,

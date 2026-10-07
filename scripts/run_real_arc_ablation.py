@@ -213,11 +213,19 @@ def run_ablation():
     tasks = load_arc_tasks(dataset_path, count=50)
     print(f"[✓] Loaded {len(tasks)} genuine ARC evaluation tasks.\n")
 
+    from sam_ai.arc.engine import ArcCompositionalEngine
+    engine = ArcCompositionalEngine()
+
+    def run_engine_solver(t):
+        pred, metrics = engine.solve(t["train"], t["test_input"])
+        return pred, metrics["verifier_calls"]
+
     configs = [
         ("1. Baseline (Identity)", lambda t: (solve_baseline_identity(t["train"], t["test_input"]), 0)),
         ("2. Baseline + D4 Symmetry", lambda t: (solve_d4_symmetry(t["train"], t["test_input"]) or solve_baseline_identity(t["train"], t["test_input"]), 8)),
         ("3. Baseline + Color Substitution", lambda t: (solve_color_substitution(t["train"], t["test_input"]) or solve_baseline_identity(t["train"], t["test_input"]), len(t["train"]))),
-        ("4. Composite Search + ArcVerifier", lambda t: solve_composite_search_verifier(t["train"], t["test_input"]))
+        ("4. Composite Search + ArcVerifier", lambda t: solve_composite_search_verifier(t["train"], t["test_input"])),
+        ("5. SAM-AI Compositional Engine", run_engine_solver)
     ]
 
     report = {}

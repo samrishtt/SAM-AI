@@ -1,0 +1,48 @@
+{
+  "total_tasks_analyzed": 50,
+  "primary_failure_distribution": {
+    "dimension_mismatch": 15,
+    "color_generation": 15,
+    "transformation_inference": 5,
+    "object_segmentation": 15
+  },
+  "granular_category_distribution": {
+    "dimension_expansion_factor": 4,
+    "color_space_divergence": 15,
+    "spatial_arrangement_error": 5,
+    "object_count_mismatch": 15,
+    "dimension_cropping": 11
+  },
+  "sample_diagnostics": [
+    {
+      "task_id": "arc_eval_00576224",
+      "category": "dimension_expansion_factor",
+      "primary_failure": "dimension_mismatch",
+      "detail": "Target is factor scaled (3x3), but candidate predicted (2x2)"
+    },
+    {
+      "task_id": "arc_eval_009d5c81",
+      "category": "color_space_divergence",
+      "primary_failure": "color_generation",
+      "detail": "Target contains colors [7] absent from candidate"
+    },
+    {
+      "task_id": "arc_eval_00dbd492",
+      "category": "color_space_divergence",
+      "primary_failure": "color_generation",
+      "detail": "Target contains colors [8, 3, 4] absent from candidate"
+    },
+    {
+      "task_id": "arc_eval_03560426",
+      "category": "spatial_arrangement_error",
+      "primary_failure": "transformation_inference",
+      "detail": "29/100 pixels mismatched (29.0%)"
+    },
+    {
+      "task_id": "arc_eval_05a7bcf2",
+      "category": "color_space_divergence",
+      "primary_failure": "color_generation",
+      "detail": "Target contains colors [3] absent from candidate"
+    }
+  ]
+}
