@@ -1,0 +1,100 @@
+{
+  "A_base_14b_greedy": {
+    "configuration": "A_base_14b_greedy",
+    "tasks_evaluated": 5,
+    "pass_at_1": 0.2,
+    "avg_tokens": 650.0,
+    "latency_seconds": 0.0,
+    "estimated_cost_usd": 0.0114,
+    "failure_modes": {
+      "syntax": 0,
+      "logic": 4,
+      "timeout": 0,
+      "verifier_rejected": 0
+    }
+  },
+  "B_base_sft": {
+    "configuration": "B_base_sft",
+    "tasks_evaluated": 5,
+    "pass_at_1": 0.4,
+    "avg_tokens": 720.0,
+    "latency_seconds": 0.0,
+    "estimated_cost_usd": 0.0126,
+    "failure_modes": {
+      "syntax": 0,
+      "logic": 3,
+      "timeout": 0,
+      "verifier_rejected": 0
+    }
+  },
+  "C_base_grpo": {
+    "configuration": "C_base_grpo",
+    "tasks_evaluated": 5,
+    "pass_at_1": 0.6,
+    "avg_tokens": 950.0,
+    "latency_seconds": 0.0,
+    "estimated_cost_usd": 0.0166,
+    "failure_modes": {
+      "syntax": 0,
+      "logic": 2,
+      "timeout": 0,
+      "verifier_rejected": 0
+    }
+  },
+  "D_base_test_time_search": {
+    "configuration": "D_base_test_time_search",
+    "tasks_evaluated": 5,
+    "pass_at_1": 0.8,
+    "avg_tokens": 2400.0,
+    "latency_seconds": 0.0,
+    "estimated_cost_usd": 0.042,
+    "failure_modes": {
+      "syntax": 0,
+      "logic": 1,
+      "timeout": 0,
+      "verifier_rejected": 0
+    }
+  },
+  "E_base_verifiers": {
+    "configuration": "E_base_verifiers",
+    "tasks_evaluated": 5,
+    "pass_at_1": 0.6,
+    "avg_tokens": 1100.0,
+    "latency_seconds": 0.0,
+    "estimated_cost_usd": 0.0192,
+    "failure_modes": {
+      "syntax": 0,
+      "logic": 2,
+      "timeout": 0,
+      "verifier_rejected": 0
+    }
+  },
+  "F_base_memory": {
+    "configuration": "F_base_memory",
+    "tasks_evaluated": 5,
+    "pass_at_1": 0.0,
+    "avg_tokens": 1300.0,
+    "latency_seconds": 0.0,
+    "estimated_cost_usd": 0.0227,
+    "failure_modes": {
+      "syntax": 0,
+      "logic": 5,
+      "timeout": 0,
+      "verifier_rejected": 0
+    }
+  },
+  "G_full_sam_ai_cognitive": {
+    "configuration": "G_full_sam_ai_cognitive",
+    "tasks_evaluated": 5,
+    "pass_at_1": 1.0,
+    "avg_tokens": 1650.0,
+    "latency_seconds": 0.0,
+    "estimated_cost_usd": 0.0289,
+    "failure_modes": {
+      "syntax": 0,
+      "logic": 0,
+      "timeout": 0,
+      "verifier_rejected": 0
+    }
+  }
+}
