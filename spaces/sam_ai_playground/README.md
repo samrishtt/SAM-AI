@@ -1,5 +1,5 @@
 ---
-title: SAM-AI by Parallax
+title: SAM-AI Playground by Parallax
 emoji: ⚡
 colorFrom: blue
 colorTo: indigo
@@ -8,46 +8,37 @@ pinned: false
 license: apache-2.0
 ---
 
-# ⚡ SAM-AI — Parallax Frontier Autonomous Intelligence Platform
+# ⚡ SAM-AI Web Playground & Tools Studio
+**Parallax Intelligence Lab | Founder: Samrish B**
 
-**Parallax Intelligence Lab | Founded by Samrish**
-
-Welcome to the official public web platform for **SAM-AI**, a sovereign frontier autonomous intelligence engineered by **Parallax**.
-
----
-
-### 🌐 Official Cloud Server & Live Web Domain
-- **Direct Standalone Web App**: [https://samrish2009-sam-ai-reasoning-playground.static.hf.space](https://samrish2009-sam-ai-reasoning-playground.static.hf.space)
-- **Hugging Face Space Portal**: [https://huggingface.co/spaces/Samrish2009/SAM-AI-Reasoning-Playground](https://huggingface.co/spaces/Samrish2009/SAM-AI-Reasoning-Playground)
-- **Custom Domain Support**: Point your custom domain via `CNAME` record to `hf.space` (requires Hugging Face PRO or Team tier).
+This static Hugging Face Space hosts the client-side user interface and interactive tool suite for **SAM-AI**.
 
 ---
 
-### 🧰 The Complete Frontier Tool & Skill Suite
+## 🔍 System Architecture & Execution Reality
 
-SAM-AI integrates native agentic capabilities across reasoning, execution, and web grounding:
+To maintain clear scientific transparency:
 
-1. **🐍 In-Browser Python Code Interpreter (Pyodide Wasm)**:
-   - Client-side WebAssembly Python runtime.
-   - Run math proofs, simulations, NumPy algorithms, and data processing directly in your browser with 0 latency.
-2. **🌐 Live Web Search & Deep Research Grounding**:
-   - Multi-hop real-time knowledge retrieval with dynamic footnote citations `[1]`, `[2]`.
-   - Synthesizes findings across scientific literature and public information.
-3. **🎨 Claude-Style Interactive Canvas & Artifacts Studio**:
-   - Split-screen workspace for real-time compilation and execution of HTML5, CSS3, JavaScript, 2D arcade games, and Mermaid architecture diagrams.
-   - One-click artifact downloads (`.html`, `.py`, `.js`).
-4. **🧩 ARC-AGI-3 Reasoning & Search Engine**:
-   - Macro-Action BFS path planning, frame-delta differential tracking, and spatial transformation reasoning.
-5. **📂 Any-to-Text Universal File Ingestion**:
-   - Upload and parse text files, source codebases, CSV datasets, JSON structures, and documents directly into model context.
-6. **🤖 Antigravity Autonomous Pair-Programming Agent**:
-   - ReAct execution loop capable of reading files, generating code, running terminal commands, and self-correcting errors.
-7. **🔌 Universal Model Context Protocol (MCP) Server**:
-   - Anthropic MCP JSON-RPC 2.0 compliant bridge enabling tools to be called from OpenCode, Cursor, and Claude Desktop.
+### 1. What generates responses in this interface?
+- **Static Hosting**: This Space is a client-side static web application (`sdk: static`). It **does not run a 14B neural model locally on Hugging Face servers** (which would require a dedicated GPU Space).
+- **Inference Routing**: Deliberation and chat responses in this web demo are powered by client-side browser logic and connected OpenAI-compatible inference endpoints (e.g. OpenRouter / local endpoint).
+- **Offline 14B Weights**: The actual 14B parameter LoRA checkpoint (`Samrish2009/SAM-AI-Reasoning-v4`) runs offline on local GPUs (via `vLLM` or `unsloth`) or Kaggle GPU kernels, not inside this static browser tab.
+
+### 2. What runs locally in the browser?
+- **Python Code Execution**: Powered client-side by **Pyodide 0.26.4 (WebAssembly)**. Executes Python, math, and data processing directly in the user's browser without sending code to an external backend.
+- **Canvas / Artifacts Studio**: Sandboxed `<iframe>` that renders HTML5, CSS3, JavaScript, and Mermaid diagrams locally.
+- **File Parsing**: Client-side JavaScript file ingestion for `.txt`, `.py`, `.js`, `.json`, `.csv`, `.md`.
+
+### 3. What is experimental or planned?
+- **ARC-AGI-3 Macro-Action Search**: Implemented in Kaggle competition solver kernels (`notebooks/samrish_milestone_2`), not running inside this static chat interface.
+- **Autonomous Agent Loop**: Implemented as a local Python script ([`scripts/sam_ai_agent.py`](https://github.com/samrishtt/SAM-AI/blob/master/scripts/sam_ai_agent.py)), requiring local terminal permissions.
+- **Model Context Protocol (MCP)**: Implemented as a local stdio Python server ([`scripts/sam_ai_mcp_server.py`](https://github.com/samrishtt/SAM-AI/blob/master/scripts/sam_ai_mcp_server.py)).
 
 ---
 
-### 📦 Published Artifacts & Competitions
-- **Hugging Face Model Hub**: [Samrish2009/SAM-AI-Reasoning-v4](https://huggingface.co/Samrish2009/SAM-AI-Reasoning-v4) (14B LoRA reasoning weights, $r=16$)
-- **Kaggle ARC-AGI-3 Competition**: Interactive track participant (`samrishb`) evaluating macro-action exploration on ARC Prize 2026.
-- **Kaggle ARC-AGI-2 Competition**: Solver notebook `samrishb/arc-agi-2-sam-ai-solver` evaluating $D_4$ dihedral symmetry rules.
+## 🌐 Endpoints & Repositories
+
+- **Live Web App**: [https://samrish2009-sam-ai-reasoning-playground.static.hf.space](https://samrish2009-sam-ai-reasoning-playground.static.hf.space)
+- **GitHub Repository**: [https://github.com/samrishtt/SAM-AI](https://github.com/samrishtt/SAM-AI)
+- **Hugging Face Model Hub**: [Samrish2009/SAM-AI-Reasoning-v4](https://huggingface.co/Samrish2009/SAM-AI-Reasoning-v4)
+- **Evidence Registry**: [EVIDENCE_REGISTRY.md](https://github.com/samrishtt/SAM-AI/blob/master/EVIDENCE_REGISTRY.md)

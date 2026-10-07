@@ -1,0 +1,50 @@
+{
+  "1. Baseline (Identity)": {
+    "tasks_evaluated": 50,
+    "solved": 0,
+    "accuracy": 0.0,
+    "latency_seconds": 0.002,
+    "verifier_calls": 0,
+    "failures": {
+      "dimension_mismatch": 15,
+      "color_mismatch": 35,
+      "pattern_unrecognized": 0
+    }
+  },
+  "2. Baseline + D4 Symmetry": {
+    "tasks_evaluated": 50,
+    "solved": 0,
+    "accuracy": 0.0,
+    "latency_seconds": 0.007,
+    "verifier_calls": 400,
+    "failures": {
+      "dimension_mismatch": 15,
+      "color_mismatch": 35,
+      "pattern_unrecognized": 0
+    }
+  },
+  "3. Baseline + Color Substitution": {
+    "tasks_evaluated": 50,
+    "solved": 0,
+    "accuracy": 0.0,
+    "latency_seconds": 0.002,
+    "verifier_calls": 165,
+    "failures": {
+      "dimension_mismatch": 15,
+      "color_mismatch": 35,
+      "pattern_unrecognized": 0
+    }
+  },
+  "4. Composite Search + ArcVerifier": {
+    "tasks_evaluated": 50,
+    "solved": 0,
+    "accuracy": 0.0,
+    "latency_seconds": 0.013,
+    "verifier_calls": 895,
+    "failures": {
+      "dimension_mismatch": 15,
+      "color_mismatch": 35,
+      "pattern_unrecognized": 0
+    }
+  }
+}
