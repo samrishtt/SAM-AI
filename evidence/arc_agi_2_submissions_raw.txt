@@ -1,0 +1,15 @@
+﻿     ref  fileName         date                        description                                               status                     publicScore  privateScore  
+--------  ---------------  --------------------------  --------------------------------------------------------  -------------------------  -----------  ------------  
+56926754  submission.json  2026-10-08 00:50:35.540000                                                            SubmissionStatus.PENDING                              
+56856781  submission.json  2026-10-05 16:24:41.433000                                                            SubmissionStatus.COMPLETE  0.00                       
+56816474  submission.json  2026-10-04 06:45:04.443000  SAM-AI ARC-AGI-2 Solver by Parallax (Founder: Samrish B)  SubmissionStatus.COMPLETE  0.00                       
+56038491  submission.json  2026-09-05 18:17:15.237000                                                            SubmissionStatus.COMPLETE  29.72                      
+55896879  submission.json  2026-08-30 17:41:14.703000                                                            SubmissionStatus.COMPLETE  29.44                      
+55661326  submission.json  2026-08-21 05:25:47.900000                                                            SubmissionStatus.COMPLETE  28.06                      
+55151535  submission.json  2026-08-01 02:06:11.783000                                                            SubmissionStatus.COMPLETE  30.56                      
+55141593  submission.json  2026-07-31 15:40:07.313000                                                            SubmissionStatus.COMPLETE  28.61                      
+54829645  submission.json  2026-07-19 11:20:47.577000                                                            SubmissionStatus.COMPLETE  0.00                       
+54538792  submission.json  2026-07-10 20:36:50.140000                                                            SubmissionStatus.COMPLETE  0.00                       
+54268676  submission.json  2026-07-02 14:50:49.280000                                                            SubmissionStatus.COMPLETE  29.17                      
+54210413  submission.json  2026-06-30 19:04:33.883000                                                            SubmissionStatus.COMPLETE  30.14                      
+54124365  submission.json  2026-06-28 01:04:07.090000  Notebook Failed in AIMO | Version 1                       SubmissionStatus.COMPLETE                             

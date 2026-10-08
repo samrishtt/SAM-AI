@@ -1,0 +1,7 @@
+﻿ref                                                             deadline             category         reward  teamCount  userHasEntered  userRank  
+--------------------------------------------------------------  -------------------  --------  -------------  ---------  --------------  --------  
+https://www.kaggle.com/competitions/arc-prize-2026-arc-agi-3    2026-11-02 23:59:00  Featured    850,000 Usd       3976            True       385  
+https://www.kaggle.com/competitions/arc-prize-2026-arc-agi-2    2026-11-02 23:59:00  Featured    700,000 Usd       2558            True       641  
+https://www.kaggle.com/competitions/arc-prize-2026-paper-track  2026-11-09 23:59:00  Featured    450,000 Usd        237            True         0  
+https://www.kaggle.com/competitions/arc-prize-2024              2024-11-10 23:59:00  Featured  1,100,000 Usd       1427           False         0  
+https://www.kaggle.com/competitions/arc-prize-2025              2025-11-03 23:59:00  Featured  1,000,000 Usd       1455           False         0  

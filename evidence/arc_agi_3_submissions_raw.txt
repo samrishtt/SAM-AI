@@ -1,0 +1,52 @@
+﻿     ref  fileName            date                        description                       status                     publicScore  privateScore  
+--------  ------------------  --------------------------  --------------------------------  -------------------------  -----------  ------------  
+56926771  submission.parquet  2026-10-08 00:51:20.220000                                    SubmissionStatus.COMPLETE  25.76                      
+56919253  submission.parquet  2026-10-07 18:46:43.957000                                    SubmissionStatus.COMPLETE  26.04                      
+56866777  submission.parquet  2026-10-06 01:26:32.217000                                    SubmissionStatus.COMPLETE  28.29                      
+56839005  submission.parquet  2026-10-05 01:29:33.717000                                    SubmissionStatus.COMPLETE  24.71                      
+56813323  submission.parquet  2026-10-04 03:44:25.860000                                    SubmissionStatus.COMPLETE  25.32                      
+56804468  submission.parquet  2026-10-03 18:29:41.773000  SAM-AI Milestone 2 Solver V5      SubmissionStatus.COMPLETE  29.21                      
+56778728  submission.parquet  2026-10-02 17:10:32.587000                                    SubmissionStatus.COMPLETE  0.00                       
+56751663  submission.parquet  2026-10-01 13:15:11.117000                                    SubmissionStatus.COMPLETE  27.73                      
+56714691  submission.parquet  2026-09-30 17:35:54.140000                                    SubmissionStatus.COMPLETE  3.52                       
+56625396  submission.parquet  2026-09-28 01:39:03.750000                                    SubmissionStatus.COMPLETE  0.00                       
+56556693  submission.parquet  2026-09-25 17:39:13.280000                                    SubmissionStatus.COMPLETE  0.00                       
+56508133  submission.parquet  2026-09-24 01:19:24.820000                                    SubmissionStatus.COMPLETE  1.03                       
+56478067  submission.parquet  2026-09-23 00:54:37.700000                                    SubmissionStatus.COMPLETE  1.43                       
+56468848  submission.parquet  2026-09-22 15:53:33.583000                                    SubmissionStatus.COMPLETE  0.23                       
+56410508  submission.parquet  2026-09-21 01:35:32.183000                                    SubmissionStatus.COMPLETE  1.56                       
+56380126  submission.parquet  2026-09-20 04:19:01.990000                                    SubmissionStatus.COMPLETE  1.52                       
+56347486  submission.parquet  2026-09-19 03:49:09.617000                                    SubmissionStatus.COMPLETE  2.59                       
+56317093  submission.parquet  2026-09-18 01:04:03.897000                                    SubmissionStatus.COMPLETE  3.09                       
+56305938  submission.parquet  2026-09-17 13:43:08.623000  arc3x v7 12.45 score gateway fix  SubmissionStatus.COMPLETE  0.02                       
+56291327  submission.parquet  2026-09-17 01:43:57.627000                                    SubmissionStatus.ERROR                                
+56282695  submission.parquet  2026-09-16 16:02:20.690000                                    SubmissionStatus.COMPLETE  2.75                       
+56261094  submission.parquet  2026-09-15 18:49:12.843000                                    SubmissionStatus.COMPLETE  1.02                       
+56230991  submission.parquet  2026-09-14 12:35:55.993000                                    SubmissionStatus.COMPLETE  2.97                       
+56213831  submission.parquet  2026-09-13 19:28:29.107000                                    SubmissionStatus.COMPLETE  2.04                       
+56189630  submission.parquet  2026-09-12 16:48:51.090000                                    SubmissionStatus.COMPLETE  2.72                       
+56170551  submission.parquet  2026-09-11 18:00:33.193000                                    SubmissionStatus.COMPLETE  3.12                       
+56145315  submission.parquet  2026-09-10 13:39:48.527000                                    SubmissionStatus.COMPLETE  2.54                       
+56087561  submission.parquet  2026-09-08 00:52:49.320000                                    SubmissionStatus.COMPLETE  3.19                       
+56065816  submission.parquet  2026-09-07 00:46:53.510000                                    SubmissionStatus.COMPLETE  3.00                       
+56047639  submission.parquet  2026-09-06 05:31:51.827000                                    SubmissionStatus.COMPLETE  0.89                       
+56022167  submission.parquet  2026-09-05 00:54:33.820000                                    SubmissionStatus.COMPLETE  0.72                       
+56004968  submission.parquet  2026-09-04 04:55:23.370000                                    SubmissionStatus.COMPLETE  1.57                       
+55972387  submission.parquet  2026-09-03 02:06:44.907000                                    SubmissionStatus.COMPLETE  3.62                       
+55951145  submission.parquet  2026-09-02 01:09:18.230000                                    SubmissionStatus.COMPLETE  2.81                       
+55929212  submission.parquet  2026-09-01 01:55:09.647000                                    SubmissionStatus.COMPLETE  1.45                       
+55920240  submission.parquet  2026-08-31 16:44:55.823000                                    SubmissionStatus.COMPLETE  0.21                       
+55897878  submission.parquet  2026-08-30 18:36:32.303000                                    SubmissionStatus.COMPLETE  1.88                       
+55869451  submission.parquet  2026-08-29 14:50:22.120000                                    SubmissionStatus.COMPLETE  1.43                       
+55792537  submission.parquet  2026-08-26 10:34:30                                           SubmissionStatus.ERROR                                
+55757853  submission.parquet  2026-08-25 01:50:02.013000                                    SubmissionStatus.COMPLETE  1.37                       
+55729868  submission.parquet  2026-08-24 01:51:33.773000                                    SubmissionStatus.COMPLETE  0.93                       
+55714717  submission.parquet  2026-08-23 12:33:17.433000                                    SubmissionStatus.COMPLETE  0.69                       
+55680056  submission.parquet  2026-08-22 00:48:13.533000                                    SubmissionStatus.COMPLETE  1.28                       
+55660007  submission.parquet  2026-08-21 03:58:55.010000                                    SubmissionStatus.COMPLETE  1.72                       
+55635529  submission.parquet  2026-08-20 01:47:56.933000                                    SubmissionStatus.COMPLETE  1.46                       
+55612690  submission.parquet  2026-08-19 02:24:55.430000                                    SubmissionStatus.COMPLETE  1.71                       
+55589830  submission.parquet  2026-08-18 02:02:14.350000                                    SubmissionStatus.COMPLETE  2.14                       
+55570627  submission.parquet  2026-08-17 04:38:07.243000                                    SubmissionStatus.COMPLETE  1.02                       
+55462423  submission.parquet  2026-08-12 15:51:41.367000                                    SubmissionStatus.COMPLETE  0.79                       
+55420935  submission.parquet  2026-08-11 02:23:38.623000                                    SubmissionStatus.ERROR                                
