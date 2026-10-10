@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
-Generates the audited, unexecuted private Kaggle notebook for SAM-AI real-model smoke testing.
-Enforces 100% parity with `scripts/run_real_model_smoke_test.py` by using `HuggingFaceModelRunner`
-from `sam_ai.substrate.models`.
+Generates the audited, unexecuted private Kaggle notebook for the SAM-AI Real Base-Model Smoke Test.
+Configured strictly for Base-Model Zero-Shot evaluation (REAL_MODEL_ZERO_SHOT_BASE).
+Does NOT mount, load, or claim to evaluate the SAM-AI LoRA adapter.
+Enforces 100% parity with `scripts/run_real_model_smoke_test.py` via `HuggingFaceModelRunner`.
 """
 
 import json
@@ -21,10 +22,16 @@ metadata = {
     "enable_gpu": True,
     "enable_tpu": False,
     "enable_internet": False,
-    "dataset_sources": [],
-    "competition_sources": ["arc-prize-2026-arc-agi-3"],
+    "dataset_sources": [
+        "samrishb/sam-ai-source-bundle"
+    ],
+    "competition_sources": [
+        "arc-prize-2026-arc-agi-3"
+    ],
     "kernel_sources": [],
-    "model_sources": []
+    "model_sources": [
+        "gowillgo/unsloth-deepseek-r1-distill-qwen-14b-bnb-4bit/transformers/v1"
+    ]
 }
 
 with open(out_dir / "kernel-metadata.json", "w", encoding="utf-8") as f:
@@ -36,14 +43,14 @@ nb = {
             "cell_type": "markdown",
             "metadata": {},
             "source": [
-                "# SAM-AI Sovereign Agent: Real-Model Smoke Test (Audited & Reconciled)\n",
+                "# SAM-AI Sovereign Agent: Real Base-Model Smoke Test (Zero-Shot Baseline)\n",
                 "\n",
-                "**Objective:** Verify that the sovereign SAM-AI agent (`sam_ai.agent`) loads authentic model weights via `HuggingFaceModelRunner`, attaches the verified LoRA adapter (checkpoint-25), connects to the official ARC-3 `Arcade` environment interface, and executes a strictly budgeted 5-step interactive loop.\n",
+                "**Objective:** Verify that the sovereign SAM-AI agent (`sam_ai.agent`) loads authentic 4-bit base model weights (`DeepSeek-R1-Distill-Qwen-14B-bnb-4bit`) via `HuggingFaceModelRunner`, connects to the official ARC-3 `Arcade` environment interface, and executes a strictly budgeted 5-step interactive loop.\n",
                 "\n",
                 "> **Hard Rules:**\n",
                 "> 1. **Zero competition submission:** Does not create `submission.parquet` or invoke submission APIs.\n",
-                "> 2. **No mock fallback:** If weights, GPU, or environment data are absent, halts cleanly with `[BLOCKED]`.\n",
-                "> 3. **Truthful evaluation reporting:** Distinguishes base model zero-shot runs from adapter evaluations; rejects corrupt adapters (checkpoint-50).\n",
+                "> 2. **Base-Model Only:** Does not mount, load, or evaluate the SAM-AI adapter. All results labeled `REAL_MODEL_ZERO_SHOT_BASE`.\n",
+                "> 3. **No mock fallback:** If weights, GPU, or environment data are absent, halts cleanly with `[BLOCKED]`.\n",
                 "> 4. **Small compute footprint:** Bounded to 5 environment steps total (< 2 minutes GPU runtime).\n",
                 "> 5. **Architectural Parity:** Uses identical `HuggingFaceModelRunner` and telemetry schema as the local `scripts/run_real_model_smoke_test.py`.\n"
             ]
@@ -66,12 +73,12 @@ nb = {
                 "from pathlib import Path\n",
                 "\n",
                 "print('=' * 75)\n",
-                "print('  SAM-AI REAL-MODEL SMOKE TEST: STATIC PRECONDITION AUDIT')\n",
+                "print('  SAM-AI REAL BASE-MODEL SMOKE TEST: STATIC PRECONDITION AUDIT')\n",
                 "print('=' * 75)\n",
                 "\n",
                 "missing = []\n",
                 "\n",
-                "# 0. Extract SAM-AI Source Bundle if Mounted\n",
+                "# 0. Extract SAM-AI Source Bundle from Mounted Dataset\n",
                 "bundle_candidates = [\n",
                 "    Path('/kaggle/input/sam-ai-source-bundle/sam_ai_source_bundle.tar.gz'),\n",
                 "    Path('/kaggle/input/sam-ai-source-bundle.tar.gz'),\n",
@@ -153,34 +160,11 @@ nb = {
                 "else:\n",
                 "    print(f'[OK] Base Model Path: {base_model_path}')\n",
                 "\n",
-                "# 4. Check Adapter Weights & Compatibility (Checkpoint-25 Verified)\n",
-                "ADAPTER_CANDIDATES = [\n",
-                "    '/kaggle/input/sam-ai-v4-adapter-checkpoint-25',\n",
-                "    '/kaggle/input/sam-ai-v4-checkpoint-25-adapter',\n",
-                "    'kaggle_flywheel_check/sam_ai_v4_trained/checkpoint-25',\n",
-                "]\n",
+                "# 4. Adapter Explicitly Disabled (Zero-Shot Base Mode)\n",
                 "adapter_path = None\n",
                 "adapter_bytes = 0\n",
-                "for a in ADAPTER_CANDIDATES:\n",
-                "    if Path(a).exists():\n",
-                "        weights = list(Path(a).glob('*.safetensors')) + list(Path(a).glob('*.bin'))\n",
-                "        total_sz = sum(w.stat().st_size for w in weights)\n",
-                "        if total_sz > 0:\n",
-                "            adapter_path = a\n",
-                "            adapter_bytes = total_sz\n",
-                "            break\n",
-                "        else:\n",
-                "            print(f'[WARN] Skipping corrupt/0-byte adapter in {a}')\n",
-                "\n",
-                "if adapter_path:\n",
-                "    cfg_p = Path(adapter_path) / 'adapter_config.json'\n",
-                "    if cfg_p.exists():\n",
-                "        with open(cfg_p, 'r', encoding='utf-8') as f:\n",
-                "            ad_cfg = json.load(f)\n",
-                "        print(f'[OK] Verified LoRA Adapter: {adapter_path}')\n",
-                "        print(f'     Rank: {ad_cfg.get(\"r\")}, Alpha: {ad_cfg.get(\"lora_alpha\")}, Size: {adapter_bytes / (1024**2):.2f} MB')\n",
-                "else:\n",
-                "    print('[INFO] No non-empty adapter mounted. Running in Zero-Shot Base Model Mode.')\n",
+                "print('[INFO] Operating in Base-Model-Only Zero-Shot Mode (REAL_MODEL_ZERO_SHOT_BASE).')\n",
+                "print('       SAM-AI LoRA adapter is NOT loaded in this evaluation.')\n",
                 "\n",
                 "# 5. Check Official ARC-3 Environment Data via Arcade\n",
                 "ENV_DATA_DIR = os.environ.get(\n",
@@ -194,12 +178,12 @@ nb = {
                 "    print(f'[OK] Found {found_envs} official ARC-3 environment files in {ENV_DATA_DIR}.')\n",
                 "\n",
                 "if missing:\n",
-                "    print('\\n[BLOCKED] Cannot execute real-model smoke test.')\n",
+                "    print('\\n[BLOCKED] Cannot execute real base-model smoke test.')\n",
                 "    for m in missing:\n",
                 "        print(f'  - {m}')\n",
                 "    raise RuntimeError('Smoke test halted due to missing prerequisites.')\n",
                 "\n",
-                "print('\\n[READY] All hardware, model, and environment prerequisites verified.')\n"
+                "print('\\n[READY] All hardware, base model, and environment prerequisites verified.')\n"
             ]
         },
         {
@@ -209,25 +193,24 @@ nb = {
             "outputs": [],
             "source": [
                 "# ==============================================================================\n",
-                "# 2. Sovereign ModelRunner Loading (HuggingFaceModelRunner)\n",
+                "# 2. Sovereign ModelRunner Loading (Base Model Only)\n",
                 "# ==============================================================================\n",
                 "from sam_ai.substrate.models import HuggingFaceModelRunner\n",
                 "\n",
-                "print(f'[*] Initializing sovereign HuggingFaceModelRunner...')\n",
+                "print(f'[*] Initializing sovereign HuggingFaceModelRunner with base model...')\n",
                 "runner = HuggingFaceModelRunner(\n",
                 "    model_name_or_path=base_model_path,\n",
-                "    adapter_path=adapter_path,\n",
+                "    adapter_path=None, # Strictly base-model zero-shot\n",
                 "    device_map='auto',\n",
                 "    load_in_4bit=True,\n",
                 ")\n",
                 "runner.load_model()\n",
                 "\n",
                 "is_adapter_active = runner.is_adapter_loaded\n",
+                "assert not is_adapter_active, 'CRITICAL: Adapter must not be loaded in zero-shot base evaluation.'\n",
                 "print(f'[OK] ModelRunner ready.')\n",
                 "print(f'     Model Name:     {runner.model_name}')\n",
-                "print(f'     Adapter Active: {is_adapter_active}')\n",
-                "if is_adapter_active:\n",
-                "    print(f'     Adapter Bytes:  {runner.adapter_bytes:,} bytes')\n"
+                "print(f'     Adapter Active: {is_adapter_active} (Zero-Shot Base Mode)')\n"
             ]
         },
         {
@@ -281,19 +264,19 @@ nb = {
                 "summary = agent.run_session(env, game_id=chosen_game, max_steps=5)\n",
                 "elapsed = time.perf_counter() - t0\n",
                 "\n",
-                "# Persist Telemetry\n",
+                "# Persist Telemetry (Strictly REAL_MODEL_ZERO_SHOT_BASE)\n",
                 "out_dir = Path('evidence/real_model_smoke_test')\n",
                 "out_dir.mkdir(parents=True, exist_ok=True)\n",
                 "\n",
-                "eval_type = 'REAL_MODEL_WITH_ADAPTER' if is_adapter_active else 'REAL_MODEL_ZERO_SHOT_BASE'\n",
+                "eval_type = 'REAL_MODEL_ZERO_SHOT_BASE'\n",
                 "report = {\n",
                 "    'timestamp': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),\n",
                 "    'game_id': chosen_game,\n",
                 "    'evaluation_type': eval_type,\n",
                 "    'is_real_model': True,\n",
-                "    'adapter_loaded': is_adapter_active,\n",
-                "    'adapter_path': adapter_path,\n",
-                "    'adapter_bytes': adapter_bytes,\n",
+                "    'adapter_loaded': False,\n",
+                "    'adapter_path': None,\n",
+                "    'adapter_bytes': 0,\n",
                 "    'base_model': base_model_path,\n",
                 "    'steps_taken': summary.total_steps,\n",
                 "    'levels_completed': summary.levels_completed,\n",
@@ -336,4 +319,4 @@ nb = {
 with open(out_dir / "sam_ai_real_model_smoke_test.ipynb", "w", encoding="utf-8") as f:
     json.dump(nb, f, indent=2)
 
-print("[OK] Generated reconciled smoke-test notebook and kernel-metadata.json successfully.")
+print("[OK] Generated base-model zero-shot smoke-test notebook and kernel-metadata.json successfully.")
