@@ -34,16 +34,17 @@
 
 ---
 
-## Experiment 2: Pre-Registered SAM-AI Verification & Failure Memory Ablation
+## Experiment 2: Pre-Registered SAM-AI Verification Guard Ablation (Single-Variable Isolation)
 * **Experiment ID:** `EXP-SAM-01-SCAFFOLDING-EVAL`
 * **Status:** `NOT_RUN (PROPOSED PRE-REGISTERED EXPERIMENT — PENDING USER APPROVAL)`
 * **Specification File:** `research/EXP_SAM_01_SCAFFOLDING_EVAL.md`
 * **Target System:** SAM-AI Sovereign Agent (`sam_ai.agent.arc3_agent.SAMARC3Agent`)
-* **Hardware Required:** GPU Host with mounted model weights (NVIDIA L4 / RTX Pro 6000) or local CPU if quant available.
+* **Hardware Required:** GPU Host with mounted model weights (NVIDIA L4 / RTX Pro 6000 or 2x T4).
 * **Control Arm (Arm A):** Base foundation model in minimal action loop with strict schema parsing (`verification_guard=False`, `failure_memory=False`).
-* **Treatment Arm (Arm B):** Base foundation model with SAM-AI pre-execution verification guard (`verification_guard=True`) and dynamic failure memory (`failure_memory=True`).
+* **Treatment Arm (Arm B):** Base foundation model with verification guard ONLY (`verification_guard=True`, `failure_memory=False`). Failure memory held constant.
+* **Subsequent Step (Arm C / EXP-02):** Failure memory deferred to separate follow-up experiment after Arm B is evaluated.
 * **Primary Metric:** Action Efficiency (levels completed per action spent across 30 episodes, single-pass $N=1$).
-* **Pre-Registered Success Criterion:** $\ge 30\%$ reduction in zero-delta moves ($p < 0.05$) and zero repeat fatal moves, without degrading single-pass completion rate.
+* **Pre-Registered Success Criterion:** $\ge 25\%$ reduction in illegal/wasted moves, zero unhandled action exceptions reaching environment, and non-regressing Action Efficiency.
 * **Current Blocker:** Real model weights missing locally; execution locked awaiting user review and approval.
 
 

@@ -324,17 +324,28 @@ To scale beyond 14B parameters toward frontier reasoning, SAM-AI requires:
 
 ---
 
-## Summary Protocol & Phasing Lock
+## Summary Protocol & Current Milestone Status
 
-| Milestone | Focus | Stage | Prerequisites |
+### Precise Current Status Audit (October 10, 2026)
+* **Agent Code & Test Plumbing:** **IMPLEMENTED** (in `sam_ai/agent/` and `sam_ai/substrate/`).
+* **Unit Tests:** **15/15 PASSED** (offline smoke tests in `tests/test_sam_ai_arc3_agent.py`, strictly stamped `TEST_ONLY`).
+* **Real 14B Model Execution:** **BLOCKED** until model weight files and a CUDA GPU runtime are available.
+* **Adapter Evaluation:** **BLOCKED** until verified non-empty weights are loaded. (Forensics: `sam_ai_v4_trained/checkpoint-25` is verified non-empty at 137.7 MB; `checkpoint-50` is 0 bytes and unusable).
+* **Official ARC-3 Execution:** **BLOCKED LOCALLY** until official environment files (`metadata.json`) are mounted in the execution environment (e.g. via Kaggle input).
+* **Real Capability Improvement:** **NOT YET DEMONSTRATED**. (Passing unit tests verifies plumbing only; real intelligence gains have not yet been evaluated).
+
+### Milestone Phasing Matrix
+
+| Milestone | Focus | Stage | Current Status |
 |---|---|---|---|
-| **M1: Execution & Evaluation** | Truthful Telemetry & Provenance | **ACTIVE IMPLEMENTATION** | Python 3.10+, Local Harness, Mock/Real Checks |
-| **M2: Reasoning & Verification** | Pre-Execution Guard & Schemas | **ACTIVE PLUMBING / SPEC READY** | Pre-Registered EXP-SAM-01, User Approval |
-| **M3: Learning from Failures** | Synthetic Curricula & GRPO | **ROADMAP SPECIFICATION** | M1 & M2 Validated, GPU Quota Approved |
-| **M4: Memory & World Tracking** | Provenance Graphs & State Maps | **ROADMAP SPECIFICATION** | M2 Validated |
-| **M5: Tool-Using Agents** | Sandboxed REPL & Spatial Tools | **ROADMAP SPECIFICATION** | M2 & M4 Validated |
-| **M6: Broader Generalization** | Math, Code, Science Transfers | **ROADMAP SPECIFICATION** | M5 Validated |
-| **M7: Multimodal Grounding** | Vision Encoders + Symbolic Dual | **ROADMAP SPECIFICATION** | M1-M5 Validated, Vision GPU |
-| **M8: Frontier Scaling** | MLA, MoE, Cluster Training | **LONG-TERM VISION** | Formal Funding & Academic Verification |
+| **M1: Execution & Evaluation** | Truthful Telemetry & Provenance | **PLUMBING READY / REAL MODEL BLOCKED** | Plumbing & `HuggingFaceModelRunner` implemented. Real-model execution BLOCKED awaiting GPU and weight files. |
+| **M2: Reasoning & Verification** | Single-Variable Verification Guard | **PRE-REGISTERED / NOT_RUN** | Single-variable specification (`EXP-SAM-01`) pre-registered. NOT RUN pending user approval. |
+| **M3: Learning from Failures** | Failure Memory & Synthetic GRPO | **ROADMAP SPECIFICATION** | Failure Memory (Arm C / EXP-SAM-02) deferred until M2 is evaluated. |
+| **M4: Memory & World Tracking** | Provenance Graphs & State Maps | **ROADMAP SPECIFICATION** | Non-active research track. |
+| **M5: Tool-Using Agents** | Sandboxed REPL & Spatial Tools | **ROADMAP SPECIFICATION** | Non-active research track. |
+| **M6: Broader Generalization** | Math, Code, Science Transfers | **ROADMAP SPECIFICATION** | Non-active research track. |
+| **M7: Multimodal Grounding** | Vision Encoders + Symbolic Dual | **ROADMAP SPECIFICATION** | Non-active research track. |
+| **M8: Frontier Scaling** | MLA, MoE, Cluster Training | **LONG-TERM VISION** | Non-active research track. |
 
-> **Directive:** All work remains strictly locked at Milestone 1/2. No GPU quota consumption, Kaggle submission, or automated code execution will occur without explicit, written user authorization.
+> **Directive:** Passing offline plumbing tests does NOT constitute a completed real-model evaluation. All execution remains strictly locked. No GPU quota consumption, Kaggle submission, or automated code execution will occur without explicit, written user authorization.
+

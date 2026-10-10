@@ -189,3 +189,160 @@ class OpenAICompatibleModelRunner(ModelRunner):
                 latency_ms=latency_ms,
                 raw_response={"error": str(e)},
             )
+
+
+class HuggingFaceModelRunner(ModelRunner):
+    """
+    Direct in-process PyTorch / HuggingFace model runner for environments
+    with a local GPU (e.g. Kaggle notebook) where model weights and adapters
+    are loaded directly in memory without requiring a separate HTTP server.
+    """
+
+    def __init__(
+        self,
+        model_name_or_path: str,
+        adapter_path: Optional[str] = None,
+        device_map: str = "auto",
+        torch_dtype: Optional[Any] = None,
+        load_in_4bit: bool = False,
+        trust_remote_code: bool = True,
+        local_files_only: bool = False,
+    ):
+        self._model_name = model_name_or_path
+        self.adapter_path = adapter_path
+        self.device_map = device_map
+        self.load_in_4bit = load_in_4bit
+        self.trust_remote_code = trust_remote_code
+        self.local_files_only = local_files_only
+
+        # Verify dependencies
+        try:
+            import torch
+            from transformers import AutoTokenizer, AutoModelForCausalLM
+        except ImportError as e:
+            raise RuntimeError(
+                f"HuggingFaceModelRunner requires 'torch' and 'transformers'. Missing: {e}"
+            )
+
+        self.torch = torch
+        self.AutoTokenizer = AutoTokenizer
+        self.AutoModelForCausalLM = AutoModelForCausalLM
+
+        self.torch_dtype = torch_dtype or (torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16)
+        self.model = None
+        self.tokenizer = None
+        self._is_loaded = False
+
+    @property
+    def model_name(self) -> str:
+        if self.adapter_path:
+            return f"{self._model_name}+adapter:{self.adapter_path}"
+        return self._model_name
+
+    def load_model(self):
+        """Loads base model and optional LoRA adapter into memory."""
+        if self._is_loaded:
+            return
+
+        start_time = time.perf_counter()
+        print(f"[*] Loading tokenizer: {self._model_name}...")
+        self.tokenizer = self.AutoTokenizer.from_pretrained(
+            self._model_name,
+            trust_remote_code=self.trust_remote_code,
+            local_files_only=self.local_files_only,
+        )
+        if self.tokenizer.pad_token is None:
+            self.tokenizer.pad_token = self.tokenizer.eos_token
+
+        print(f"[*] Loading base model weights: {self._model_name}...")
+        load_kwargs: Dict[str, Any] = {
+            "device_map": self.device_map,
+            "torch_dtype": self.torch_dtype,
+            "trust_remote_code": self.trust_remote_code,
+            "local_files_only": self.local_files_only,
+        }
+        if self.load_in_4bit:
+            load_kwargs["load_in_4bit"] = True
+
+        self.model = self.AutoModelForCausalLM.from_pretrained(
+            self._model_name,
+            **load_kwargs,
+        )
+
+        if self.adapter_path:
+            print(f"[*] Attaching PEFT LoRA adapter: {self.adapter_path}...")
+            try:
+                from peft import PeftModel
+            except ImportError:
+                raise RuntimeError("PEFT adapter specified but 'peft' library is not installed.")
+
+            self.model = PeftModel.from_pretrained(self.model, self.adapter_path)
+            print(f"[OK] Adapter attached successfully.")
+
+        self.model.eval()
+        self._is_loaded = True
+        elapsed = time.perf_counter() - start_time
+        print(f"[OK] Model loaded successfully in {elapsed:.2f}s.")
+
+    def generate(
+        self,
+        prompt: str,
+        system_prompt: Optional[str] = None,
+        temperature: float = 0.0,
+        max_tokens: int = 2048,
+        stop: Optional[List[str]] = None,
+    ) -> ModelOutput:
+        if not self._is_loaded:
+            self.load_model()
+
+        start_time = time.perf_counter()
+
+        # Format chat prompt
+        messages = []
+        if system_prompt:
+            messages.append({"role": "system", "content": system_prompt})
+        messages.append({"role": "user", "content": prompt})
+
+        if hasattr(self.tokenizer, "apply_chat_template") and self.tokenizer.chat_template:
+            formatted_prompt = self.tokenizer.apply_chat_template(
+                messages, tokenize=False, add_generation_prompt=True
+            )
+        else:
+            sys_part = f"System: {system_prompt}\n\n" if system_prompt else ""
+            formatted_prompt = f"{sys_part}User: {prompt}\n\nAssistant:"
+
+        inputs = self.tokenizer(formatted_prompt, return_tensors="pt")
+        prompt_tokens = inputs["input_ids"].shape[1]
+
+        # Move to model device
+        device = next(self.model.parameters()).device
+        inputs = {k: v.to(device) for k, v in inputs.items()}
+
+        gen_kwargs: Dict[str, Any] = {
+            "max_new_tokens": max_tokens,
+            "pad_token_id": self.tokenizer.pad_token_id,
+        }
+        if temperature > 0.0:
+            gen_kwargs["do_sample"] = True
+            gen_kwargs["temperature"] = temperature
+            gen_kwargs["top_p"] = 0.95
+        else:
+            gen_kwargs["do_sample"] = False
+
+        with self.torch.no_grad():
+            outputs = self.model.generate(**inputs, **gen_kwargs)
+
+        completion_ids = outputs[0][prompt_tokens:]
+        completion_text = self.tokenizer.decode(completion_ids, skip_special_tokens=True)
+        completion_tokens = len(completion_ids)
+        latency_ms = (time.perf_counter() - start_time) * 1000.0
+
+        return ModelOutput(
+            text=completion_text,
+            reasoning_trace=None,
+            prompt_tokens=prompt_tokens,
+            completion_tokens=completion_tokens,
+            latency_ms=latency_ms,
+            raw_response={"finish_reason": "length" if completion_tokens >= max_tokens else "stop"},
+        )
+

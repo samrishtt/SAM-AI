@@ -39,6 +39,7 @@ from sam_ai.substrate.failure_memory import StructuredFailureMemory
 from sam_ai.substrate.models import (
     DeterministicModelRunner,
     OpenAICompatibleModelRunner,
+    HuggingFaceModelRunner,
 )
 from sam_ai.substrate.strategies import (
     DirectStrategy,
@@ -82,6 +83,7 @@ __all__ = [
     "StructuredFailureMemory",
     "DeterministicModelRunner",
     "OpenAICompatibleModelRunner",
+    "HuggingFaceModelRunner",
     "DirectStrategy",
     "BestOfNStrategy",
     "SearchStrategy",

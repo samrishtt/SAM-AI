@@ -292,6 +292,18 @@ class TestAbsentModelHandling(unittest.TestCase):
         self.assertIsNotNone(out.raw_response)
         self.assertIn("error", out.raw_response)
 
+    def test_absent_huggingface_model_raises_cleanly(self):
+        from sam_ai.substrate.models import HuggingFaceModelRunner
+        # Test non-existent local directory path to verify clean error handling
+        runner = HuggingFaceModelRunner(
+            model_name_or_path="./non_existent_dir_12345",
+            device_map="cpu",
+            local_files_only=True,
+        )
+        with self.assertRaises(Exception):
+            runner.load_model()
+
 
 if __name__ == "__main__":
     unittest.main()
+
