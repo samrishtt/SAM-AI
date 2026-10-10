@@ -29,6 +29,11 @@ def create_source_bundle(output_tar: str = "dist/sam_ai_source_bundle.tar.gz") -
 
     print(f"[*] Packaging '{src_dir}' into '{out_path}'...")
     with tarfile.open(out_path, "w:gz") as tar:
+        # Add root LICENSE and NOTICE files
+        if (root / "LICENSE").exists():
+            tar.add(root / "LICENSE", arcname="LICENSE")
+        if (root / "NOTICE").exists():
+            tar.add(root / "NOTICE", arcname="NOTICE")
         tar.add(src_dir, arcname="sam_ai", filter=filter_func)
 
     # Compute SHA-256
