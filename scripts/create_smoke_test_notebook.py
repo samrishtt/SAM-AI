@@ -31,7 +31,12 @@ metadata = {
     "kernel_sources": [],
     "model_sources": [
         "gowillgo/unsloth-deepseek-r1-distill-qwen-14b-bnb-4bit/transformers/v1/1"
-    ]
+    ],
+    "keywords": [
+        "gpu"
+    ],
+    "docker_image": "gcr.io/kaggle-private-byod/python@sha256:57e612b484cf3df5026ee4dcc3cb176974b22b2bc0937fb1e16132a8be4cb13c",
+    "machine_shape": "NvidiaRtxPro6000"
 }
 
 with open(out_dir / "kernel-metadata.json", "w", encoding="utf-8") as f:
@@ -147,6 +152,8 @@ nb = {
                 "\n",
                 "# 3. Check Base Model Path\n",
                 "BASE_MODEL_CANDIDATES = [\n",
+                "    '/kaggle/input/unsloth-deepseek-r1-distill-qwen-14b-bnb-4bit/transformers/v1/1',\n",
+                "    '/kaggle/input/models/gowillgo/unsloth-deepseek-r1-distill-qwen-14b-bnb-4bit/transformers/v1/1',\n",
                 "    '/kaggle/input/unsloth-deepseek-r1-distill-qwen-14b-bnb-4bit/transformers/v1',\n",
                 "    '/kaggle/input/models/gowillgo/unsloth-deepseek-r1-distill-qwen-14b-bnb-4bit/transformers/v1',\n",
                 "    '/kaggle/input/unsloth-deepseek-r1-distill-qwen-14b-bnb-4bit',\n",
@@ -159,6 +166,13 @@ nb = {
                 "    if Path(c).exists():\n",
                 "        base_model_path = c\n",
                 "        break\n",
+                "\n",
+                "if not base_model_path:\n",
+                "    for p in Path('/kaggle/input').rglob('config.json'):\n",
+                "        p_str = str(p).lower()\n",
+                "        if 'unsloth' in p_str or 'deepseek' in p_str or 'qwen' in p_str:\n",
+                "            base_model_path = str(p.parent)\n",
+                "            break\n",
                 "\n",
                 "if not base_model_path:\n",
                 "    missing.append('Base model weights not found in /kaggle/input/ mounts.')\n",
@@ -294,8 +308,12 @@ nb = {
                 "\n",
                 "with open(out_dir / 'smoke_summary.json', 'w', encoding='utf-8') as f:\n",
                 "    json.dump(report, f, indent=2)\n",
+                "with open('smoke_summary.json', 'w', encoding='utf-8') as f:\n",
+                "    json.dump(report, f, indent=2)\n",
                 "\n",
                 "with open(out_dir / 'smoke_trace.jsonl', 'a', encoding='utf-8') as f:\n",
+                "    f.write(json.dumps(report) + '\\n')\n",
+                "with open('smoke_trace.jsonl', 'a', encoding='utf-8') as f:\n",
                 "    f.write(json.dumps(report) + '\\n')\n",
                 "\n",
                 "print('=' * 75)\n",
@@ -315,6 +333,11 @@ nb = {
         "language_info": {
             "name": "python",
             "version": "3.10.12"
+        },
+        "kaggle": {
+            "accelerator": "nvidiaRtxPro6000",
+            "isGpuEnabled": True,
+            "isInternetEnabled": False
         }
     },
     "nbformat": 4,
