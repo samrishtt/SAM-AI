@@ -103,10 +103,25 @@ def check_prerequisites(
     # 2. Check Base Model
     base_p = Path(base_model_path)
     if not base_p.exists():
-        # Check HuggingFace hub cache
-        cache_check = Path(os.path.expanduser("~/.cache/huggingface/hub")) / f"models--{base_model_path.replace('/', '--')}"
-        if not cache_check.exists():
-            missing.append(f"Base model weights not found on disk at '{base_model_path}'.")
+        candidates = [
+            "/kaggle/input/unsloth-deepseek-r1-distill-qwen-14b-bnb-4bit/transformers/v1",
+            "/kaggle/input/models/gowillgo/unsloth-deepseek-r1-distill-qwen-14b-bnb-4bit/transformers/v1",
+            "/kaggle/input/unsloth-deepseek-r1-distill-qwen-14b-bnb-4bit",
+            "/kaggle/input/deepseek-r1-distill-qwen-14b-bnb-4bit",
+            "/kaggle/input/models/unsloth/deepseek-r1-distill-qwen-14b-bnb-4bit",
+        ]
+        found = False
+        for c in candidates:
+            if Path(c).exists():
+                base_model_path = c
+                found = True
+                break
+        if not found:
+            cache_check = Path(os.path.expanduser("~/.cache/huggingface/hub")) / f"models--{base_model_path.replace('/', '--')}"
+            if not cache_check.exists():
+                missing.append(f"Base model weights not found on disk at '{base_model_path}'.")
+    else:
+        found = True
 
     # 3. Check Adapter Compatibility & Size
     if adapter_path:
