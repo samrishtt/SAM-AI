@@ -15,8 +15,8 @@ This document catalogs every technical claim made regarding SAM-AI, the exact ev
 | **CLM-03** | GRPO algorithm implementation runs | `sam_ai/training/grpo_core.py` | `python sam_ai/training/grpo_core.py` | Local PyTorch unit test | Local code | 2026-10-05 | Code execution & loss calculation | Unit test execution | ⚠️ **PROTOTYPE / CODE RUNS (SCALED TRAINING PENDING)** |
 | **CLM-04** | Client-side Python execution in browser via WebAssembly | `spaces/sam_ai_playground/index.html` | Open `https://samrish2009-sam-ai-reasoning-playground.static.hf.space` in browser | Pyodide 0.26.4 runtime | Web UI | 2026-10-07 | Interactive code execution in browser | Interactive inspection | ✅ **VERIFIED** |
 | **CLM-05** | Universal MCP Server with 7 tools | `scripts/sam_ai_mcp_server.py` | `python scripts/sam_ai_mcp_server.py` | JSON-RPC 2.0 stdio | Local script | 2026-10-07 | Tools list protocol response | Stdio JSON-RPC test | ✅ **VERIFIED** |
-| **CLM-06** | ARC-AGI-3 Milestone Scores of 29.21 and 28.29 | Kaggle submissions `56804468` & `56866777` | `kaggle competitions submissions -c arc-prize-2026-arc-agi-3` | ARC Prize 2026 test challenges | `samrishb/arc-agi-3-sam-ai-milestone-2-solver` | Oct 3 & Oct 6, 2026 | RHAE Relative Efficiency Score | Kaggle official platform | ⚠️ **PARTIALLY VERIFIED (KAGGLE SUBMISSION)** |
-| **CLM-07** | ARC-AGI-3 Historical Baseline Score of 3.62 | Kaggle submission `55972387` | `kaggle competitions submissions -c arc-prize-2026-arc-agi-3` | ARC Prize 2026 test challenges | `samrishb` early submission | 2026-09-03 | RHAE Relative Efficiency Score | Kaggle official platform | ⚠️ **PARTIALLY VERIFIED (SEPTEMBER 3 BASELINE)** |
+| **CLM-06** | ARC-AGI-3 Milestone Scores of 29.21 (Oct 3) and 28.29 (Oct 6) | Kaggle submissions `56804468` & `56866777` | `kaggle competitions submissions -c arc-prize-2026-arc-agi-3` | ARC Prize 2026 test challenges | `dfranzen` Milestone 2 solution (built on Tufa Labs Duck harness; Intel Qwen 3.8B AutoRound + Albucino MTP drafter) | Oct 3 & Oct 6, 2026 | RHAE Relative Efficiency Score | Kaggle official platform | ⚠️ **ATTRIBUTED TO FRANZEN M2 / TUFA HARNESS (NOT SAM-AI 14B)** |
+| **CLM-07** | ARC-AGI-3 September Historical Baseline Score of 3.62 | Kaggle submission `55972387` | `kaggle competitions submissions -c arc-prize-2026-arc-agi-3` | ARC Prize 2026 test challenges | Early experimental submission | 2026-09-03 | RHAE Relative Efficiency Score | Kaggle official platform | ⚠️ **HISTORICAL BASELINE (SEPTEMBER 3, NOT REGRESSION)** |
 | **CLM-08** | ARC-AGI-2 offline test predictions (120 tasks formatted) | `output_arc2_sam_ai/submission.json` | `python scripts/create_arc2_sam_ai_solver.py` | ARC-AGI-2 offline test set | Local inference runner | 2026-10-07 | 2 attempts per task formatted JSON | Offline file inspection | ✅ **VERIFIED (FORMATTED OUTPUT)** |
 | **CLM-09** | SWE-bench PR #61 is an official accepted leaderboard score | `SWE-bench/swe-bench.github.io#61` | GitHub API PR inspection | SWE-bench Verified (500 tasks) | `samrishtt` submission PR | 2026-09-28 | Leaderboard PR status | External GitHub audit | ❌ **CORRECTED / REMOVED (OPEN PR ONLY)** |
 | **CLM-10** | LiveCodeBench PR #3 is an official accepted leaderboard score | `LiveCodeBench/livecodebench.github.io#3` | GitHub API PR inspection | LiveCodeBench | `samrishtt` submission PR | 2026-10-01 | Leaderboard PR status | External GitHub audit | ❌ **CORRECTED / REMOVED (OPEN PR ONLY)** |
@@ -24,18 +24,41 @@ This document catalogs every technical claim made regarding SAM-AI, the exact ev
 | **CLM-12** | Adaptive Reasoning Controller Routing | `sam_ai/reasoning/adaptive_controller.py` | `python -m sam_ai.reasoning.adaptive_controller` | Multi-difficulty problem prompts | Heuristic router | 2026-10-07 | Rule-based strategy selection; unverified tasks return NOT_RUN | Unit test | 🧪 **HEURISTIC PROTOTYPE (RULE-BASED)** |
 | **CLM-13** | Multi-Tier Cognitive Memory (Working, Episodic, Semantic, Failure) | `sam_ai/memory/cognitive_memory.py` | `python -m sam_ai.memory.cognitive_memory` | Interactive stateful agent traces | Memory harness | 2026-10-07 | Failure strategy avoidance rate | Unit test | 🧪 **EXPERIMENTAL PROTOTYPE** |
 | **CLM-14** | 7-Step Empirical Ablation Matrix | `SAM-EVAL/ablation_matrix.py` | `python SAM-EVAL/ablation_matrix.py` | Standard held-out task suites | Pluggable Backbones | 2026-10-07 | Pass@1, tokens, cost, latency | Automated testbed | 📋 **PLANNED / HARNESS UNDER CONSTRUCTION** |
+| **CLM-15** | B2 Concurrency Alignment eliminates HTTP read timeouts and scores 70.89 on 10-game multi-pass ($N=4$) | `evidence/b2_exp1_output` & `evidence/EXPERIMENT_LOG.md` | `python scripts/evaluate_b2_run.py evidence/b2_exp1_output` | 10 ARC-3 demonstration games ($N=4$ passes) | B2 (Franzen M2 + concurrency 10 + 180s timeout) | 2026-10-10 | Best-of-4: 70.89, All-pass mean: 57.00, Timeouts: 0 | Verified Kaggle kernel run (`samrishb/arc-agi-3-sam-ai-solver-b2`) | ✅ **VERIFIED** |
+
+
+---
+
+## 💡 What is SAM-AI's Original Contribution?
+
+To preserve scientific rigor, upstream foundations are strictly segregated from SAM-AI's authored research:
+
+### Upstream Foundations (Third-Party Work):
+1. **Tufa Labs (`TufaLabs/duck-harness`, MIT License):** Interactive Python REPL harness and TAAF environment interface.
+2. **Daniel Franzen (`da-fr/arc-agi-3-solution`, Apache 2.0 License):** Milestone 2 winning solver ($25,000 prize), Pennyroyal SGLang integration, Intel Qwen 3.8B W4A16 AutoRound + Albucino MTP draft model weights, and hysteresis prefix cache engineering.
+3. **John Pezzulli (`Pennyroyal` SGLang v2.5.3, Apache 2.0 License):** Low-M BF16 GEMM and Mamba prefix-cache kernels on Nvidia RTX Pro 6000.
+
+### SAM-AI's Verifiable Original Contributions:
+1. **Quantitative Failure Forensics:** Disproved the hypothesis that Cell 7 heuristic overrides caused the 29.21 &rarr; 25.76 score drop; proved that SGLang queue congestion (`concurrency = 120` vs `MAXREQ = 10` yielding 36 HTTP read timeouts) and live single-pass volatility ($\sigma \approx 1.56$, per-game pass $\sigma = 18.63$) caused the drop.
+2. **The "Reki" Modular Ablation Framework:** Refactored the monolithic solver into isolated environment-variable toggles (`ARC3_CONCURRENCY_MODE`, `ARC3_FRAME_DIFF`, `ARC3_REPL_PROBING`, `ARC3_HYSTERESIS_TRIM`) for single-variable scientific testing.
+3. **Dynamic Path Resolution (`_resolve_dir`):** Defensive mount resolution preventing silent crashes across Kaggle dataset mount variations.
+4. **Local Multi-Pass Variance Tooling:** Scripted evaluation tooling (`scripts/evaluate_b2_run.py`) computing multi-pass stochastic coefficients ($CV = \sigma / \mu$) before spending Kaggle GPU quotas.
+5. **General Reasoning Infrastructure (Outside ARC):** Sovereign 14B GRPO reinforcement learning trainer (`sam_ai/training/grpo_core.py`), Universal MCP Server (`scripts/sam_ai_mcp_server.py`), and client-side Pyodide web playground.
 
 ---
 
 ## 🚫 Explicitly Deprecated / Corrected Terminology
 
-1. **"Peer-Reviewed"**: Removed. No claims may be described as peer-reviewed until accepted by a recognized academic conference (e.g. NeurIPS, ICML, ICLR).
-2. **"Sovereign / Definitive"**: Deprecated as uninformative marketing language. Replaced with technical architecture descriptions.
-3. **"Polynomial UCT"**: Corrected to **Predictor Upper Confidence bounds for Trees (PUCT)** (AlphaZero standard).
-4. **"100% Multi-Domain Benchmark"**: Renamed strictly to **"Internal Scaffolding Smoke Tests"** (3 toy demonstration prompts).
-5. **"Nexis"**: Deprecated in favor of the canonical project name **SAM-AI**.
-6. **Simulated Benchmark Results**: Removed all hardcoded outcomes (`success = True`). Unexecuted configurations must report **NOT_RUN**.
+1. **"SAM-AI 14B Adapter / Custom BFS generated 29.21 / 28.29 on ARC-3"**: **PERMANENTLY EXPUNGED.** Scores 29.21 and 28.29 were achieved by Daniel Franzen's Milestone 2 solution running Intel Qwen 3.8B + Albucino drafter, NOT by SAM-AI's 14B adapter or custom search code.
+2. **"3.62 was an October regression"**: **CORRECTED.** The 3.62 score was from submission `55972387` on September 3, 2026.
+3. **"ARC-3 Rank ~91"**: **EXPUNGED.** Official verified standing is **Rank 385 / 3,976** on ARC-3 and **Rank 641 / 2,558** on ARC-2.
+4. **"Peer-Reviewed"**: Removed. No claims may be described as peer-reviewed until accepted by a recognized academic venue.
+5. **"Sovereign / Definitive"**: Deprecated marketing language. Replaced with technical architecture descriptions.
+6. **"Polynomial UCT"**: Corrected to **Predictor Upper Confidence bounds for Trees (PUCT)** (AlphaZero standard).
+7. **"100% Multi-Domain Benchmark"**: Renamed strictly to **"Internal Scaffolding Smoke Tests"** (3 toy demonstration prompts).
+8. **Simulated Benchmark Results**: Removed all hardcoded outcomes (`success = True`). Unexecuted configurations must report **NOT_RUN**.
 
 ---
 
 *Parallax Intelligence Lab — Ground-Truth Evidence Standard*
+

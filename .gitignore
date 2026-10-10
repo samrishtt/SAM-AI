@@ -35,3 +35,7 @@ kaggle_arc3x_output/
 *.pt
 *.tar.gz
 *.zip
+evidence/**/artifacts/
+evidence/**/*.jsonl
+predictions/**/
+
