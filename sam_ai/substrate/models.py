@@ -13,10 +13,12 @@ Rule:
 - Always measures token counts and latency accurately without mocking.
 """
 
+import os
 import json
 import time
 import urllib.request
 import urllib.error
+from pathlib import Path
 from typing import Dict, Any, List, Optional, Callable
 
 from sam_ai.substrate.interfaces import ModelRunner, ModelOutput
@@ -238,6 +240,8 @@ class HuggingFaceModelRunner(ModelRunner):
         self.model = None
         self.tokenizer = None
         self._is_loaded = False
+        self.is_adapter_loaded = False
+        self.adapter_bytes = 0
 
     @property
     def model_name(self) -> str:
@@ -281,14 +285,42 @@ class HuggingFaceModelRunner(ModelRunner):
         )
 
         if self.adapter_path:
-            print(f"[*] Attaching PEFT LoRA adapter: {self.adapter_path}...")
+            p = Path(self.adapter_path)
+            if not p.exists():
+                raise FileNotFoundError(f"Adapter directory '{self.adapter_path}' does not exist.")
+
+            cfg_file = p / "adapter_config.json"
+            if not cfg_file.exists():
+                raise FileNotFoundError(f"Missing 'adapter_config.json' in '{self.adapter_path}'.")
+
+            weights = list(p.glob("*.safetensors")) + list(p.glob("*.bin"))
+            if not weights:
+                raise FileNotFoundError(f"No weight files (*.safetensors or *.bin) found in '{self.adapter_path}'.")
+
+            total_bytes = sum(w.stat().st_size for w in weights)
+            if total_bytes == 0:
+                raise ValueError(
+                    f"Adapter weights in '{self.adapter_path}' are 0 bytes (corrupt/empty save). Refusing to proceed."
+                )
+
+            print(f"[*] Attaching PEFT LoRA adapter: {self.adapter_path} ({total_bytes / (1024*1024):.2f} MB)...")
             try:
                 from peft import PeftModel
             except ImportError:
                 raise RuntimeError("PEFT adapter specified but 'peft' library is not installed.")
 
-            self.model = PeftModel.from_pretrained(self.model, self.adapter_path)
-            print(f"[OK] Adapter attached successfully.")
+            try:
+                self.model = PeftModel.from_pretrained(self.model, self.adapter_path)
+                print(f"[OK] Adapter attached successfully.")
+                self.is_adapter_loaded = True
+                self.adapter_bytes = total_bytes
+            except Exception as e:
+                raise RuntimeError(
+                    f"Failed to attach PEFT adapter '{self.adapter_path}': {e}. Execution halted. Never silently fall back."
+                ) from e
+        else:
+            self.is_adapter_loaded = False
+            self.adapter_bytes = 0
 
         self.model.eval()
         self._is_loaded = True
