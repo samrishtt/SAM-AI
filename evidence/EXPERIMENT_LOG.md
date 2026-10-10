@@ -32,4 +32,19 @@
   - The claim that concurrency was the "sole cause" is retracted.
   - This result is strictly an infrastructure reproduction of Daniel Franzen's Milestone 2 solver, NOT an evaluation of SAM-AI's sovereign reasoning system.
 
+---
+
+## Experiment 2: Pre-Registered SAM-AI Verification & Failure Memory Ablation
+* **Experiment ID:** `EXP-SAM-01-SCAFFOLDING-EVAL`
+* **Status:** `NOT_RUN (PROPOSED PRE-REGISTERED EXPERIMENT — PENDING USER APPROVAL)`
+* **Specification File:** `research/EXP_SAM_01_SCAFFOLDING_EVAL.md`
+* **Target System:** SAM-AI Sovereign Agent (`sam_ai.agent.arc3_agent.SAMARC3Agent`)
+* **Hardware Required:** GPU Host with mounted model weights (NVIDIA L4 / RTX Pro 6000) or local CPU if quant available.
+* **Control Arm (Arm A):** Base foundation model in minimal action loop with strict schema parsing (`verification_guard=False`, `failure_memory=False`).
+* **Treatment Arm (Arm B):** Base foundation model with SAM-AI pre-execution verification guard (`verification_guard=True`) and dynamic failure memory (`failure_memory=True`).
+* **Primary Metric:** Action Efficiency (levels completed per action spent across 30 episodes, single-pass $N=1$).
+* **Pre-Registered Success Criterion:** $\ge 30\%$ reduction in zero-delta moves ($p < 0.05$) and zero repeat fatal moves, without degrading single-pass completion rate.
+* **Current Blocker:** Real model weights missing locally; execution locked awaiting user review and approval.
+
+
 
