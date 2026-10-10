@@ -12,10 +12,16 @@ Rules:
 - Verification status strictly in {PASS, FAIL, NOT_RUN, ERROR, TIMEOUT}
 - Never claims heuristics are "learned"
 - All token usage, latencies, and candidate traces are faithfully tracked
+- Evaluation integrity: by default a strategy NEVER consults the grader to choose or stop.
+  The grader (verifier + ground truth) scores only the final selected candidate, so the
+  PASS rate is a real accuracy. With oracle=True the grader's verdict selects/stops, and the
+  result is labeled selection_mode="oracle_pass_at_n" (pass@N upper bound, not accuracy).
+- Model-facing feedback uses VerificationResult.public_details only; never reference answers.
 """
 
+import re
 import time
-import copy
+from collections import Counter
 from typing import Dict, Any, List, Optional
 
 from sam_ai.substrate.interfaces import (
@@ -27,6 +33,31 @@ from sam_ai.substrate.interfaces import (
     VerificationResult,
     VerificationStatus,
 )
+
+
+ORACLE_MODE = "oracle_pass_at_n"
+UNSUPERVISED_MODE = "unsupervised"
+
+
+def normalize_answer(text: Any) -> str:
+    """Canonical form used for self-consistency voting (no grader involved)."""
+    t = str(text).strip()
+    m = re.search(r"\\boxed\{([^{}]*)\}", t)
+    if m:
+        t = m.group(1)
+    m = re.search(r"<answer>(.*?)</answer>", t, re.DOTALL)
+    if m:
+        t = m.group(1)
+    return re.sub(r"\s+", "", t).lower()
+
+
+def majority_vote(candidates: List[str], prefer_last_on_tie: bool = False) -> int:
+    """Index of the candidate whose normalized answer is most frequent (grader-free)."""
+    keys = [normalize_answer(c) for c in candidates]
+    counts = Counter(keys)
+    top = max(counts.values())
+    idxs = [i for i, k in enumerate(keys) if counts[k] == top]
+    return idxs[-1] if prefer_last_on_tie else idxs[0]
 
 
 class DirectStrategy(ReasoningStrategy):
@@ -82,16 +113,21 @@ class DirectStrategy(ReasoningStrategy):
 
 class BestOfNStrategy(ReasoningStrategy):
     """
-    Best-of-N reasoning: Generates N diverse candidate solutions, evaluates
-    each against the verifier, and selects the first PASS or highest confidence candidate.
+    Best-of-N reasoning: samples N candidates.
+
+    oracle=False (default): picks the self-consistency (majority-vote) answer, then the
+        grader scores that single selection. PASS rate == accuracy.
+    oracle=True: stops at / selects the first candidate the grader marks PASS. This is
+        pass@N with an answer key in the loop; results are labeled "oracle_pass_at_n".
     """
 
-    def __init__(self, temperature: float = 0.7):
+    def __init__(self, temperature: float = 0.7, oracle: bool = False):
         self.temperature = temperature
+        self.oracle = oracle
 
     @property
     def name(self) -> str:
-        return "best_of_n"
+        return "best_of_n_oracle" if self.oracle else "best_of_n"
 
     def execute(
         self,
@@ -104,52 +140,49 @@ class BestOfNStrategy(ReasoningStrategy):
 
         n = max(1, search_budget)
         candidates: List[str] = []
-        verifications: List[VerificationResult] = []
         total_tokens = 0
-        trace = []
+        trace: List[Dict[str, Any]] = []
 
         best_candidate = None
         best_verification = VerificationResult(status=VerificationStatus.NOT_RUN, confidence=-1.0)
 
         for i in range(n):
             temp = 0.0 if i == 0 else self.temperature
-            model_out = model.generate(
-                prompt=task.prompt,
-                temperature=temp,
-                max_tokens=2048,
-            )
+            model_out = model.generate(prompt=task.prompt, temperature=temp, max_tokens=2048)
             total_tokens += (model_out.prompt_tokens + model_out.completion_tokens)
-
             cand = model_out.text.strip()
-            v_res = verifier.verify(
-                candidate=cand,
-                ground_truth=task.ground_truth,
-                context=task.metadata,
-            )
-
             candidates.append(cand)
-            verifications.append(v_res)
+
+            if not self.oracle:
+                trace.append({"iteration": i + 1, "candidate": cand})
+                continue
+
+            v_res = verifier.verify(candidate=cand, ground_truth=task.ground_truth, context=task.metadata)
             trace.append({
-                "iteration": i + 1,
-                "candidate": cand,
-                "status": v_res.status.value,
-                "confidence": v_res.confidence,
-                "details": v_res.details,
+                "iteration": i + 1, "candidate": cand,
+                "status": v_res.status.value, "confidence": v_res.confidence, "details": v_res.details,
             })
-
-            # Check if this candidate is superior
             if v_res.status == VerificationStatus.PASS:
-                best_candidate = cand
-                best_verification = v_res
-                # Early stop on verified pass
+                best_candidate, best_verification = cand, v_res
                 break
-            elif v_res.confidence > best_verification.confidence:
-                best_candidate = cand
-                best_verification = v_res
+            if v_res.confidence > best_verification.confidence:
+                best_candidate, best_verification = cand, v_res
 
-        if best_candidate is None and candidates:
+        if not self.oracle:
+            idx = majority_vote(candidates)
+            best_candidate = candidates[idx]
+            best_verification = verifier.verify(
+                candidate=best_candidate, ground_truth=task.ground_truth, context=task.metadata)
+            trace.append({
+                "selected_index": idx + 1,
+                "selection": "majority_vote",
+                "status": best_verification.status.value,
+                "details": best_verification.details,
+            })
+        elif best_candidate is None and candidates:
             best_candidate = candidates[0]
-            best_verification = verifications[0]
+            best_verification = verifier.verify(
+                candidate=best_candidate, ground_truth=task.ground_truth, context=task.metadata)
 
         latency_ms = (time.perf_counter() - start_time) * 1000.0
 
@@ -162,18 +195,29 @@ class BestOfNStrategy(ReasoningStrategy):
             total_tokens=total_tokens,
             latency_ms=latency_ms,
             trace=trace,
+            selection_mode=ORACLE_MODE if self.oracle else UNSUPERVISED_MODE,
         )
 
 
 class SearchStrategy(ReasoningStrategy):
     """
-    Search-based reasoning: Explores candidate refinements sequentially,
-    evaluating verification feedback to guide search branches.
+    Sequential refinement search.
+
+    oracle=False (default): self-refinement. Each round shows the model its own previous
+        attempt and asks it to re-check; no grader signal is used. The final answer is the
+        majority answer across rounds (ties -> latest). PASS rate == accuracy.
+    oracle=True: verifier-in-the-loop. Each round feeds back VerificationResult.public_details
+        (never reference answers) and stops at the first PASS. Valid as an agent loop when a
+        verifier exists at inference time (e.g. visible tests); NOT valid as held-out accuracy,
+        so it is labeled "oracle_pass_at_n".
     """
+
+    def __init__(self, oracle: bool = False):
+        self.oracle = oracle
 
     @property
     def name(self) -> str:
-        return "search"
+        return "search_oracle" if self.oracle else "search"
 
     def execute(
         self,
@@ -185,10 +229,9 @@ class SearchStrategy(ReasoningStrategy):
         start_time = time.perf_counter()
 
         total_tokens = 0
-        trace = []
-        candidates = []
+        trace: List[Dict[str, Any]] = []
+        candidates: List[str] = []
 
-        # Step 1: Initial hypothesis
         current_prompt = task.prompt
         best_candidate = None
         best_v = VerificationResult(status=VerificationStatus.NOT_RUN, confidence=-1.0)
@@ -196,36 +239,44 @@ class SearchStrategy(ReasoningStrategy):
         for depth in range(max(1, search_budget)):
             m_out = model.generate(prompt=current_prompt, temperature=0.2 * depth, max_tokens=2048)
             total_tokens += (m_out.prompt_tokens + m_out.completion_tokens)
-
             cand = m_out.text.strip()
             candidates.append(cand)
 
+            if not self.oracle:
+                trace.append({"depth": depth + 1, "candidate": cand})
+                current_prompt = (
+                    f"{task.prompt}\n\n"
+                    f"[Previous Attempt {depth + 1}]:\n{cand}\n"
+                    f"Re-check this attempt step by step and give your final answer."
+                )
+                continue
+
             v = verifier.verify(candidate=cand, ground_truth=task.ground_truth, context=task.metadata)
             trace.append({
-                "depth": depth + 1,
-                "candidate": cand,
-                "status": v.status.value,
-                "confidence": v.confidence,
-                "details": v.details,
+                "depth": depth + 1, "candidate": cand,
+                "status": v.status.value, "confidence": v.confidence, "details": v.details,
             })
-
             if v.status == VerificationStatus.PASS:
-                best_candidate = cand
-                best_v = v
+                best_candidate, best_v = cand, v
                 break
-            elif v.confidence > best_v.confidence:
-                best_candidate = cand
-                best_v = v
-
-            # Refinement prompt feeding back verifier failure detail
+            if v.confidence > best_v.confidence:
+                best_candidate, best_v = cand, v
             current_prompt = (
                 f"{task.prompt}\n\n"
                 f"[Previous Attempt {depth + 1}]:\n{cand}\n"
-                f"[Verifier Feedback]:\n{v.details}\n"
+                f"[Verifier Feedback]:\n{v.public_details or 'The previous attempt was incorrect.'}\n"
                 f"Please correct the error and provide the updated solution."
             )
 
-        if best_candidate is None and candidates:
+        if not self.oracle:
+            idx = majority_vote(candidates, prefer_last_on_tie=True)
+            best_candidate = candidates[idx]
+            best_v = verifier.verify(candidate=best_candidate, ground_truth=task.ground_truth, context=task.metadata)
+            trace.append({
+                "selected_index": idx + 1, "selection": "majority_vote_latest_on_tie",
+                "status": best_v.status.value, "details": best_v.details,
+            })
+        elif best_candidate is None and candidates:
             best_candidate = candidates[0]
             best_v = verifier.verify(candidate=best_candidate, ground_truth=task.ground_truth, context=task.metadata)
 
@@ -240,6 +291,7 @@ class SearchStrategy(ReasoningStrategy):
             total_tokens=total_tokens,
             latency_ms=latency_ms,
             trace=trace,
+            selection_mode=ORACLE_MODE if self.oracle else UNSUPERVISED_MODE,
         )
 
 

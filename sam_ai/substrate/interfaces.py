@@ -100,6 +100,10 @@ class VerificationResult:
     confidence: float = 0.0
     details: str = ""
     error_trace: Optional[str] = None
+    # Feedback that is safe to show the model under evaluation. It must never contain
+    # reference answers, expected cell values, or hidden test source. `details` is for
+    # human logs only and may contain such values.
+    public_details: str = ""
 
 
 class Verifier(ABC):
@@ -133,6 +137,10 @@ class StrategyResult:
     total_tokens: int = 0
     latency_ms: float = 0.0
     trace: List[Dict[str, Any]] = field(default_factory=list)
+    # "unsupervised": candidate chosen without consulting the grader (valid accuracy).
+    # "oracle_pass_at_n": candidate chosen/stopped using the grader's verdict, so the
+    #   reported PASS rate is pass@N (an upper bound), NOT accuracy.
+    selection_mode: str = "unsupervised"
 
 
 class ReasoningStrategy(ABC):

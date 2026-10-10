@@ -166,11 +166,12 @@ class TestSubstrateEngineAndMemory(unittest.TestCase):
         engine = CognitiveEngine(model=model, failure_memory=self.memory)
 
         task = BenchmarkTask(task_id="bon-1", domain="math", prompt="What is the answer?", ground_truth="42")
-        # With Best-of-N budget 2, it should find 42 on attempt 2 and pass
-        strat = BestOfNStrategy()
+        # oracle=True: the grader picks the winner, so this is pass@2 (labeled oracle), not accuracy.
+        strat = BestOfNStrategy(oracle=True)
         rec = engine.solve(task, strategy=strat, search_budget=2)
         self.assertEqual(rec.verification.status, VerificationStatus.PASS)
         self.assertEqual(rec.selected_candidate, "42")
+        self.assertEqual(rec.selection_mode, "oracle_pass_at_n")
 
     def test_evaluator_suite_run(self):
         resp_map = {
