@@ -30,7 +30,7 @@ metadata = {
     ],
     "kernel_sources": [],
     "model_sources": [
-        "gowillgo/unsloth-deepseek-r1-distill-qwen-14b-bnb-4bit/transformers/v1"
+        "gowillgo/unsloth-deepseek-r1-distill-qwen-14b-bnb-4bit/transformers/v1/1"
     ]
 }
 
