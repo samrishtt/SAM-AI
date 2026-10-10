@@ -10,7 +10,8 @@
 | :-: | :--- | :---: | :--- | :--- |
 | **1** | **Raw submissions output & score table in `evidence/`** | **COMPLETE** | `evidence/arc_agi_3_submissions_raw.txt`<br>`evidence/SCORE_RECORD.md` | Keep updated with any new approved submission. |
 | **2** | **Run-to-run variance for chosen baseline measured & recorded** | **COMPLETE** | Measured on B2 ($N=4$ passes, 10 games): Official Best-of-4 = **70.89**, All-Pass Mean = **57.00**, Per-game $\sigma = 12.33$ ($CV = 0.22$). | Baseline variance characterized; ready for ablation comparisons. |
-| **3** | **Every experiment recorded as KEEP/REJECT with raw logs** | **IN PROGRESS** | `evidence/EXPERIMENT_LOG.md`<br>Exp 1 (`EXP-01-CONCURRENCY-ALIGNMENT`): **KEEP** (70.89, 0 timeouts). | Proceed with approved sequence: Exp 5 (Frame Differencing). |
+| **3** | **Every experiment recorded as KEEP/REJECT with raw logs** | **IN PROGRESS** | `evidence/EXPERIMENT_LOG.md`<br>Exp 1: **PROVISIONAL** (reproduction only; audit report: `research/arc3_score_discrepancy_audit.md`). | HARD LOCK ACTIVE: Awaiting user review of audit and proposed SAM-AI experiment. |
+
 | **4** | **Final candidate release folder (hashes, config, license, run script)** | **READY (AUTOMATED)** | `scripts/package_frozen_candidate.py` built.<br>Target: `export/arc3_frozen_candidate/`. | Package final winning candidate once freeze criteria are met. |
 | **5** | **NEEDS USER list complete** | **ACTIVE** | Documented below. Zero unauthorized actions. | Maintain hard-stop boundary on credentials, rules, submits, spending. |
 
