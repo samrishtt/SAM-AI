@@ -263,15 +263,23 @@ class SAMARC3Agent:
             state_before = struct_obs.state
             act_name = step_res.executed_action
 
-            # Convert action string to environment action if needed
+            # Convert action string to environment action (GameAction enum) if needed
             env_action = act_name
-            if hasattr(env, "action_space") and hasattr(env.action_space, "__getitem__"):
-                pass  # String or enum passed directly
+            try:
+                import arcengine.enums
+                if hasattr(arcengine.enums, "GameAction") and act_name in arcengine.enums.GameAction.__members__:
+                    env_action = arcengine.enums.GameAction[act_name]
+            except Exception:
+                pass
 
             try:
-                # Official EnvironmentWrapper.step takes (action, data=..., reasoning=...)
+                # Official EnvironmentWrapper.step takes (action: GameAction, data=..., reasoning=...)
                 if hasattr(env, "step"):
-                    raw_next_obs = env.step(act_name, data=step_res.executed_data)
+                    try:
+                        raw_next_obs = env.step(env_action, data=step_res.executed_data)
+                    except Exception:
+                        # Fallback for mock environments that only accept string
+                        raw_next_obs = env.step(act_name, data=step_res.executed_data)
                 else:
                     raw_next_obs = None
             except Exception as e:

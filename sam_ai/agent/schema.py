@@ -191,3 +191,8 @@ class ActionParser:
             is_valid=True,
             validation_error=None,
         )
+
+
+# Alias for backward compatibility
+ActionSchemaParser = ActionParser
+

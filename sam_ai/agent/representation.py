@@ -163,3 +163,8 @@ class ObservationConverter:
             changed_pixels=changed_pixels,
             changed_coords=changed_coords,
         )
+
+
+# Alias for backward compatibility
+ArcObservationFormatter = ObservationConverter
+

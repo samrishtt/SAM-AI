@@ -1,9 +1,9 @@
 {
-  "evaluation_timestamp": 1791648875.727278,
+  "evaluation_timestamp": 1791651249.6775305,
   "run_type": "TEST_ONLY",
   "is_real_model": false,
   "model_name": "deterministic-mock-runner-v1",
-  "git_commit": "3429263ef004bc3a94ec926676056e758549cdfd",
+  "git_commit": "6d580695a58df80145f74154d4bd841d911dbead",
   "config_hash": "42cfb117a05ee82e",
   "total_games": 2,
   "n_passes": 2,

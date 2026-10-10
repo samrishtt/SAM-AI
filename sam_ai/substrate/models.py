@@ -228,7 +228,13 @@ class HuggingFaceModelRunner(ModelRunner):
         self.AutoTokenizer = AutoTokenizer
         self.AutoModelForCausalLM = AutoModelForCausalLM
 
-        self.torch_dtype = torch_dtype or (torch.bfloat16 if torch.cuda.is_bf16_supported() else torch.float16)
+        if torch_dtype is not None:
+            self.torch_dtype = torch_dtype
+        elif torch.cuda.is_available() and torch.cuda.is_bf16_supported():
+            self.torch_dtype = torch.bfloat16
+        else:
+            self.torch_dtype = torch.float32 if not torch.cuda.is_available() else torch.float16
+
         self.model = None
         self.tokenizer = None
         self._is_loaded = False
@@ -243,6 +249,11 @@ class HuggingFaceModelRunner(ModelRunner):
         """Loads base model and optional LoRA adapter into memory."""
         if self._is_loaded:
             return
+
+        if self.local_files_only and not os.path.exists(self._model_name):
+            raise FileNotFoundError(
+                f"Model path '{self._model_name}' does not exist on local filesystem."
+            )
 
         start_time = time.perf_counter()
         print(f"[*] Loading tokenizer: {self._model_name}...")
