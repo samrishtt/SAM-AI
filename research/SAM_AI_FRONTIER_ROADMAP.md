@@ -324,28 +324,55 @@ To scale beyond 14B parameters toward frontier reasoning, SAM-AI requires:
 
 ---
 
+---
+
 ## Summary Protocol & Current Milestone Status
 
-### Precise Current Status Audit (October 10, 2026)
+### Precise Current Status Audit (October 11, 2026)
 * **Agent Code & Test Plumbing:** **IMPLEMENTED** (in `sam_ai/agent/` and `sam_ai/substrate/`).
 * **Unit Tests:** **15/15 PASSED** (offline smoke tests in `tests/test_sam_ai_arc3_agent.py`, strictly stamped `TEST_ONLY`).
-* **Real 14B Model Execution:** **BLOCKED** until model weight files and a CUDA GPU runtime are available.
-* **Adapter Evaluation:** **BLOCKED** until verified non-empty weights are loaded. (Forensics: `sam_ai_v4_trained/checkpoint-25` is verified non-empty at 137.7 MB; `checkpoint-50` is 0 bytes and unusable).
-* **Official ARC-3 Execution:** **BLOCKED LOCALLY** until official environment files (`metadata.json`) are mounted in the execution environment (e.g. via Kaggle input).
-* **Real Capability Improvement:** **NOT YET DEMONSTRATED**. (Passing unit tests verifies plumbing only; real intelligence gains have not yet been evaluated).
+* **Remote Hardware Allocation:** **VERIFIED LIVE** (NVIDIA RTX PRO 6000 Blackwell Server Edition, 94.97 GB VRAM, 94.43 GB free in Run 2).
+* **Remote Model & Wheel Resolution:** **VERIFIED LIVE** (`DeepSeek-R1-Distill-Qwen-14B-bnb-4bit` safetensors located; `arc-agi` & `arcengine` installed offline).
+* **Real 14B Model Execution:** **BLOCKED IN PRECONDITION GATE** (Dataset mount `/kaggle/input/datasets/...` and competition mount `/kaggle/input/competitions/...` path resolution required).
+* **Existing Adapter Status:** **AUDITED / UNVALIDATED** (`checkpoint-25` is structurally compatible with 14B base, but received only 25 steps / 2.08% of 1 epoch with 85% completion clipping).
+* **Real Capability Improvement:** **NOT YET DEMONSTRATED**. (Real intelligence gains have not yet been evaluated).
+
+### Training & Fine-Tuning Backlog
+
+```
++----------------------------------------------------------------------------------------------------+
+|                                    SAM-AI TRAINING EXPERIMENT BACKLOG                              |
++----------------------------------------------------------------------------------------------------+
+|  Priority 1: EXP-SAM-EVAL-01 (Controlled Base vs. Checkpoint-25 Evaluation) [NOT_RUN]             |
+|  - Objective: Controlled comparison (Arm A: 14B Base vs Arm B: 14B Base + ckpt-25).               |
+|  - Prerequisites: Smoke test path resolution fix verified live. Zero GPU quota burn.               |
+|  - Keep/Reject Gate: If ckpt-25 does not outperform base on formatting or accuracy, discard.      |
+|                                                                                                    |
+|  Priority 2: EXP-SAM-FT-01 (Supervised Grounded Observation-Action SFT) [NOT_RUN]                  |
+|  - Objective: LoRA SFT on 2,000 verified observation-action pairs to eliminate syntax errors.       |
+|  - Prerequisites: Evidence of baseline 14B parse failure; verified Apache 2.0 curriculum.         |
+|  - Compute Budget: 1x RTX Pro 6000, ~0.75 GPU-hours, ~18.5 GB VRAM.                                |
+|  - Keep/Reject Gate: Parse rate >= 98%, MATH-500 regression < 1.5%.                                |
+|                                                                                                    |
+|  Priority 3: EXP-SAM-RL-01 (Inductive Reasoning RLVR via GRPO) [ROADMAP SPECIFICATION]           |
+|  - Objective: Reinforcement learning with rule-based verifiers for multi-turn spatial search.      |
+|  - Prerequisites: SFT baseline established; reward shaping verified free of reward hacking.        |
+|  - Compute Budget: 1x RTX Pro 6000, ~4.0 GPU-hours, group size G=4, max len 2048.                 |
++----------------------------------------------------------------------------------------------------+
+```
 
 ### Milestone Phasing Matrix
 
 | Milestone | Focus | Stage | Current Status |
 |---|---|---|---|
-| **M1: Execution & Evaluation** | Truthful Telemetry & Provenance | **PLUMBING READY / REAL MODEL BLOCKED** | Plumbing & `HuggingFaceModelRunner` implemented. Real-model execution BLOCKED awaiting GPU and weight files. |
-| **M2: Reasoning & Verification** | Single-Variable Verification Guard | **PRE-REGISTERED / NOT_RUN** | Single-variable specification (`EXP-SAM-01`) pre-registered. NOT RUN pending user approval. |
-| **M3: Learning from Failures** | Failure Memory & Synthetic GRPO | **ROADMAP SPECIFICATION** | Failure Memory (Arm C / EXP-SAM-02) deferred until M2 is evaluated. |
+| **M1: Execution & Evaluation** | Truthful Telemetry & Hardware Parity | **HARDWARE CONFIRMED / PATH FIX PENDING** | RTX Pro 6000 verified live (95GB VRAM). Static audit caught path mismatch. 0 fake steps run. |
+| **M2: Reasoning & Verification** | Single-Variable Verification Guard | **PRE-REGISTERED / NOT_RUN** | Single-variable specification (`EXP-SAM-01`) pre-registered. NOT RUN pending M1 completion. |
+| **M3: Learning from Failures** | Failure Memory & SFT/GRPO Post-Training | **BACKLOG FORMALIZED / NOT_RUN** | `EXP-SAM-FT-01` specified. NOT RUN pending user approval. |
 | **M4: Memory & World Tracking** | Provenance Graphs & State Maps | **ROADMAP SPECIFICATION** | Non-active research track. |
 | **M5: Tool-Using Agents** | Sandboxed REPL & Spatial Tools | **ROADMAP SPECIFICATION** | Non-active research track. |
 | **M6: Broader Generalization** | Math, Code, Science Transfers | **ROADMAP SPECIFICATION** | Non-active research track. |
 | **M7: Multimodal Grounding** | Vision Encoders + Symbolic Dual | **ROADMAP SPECIFICATION** | Non-active research track. |
 | **M8: Frontier Scaling** | MLA, MoE, Cluster Training | **LONG-TERM VISION** | Non-active research track. |
 
-> **Directive:** Passing offline plumbing tests does NOT constitute a completed real-model evaluation. All execution remains strictly locked. No GPU quota consumption, Kaggle submission, or automated code execution will occur without explicit, written user authorization.
+> **Directive:** All training and remote execution remain strictly locked. No GPU quota consumption, Kaggle submission, or automated model training will occur without explicit, written user authorization.
 
