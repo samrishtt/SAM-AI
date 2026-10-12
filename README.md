@@ -168,3 +168,5 @@ Add to your OpenCode or Claude Desktop `mcpServers` configuration:
 ## 📜 License & Attribution
 Distributed under the **Apache-2.0 License**. Free for commercial and research use.  
 Built by Parallax Intelligence Lab (Founder: Samrish).
+
+> **Third-Party Code Notice:** `baselines/` and `notebooks/` contain third-party code under its original terms and that those terms are not yet verified, so the repository's Apache-2.0 declaration does not cover them.

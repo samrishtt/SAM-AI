@@ -3,6 +3,8 @@
 Registry of all third-party code, datasets, models, tools, and ideas reused in SAM-AI / ARC-AGI-3.
 Per workspace rule 6, third-party work must be credited with exact license and attribution in all docs and research papers.
 
+> **Third-Party Code Notice:** `baselines/` and `notebooks/` contain third-party code under its original terms and that those terms are not yet verified, so the repository's Apache-2.0 declaration does not cover them.
+
 ---
 
 ## 1. Pennyroyal Wheelhouse
