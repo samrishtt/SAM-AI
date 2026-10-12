@@ -54,6 +54,7 @@ class DeterministicModelRunner(ModelRunner):
         temperature: float = 0.0,
         max_tokens: int = 2048,
         stop: Optional[List[str]] = None,
+        **kwargs: Any,
     ) -> ModelOutput:
         start_time = time.perf_counter()
 
@@ -334,9 +335,16 @@ class HuggingFaceModelRunner(ModelRunner):
         temperature: float = 0.0,
         max_tokens: int = 2048,
         stop: Optional[List[str]] = None,
+        top_p: float = 0.95,
+        seed: Optional[int] = None,
+        assistant_prefix: Optional[str] = "<think>\n",
+        **kwargs: Any,
     ) -> ModelOutput:
         if not self._is_loaded:
             self.load_model()
+
+        if seed is not None:
+            self.torch.manual_seed(seed)
 
         start_time = time.perf_counter()
 
@@ -354,6 +362,9 @@ class HuggingFaceModelRunner(ModelRunner):
             sys_part = f"System: {system_prompt}\n\n" if system_prompt else ""
             formatted_prompt = f"{sys_part}User: {prompt}\n\nAssistant:"
 
+        if assistant_prefix:
+            formatted_prompt = formatted_prompt + assistant_prefix
+
         inputs = self.tokenizer(formatted_prompt, return_tensors="pt")
         prompt_tokens = inputs["input_ids"].shape[1]
 
@@ -368,7 +379,7 @@ class HuggingFaceModelRunner(ModelRunner):
         if temperature > 0.0:
             gen_kwargs["do_sample"] = True
             gen_kwargs["temperature"] = temperature
-            gen_kwargs["top_p"] = 0.95
+            gen_kwargs["top_p"] = top_p
         else:
             gen_kwargs["do_sample"] = False
 

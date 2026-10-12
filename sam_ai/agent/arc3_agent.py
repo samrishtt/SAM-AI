@@ -19,6 +19,7 @@ from sam_ai.substrate.interfaces import (
 from sam_ai.agent.schema import ActionParser, ParsedAction, AllowedAction
 from sam_ai.agent.representation import ObservationConverter, StructuredObservation
 from sam_ai.agent.memory import TaskFailureMemory, TransitionRecord
+from sam_ai.agent.telemetry import CallTelemetry
 
 
 @dataclass
@@ -33,6 +34,7 @@ class AgentStepResult:
     model_output: ModelOutput
     transition: Optional[TransitionRecord] = None
     latency_ms: float = 0.0
+    telemetry: Optional[CallTelemetry] = None
 
 
 @dataclass
@@ -92,12 +94,24 @@ class SAMARC3Agent:
         enable_failure_memory: bool = True,
         max_action_retries: int = 1,
         is_real_model: bool = False,
+        temperature: float = 0.0,
+        top_p: float = 0.95,
+        seed: Optional[int] = 42,
+        max_tokens: int = 3072,
+        use_system_prompt: bool = True,
+        stop_on_parse_failure: bool = False,
     ):
         self.model = model_runner
         self.enable_verification_guard = enable_verification_guard
         self.enable_failure_memory = enable_failure_memory
         self.max_action_retries = max_action_retries
         self.is_real_model = is_real_model
+        self.temperature = temperature
+        self.top_p = top_p
+        self.seed = seed
+        self.max_tokens = max_tokens
+        self.use_system_prompt = use_system_prompt
+        self.stop_on_parse_failure = stop_on_parse_failure
         self.memory = TaskFailureMemory()
 
     def build_step_prompt(self, obs: StructuredObservation) -> str:
@@ -143,6 +157,14 @@ class SAMARC3Agent:
                 plan="Reset level to recover.",
                 is_valid=True,
             )
+            telemetry = CallTelemetry.create(
+                prompt_tokens=0,
+                completion_tokens=0,
+                model_text='{"action": "RESET"}',
+                parse_valid=True,
+                latency_ms=0.0,
+                seed=self.seed,
+            )
             return AgentStepResult(
                 step_idx=step_idx,
                 parsed_action=parsed,
@@ -152,14 +174,23 @@ class SAMARC3Agent:
                 verification_error=None,
                 model_output=ModelOutput(text='{"action": "RESET"}', latency_ms=0.0),
                 latency_ms=(time.perf_counter() - start_time) * 1000.0,
+                telemetry=telemetry,
             )
 
-        prompt = self.build_step_prompt(obs)
+        step_prompt_text = self.build_step_prompt(obs)
+        if self.use_system_prompt:
+            prompt = step_prompt_text
+            sys_prompt = self.SYSTEM_PROMPT
+        else:
+            # P1c: No system prompt: put instructions in the user turn
+            prompt = f"{self.SYSTEM_PROMPT}\n\n{step_prompt_text}"
+            sys_prompt = None
+
         model_out = self.model.generate(
             prompt=prompt,
-            system_prompt=self.SYSTEM_PROMPT,
-            temperature=0.0,
-            max_tokens=512,
+            system_prompt=sys_prompt,
+            temperature=self.temperature,
+            max_tokens=self.max_tokens,
         )
 
         parsed = ActionParser.parse_and_validate(
@@ -171,8 +202,8 @@ class SAMARC3Agent:
         v_status = VerificationStatus.PASS if parsed.is_valid else VerificationStatus.FAIL
         v_error = parsed.validation_error
 
-        # If invalid and retries are allowed, attempt one corrective query
-        if not parsed.is_valid and self.max_action_retries > 0:
+        # If invalid and stop_on_parse_failure is False and retries are allowed, attempt one corrective query
+        if not parsed.is_valid and not self.stop_on_parse_failure and self.max_action_retries > 0:
             correction_prompt = (
                 f"{prompt}\n\n"
                 f"[REJECTION NOTICE]: Your previous action was rejected with error:\n"
@@ -181,9 +212,9 @@ class SAMARC3Agent:
             )
             model_out_retry = self.model.generate(
                 prompt=correction_prompt,
-                system_prompt=self.SYSTEM_PROMPT,
+                system_prompt=sys_prompt,
                 temperature=0.1,
-                max_tokens=512,
+                max_tokens=self.max_tokens,
             )
             retry_parsed = ActionParser.parse_and_validate(
                 model_text=model_out_retry.text,
@@ -197,15 +228,33 @@ class SAMARC3Agent:
                 v_error = None
 
         # Execute decision
-        if self.enable_verification_guard and not parsed.is_valid:
-            # Rejection guard: Fallback to RESET or safe action
-            executed_action = "RESET"
-            executed_data = {}
+        if not parsed.is_valid:
+            if self.stop_on_parse_failure:
+                # P1c: If an action cannot be parsed, record parse_failed and stop the episode.
+                executed_action = "parse_failed"
+                executed_data = {}
+            elif self.enable_verification_guard:
+                # Rejection guard: Fallback to RESET or safe action
+                executed_action = "RESET"
+                executed_data = {}
+            else:
+                executed_action = "RESET"
+                executed_data = {}
         else:
             executed_action = parsed.action if parsed.action != "UNKNOWN" else "RESET"
             executed_data = parsed.data
 
         latency = (time.perf_counter() - start_time) * 1000.0
+
+        telemetry = CallTelemetry.create(
+            prompt_tokens=model_out.prompt_tokens,
+            completion_tokens=model_out.completion_tokens,
+            model_text=model_out.text,
+            parse_valid=parsed.is_valid,
+            latency_ms=model_out.latency_ms or latency,
+            seed=self.seed,
+        )
+
         return AgentStepResult(
             step_idx=step_idx,
             parsed_action=parsed,
@@ -215,6 +264,7 @@ class SAMARC3Agent:
             verification_error=v_error,
             model_output=model_out,
             latency_ms=latency,
+            telemetry=telemetry,
         )
 
     def run_session(
@@ -258,6 +308,13 @@ class SAMARC3Agent:
 
             if step_res.verification_status != VerificationStatus.PASS:
                 verification_failures += 1
+
+            # P1c: If an action cannot be parsed, stop the episode without fallback
+            if step_res.executed_action == "parse_failed":
+                history.append(step_res)
+                if step_callback:
+                    step_callback(step_res)
+                break
 
             # 2. Execute permitted action through environment
             state_before = struct_obs.state
