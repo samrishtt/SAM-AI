@@ -339,27 +339,22 @@ To scale beyond 14B parameters toward frontier reasoning, SAM-AI requires:
 
 ### Training & Fine-Tuning Backlog
 
+> **Status:** All items `NOT_RUN`. Governed by [`research/SAM_AI_FINE_TUNING_PROPOSAL_v2.md`](file:///C:/Users/Sam%20Pavi/.gemini/antigravity/scratch/micro_agi_integrate_claude/research/SAM_AI_FINE_TUNING_PROPOSAL_v2.md) stage gates (§3) and runtime upgrade table (§6).
+> **Principle:** Measure first, then decide whether to train. Weights are trained only for a reasoning gap that survives runtime fixes (U1–U3).
+
 ```
 +----------------------------------------------------------------------------------------------------+
-|                                    SAM-AI TRAINING EXPERIMENT BACKLOG                              |
+|                                    SAM-AI STAGE GATES & TRAINING BACKLOG                           |
 +----------------------------------------------------------------------------------------------------+
-|  Priority 1: EXP-SAM-EVAL-01 (Controlled Base vs. Checkpoint-25 Evaluation) [NOT_RUN]             |
-|  - Objective: Controlled comparison (Arm A: 14B Base vs Arm B: 14B Base + ckpt-25).               |
-|  - Prerequisites: Smoke test path resolution fix verified live. Zero GPU quota burn.               |
-|  - Keep/Reject Gate: If ckpt-25 does not outperform base on formatting or accuracy, discard.      |
-|                                                                                                    |
-|  Priority 2: EXP-SAM-FT-01 (Supervised Grounded Observation-Action SFT) [NOT_RUN]                  |
-|  - Objective: LoRA SFT on 2,000 verified observation-action pairs to eliminate syntax errors.       |
-|  - Prerequisites: Evidence of baseline 14B parse failure; verified Apache 2.0 curriculum.         |
-|  - Compute Budget: 1x RTX Pro 6000, ~0.75 GPU-hours, ~18.5 GB VRAM.                                |
-|  - Keep/Reject Gate: Parse rate >= 98%, MATH-500 regression < 1.5%.                                |
-|                                                                                                    |
-|  Priority 3: EXP-SAM-RL-01 (Inductive Reasoning RLVR via GRPO) [ROADMAP SPECIFICATION]           |
-|  - Objective: Reinforcement learning with rule-based verifiers for multi-turn spatial search.      |
-|  - Prerequisites: SFT baseline established; reward shaping verified free of reward hacking.        |
-|  - Compute Budget: 1x RTX Pro 6000, ~4.0 GPU-hours, group size G=4, max len 2048.                 |
+|  Gate G0: Integration smoke (5 env steps, base only) -> proves load + generate. [NOT_RUN]          |
+|  Gate G1: E1 baseline characterisation (think-length, validity, throughput) [NOT_RUN]             |
+|  Gate G2: Runtime fixes U1/U2 applied & re-measured; evaluate surviving gap [NOT_RUN]              |
+|  Gate G3: EXP-SAM-EVAL-01: checkpoint-25 vs base controlled comparison (optional) [NOT_RUN]        |
+|  Gate G4: EXP-SAM-RFT-01: rejection-sampling fine-tune on verified successes [NOT_RUN]             |
 +----------------------------------------------------------------------------------------------------+
 ```
+
+See [`research/SAM_AI_FINE_TUNING_PROPOSAL_v2.md`](file:///C:/Users/Sam%20Pavi/.gemini/antigravity/scratch/micro_agi_integrate_claude/research/SAM_AI_FINE_TUNING_PROPOSAL_v2.md) for full protocol, pre-registered decision rules, and resource ceilings.
 
 ### Milestone Phasing Matrix
 

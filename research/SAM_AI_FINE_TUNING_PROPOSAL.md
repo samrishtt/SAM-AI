@@ -1,3 +1,5 @@
+SUPERSEDED by SAM_AI_FINE_TUNING_PROPOSAL_v2.md on 2026-10-12. Kept as a historical record.
+
 # SAM-AI Sovereign Fine-Tuning & Capability Proposal (EXP-SAM-FT-01)
 
 > **Document Status:** PROPOSAL / SPECIFICATION (Status: `NOT_RUN`)  
