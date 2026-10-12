@@ -134,6 +134,17 @@ def audit_bundle(tar_path: str = "dist/sam_ai_source_bundle.tar.gz"):
     if licenses_md.exists():
         print(f"    research/licenses.md exists.")
 
+    # Quarantined Benchmark Check (P1f)
+    print("\n[*] Quarantined Benchmark Files Check:")
+    quarantined_patterns = ["phd_evaluation_suite.py", "universal_benchmark_suite.py"]
+    quarantined_found = [f for f in file_list if any(qp in f for qp in quarantined_patterns)]
+    if quarantined_found:
+        print(f"    Found {len(quarantined_found)} quarantined benchmark file(s) in bundle manifest:")
+        for qf in quarantined_found:
+            print(f"      - {qf} (NOT A BENCHMARK: expected outputs hand-written; no model called)")
+    else:
+        print("    No quarantined benchmark files found in bundle manifest.")
+
     print("\n" + "=" * 80)
     passed = len(violations) == 0 and len(suspicious_files) == 0
     print(f"OVERALL SECURITY SCAN VERDICT: {'PASSED [CLEAN]' if passed else 'FAILED'}")

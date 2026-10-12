@@ -1,4 +1,7 @@
+# NOT A BENCHMARK: expected outputs are hand-written; no model is called.
 """Universal Frontier Benchmark & Multi-Domain Evaluation Suite for SAM-AI.
+
+WARNING: NOT A BENCHMARK: expected outputs are hand-written; no model is called.
 
 Unifies evaluation across all 8 frontier capability domains:
 1. SWE-bench Verified (Autonomous Repository Repair)
