@@ -100,28 +100,25 @@ def check_prerequisites(
     except ImportError:
         missing.append("PyTorch is not installed.")
 
-    # 2. Check Base Model
-    base_p = Path(base_model_path)
-    if not base_p.exists():
-        candidates = [
-            "/kaggle/input/unsloth-deepseek-r1-distill-qwen-14b-bnb-4bit/transformers/v1",
-            "/kaggle/input/models/gowillgo/unsloth-deepseek-r1-distill-qwen-14b-bnb-4bit/transformers/v1",
-            "/kaggle/input/unsloth-deepseek-r1-distill-qwen-14b-bnb-4bit",
-            "/kaggle/input/deepseek-r1-distill-qwen-14b-bnb-4bit",
-            "/kaggle/input/models/unsloth/deepseek-r1-distill-qwen-14b-bnb-4bit",
-        ]
-        found = False
-        for c in candidates:
-            if Path(c).exists():
-                base_model_path = c
-                found = True
-                break
-        if not found:
-            cache_check = Path(os.path.expanduser("~/.cache/huggingface/hub")) / f"models--{base_model_path.replace('/', '--')}"
-            if not cache_check.exists():
-                missing.append(f"Base model weights not found on disk at '{base_model_path}'.")
+    # 2. Path Discovery via content-based discover_inputs()
+    discovered_paths = None
+    input_dir_env = os.environ.get("KAGGLE_INPUT_PATH", "/kaggle/input")
+    if Path(input_dir_env).exists() or not Path(base_model_path).exists():
+        try:
+            from scripts.kaggle_path_discovery import discover_inputs
+            discovered_paths = discover_inputs(input_dir=input_dir_env)
+            if "sam_ai_parent" in discovered_paths:
+                parent_str = str(discovered_paths["sam_ai_parent"])
+                if parent_str not in sys.path:
+                    sys.path.insert(0, parent_str)
+            base_model_path = str(discovered_paths["base_model"])
+            target_env_dir = str(discovered_paths["environment_files"])
+        except Exception as e:
+            if not Path(base_model_path).exists():
+                missing.append(f"Content discovery failed: {e}")
+            target_env_dir = env_dir or os.environ.get("ENVIRONMENTS_DIR", "environment_files")
     else:
-        found = True
+        target_env_dir = env_dir or os.environ.get("ENVIRONMENTS_DIR", "environment_files")
 
     # 3. Check Adapter Compatibility & Size
     if adapter_path:
@@ -130,25 +127,18 @@ def check_prerequisites(
             missing.append(f"Adapter verification failed: {ad_msg}")
 
     # 4. Check ARC-3 Public Environment Data
-    target_env_dir = env_dir or os.environ.get(
-        "ENVIRONMENTS_DIR",
-        "/kaggle/input/arc-prize-2026-arc-agi-3/environment_files"
-    )
     env_p = Path(target_env_dir)
     if not env_p.exists() or not list(env_p.rglob("metadata.json")):
-        local_fallback = Path("environment_files")
-        if not local_fallback.exists() or not list(local_fallback.rglob("metadata.json")):
-            missing.append(
-                f"ARC-3 environment data not found at '{target_env_dir}' or 'environment_files/'."
-            )
-        else:
-            target_env_dir = str(local_fallback)
+        missing.append(
+            f"ARC-3 environment data not found at '{target_env_dir}'."
+        )
 
     return {
         "is_ready": len(missing) == 0,
         "missing": missing,
         "gpu_info": gpu_info,
         "target_env_dir": target_env_dir,
+        "base_model_path": base_model_path,
         "adapter_bytes": adapter_bytes,
     }
 
@@ -197,12 +187,24 @@ def run_smoke_test(
     )
     model_runner.load_model()
 
-    # 4. Initialize Agent (Arm B: Verification Guard ONLY, Failure Memory Disabled)
+    # Guard: fail if adapter was requested but did not attach
+    if adapter_path:
+        assert model_runner.is_adapter_loaded, "CRITICAL: Adapter was requested but failed to attach."
+    else:
+        assert not model_runner.is_adapter_loaded, "CRITICAL: Adapter must not be loaded in base-model evaluation."
+
+    # 4. Initialize Agent (Arm B: Verification Guard ONLY, Failure Memory Disabled, Smoke Sampling)
     agent = SAMARC3Agent(
         model_runner=model_runner,
         enable_verification_guard=True,
         enable_failure_memory=False, # Single-variable isolation
         is_real_model=True,
+        temperature=0.6,
+        top_p=0.95,
+        seed=42,
+        max_tokens=3072,
+        use_system_prompt=False,
+        stop_on_parse_failure=True,
     )
 
     # 5. Initialize Official ARC Environment via Arcade
@@ -250,7 +252,13 @@ def run_smoke_test(
         "success": summary.success,
         "verification_failures": summary.verification_failures,
         "elapsed_seconds": elapsed_time,
-        "action_history": summary.action_history,
+        "action_history": [
+            {"step": s.step_idx, "action": s.executed_action, "status": s.verification_status.value}
+            for s in summary.steps_history
+        ],
+        "steps_telemetry": [
+            step.telemetry.to_dict() for step in summary.steps_history if step.telemetry is not None
+        ],
     }
 
     with open(raw_jsonl_path, "a", encoding="utf-8") as f:
