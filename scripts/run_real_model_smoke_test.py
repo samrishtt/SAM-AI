@@ -201,19 +201,11 @@ def run_smoke_test(
     else:
         assert not model_runner.is_adapter_loaded, "CRITICAL: Adapter must not be loaded in base-model evaluation."
 
-    # 4. Initialize Agent (Arm B: Verification Guard ONLY, Failure Memory Disabled, Smoke Sampling)
-    agent = SAMARC3Agent(
-        model_runner=model_runner,
-        enable_verification_guard=True,
-        enable_failure_memory=False, # Single-variable isolation
-        is_real_model=True,
-        temperature=0.6,
-        top_p=0.95,
-        seed=42,
-        max_tokens=3072,
-        use_system_prompt=False,
-        stop_on_parse_failure=True,
-    )
+    # 4. Wall-Clock Limit & Two-Arm Execution Setup
+    start_kernel_time = time.perf_counter()
+    WALL_CLOCK_LIMIT_SECONDS = 1500.0  # 25 minutes
+    eval_type = "REAL_MODEL_ZERO_SHOT_BASE"
+    results = {}
 
     # 5. Initialize Official ARC Environment via Arcade
     from arc_agi import Arcade, OperationMode
@@ -232,56 +224,165 @@ def run_smoke_test(
     chosen_game = game_id or available_envs[0].game_id
     print(f"[*] Selected Smoke-Test Game: {chosen_game}")
 
-    env = arcade.make(game_id=chosen_game, seed=0)
-    if env is None:
-        print(f"[ERROR] arcade.make returned None for game '{chosen_game}'")
-        sys.exit(1)
+    # --- ARM A: Plain Decoding ---
+    print("\n" + "=" * 80)
+    print("STARTING ARM A: PLAIN DECODING (decode_mode='plain')")
+    print("=" * 80)
+    agent_a = SAMARC3Agent(
+        model_runner=model_runner,
+        enable_verification_guard=True,
+        enable_failure_memory=False,
+        is_real_model=True,
+        temperature=0.6,
+        top_p=0.95,
+        seed=42,
+        max_tokens=3072,
+        use_system_prompt=False,
+        stop_on_parse_failure=True,
+        decode_mode="plain",
+    )
+    env_a = arcade.make(game_id=chosen_game, seed=0)
+    if env_a is None:
+        raise RuntimeError(f"arcade.make returned None for game '{chosen_game}' (Arm A)")
 
-    # 6. Run Session with strict step budget
-    print(f"[*] Executing interactive session (max_steps={max_steps})...")
-    start_time = time.perf_counter()
-    summary = agent.run_session(env, game_id=chosen_game, max_steps=max_steps)
-    elapsed_time = time.perf_counter() - start_time
+    t0_a = time.perf_counter()
+    summary_a = agent_a.run_session(
+        env_a,
+        game_id=chosen_game,
+        max_steps=max_steps,
+        wall_clock_limit_seconds=WALL_CLOCK_LIMIT_SECONDS,
+        kernel_start_time=start_kernel_time,
+    )
+    elapsed_a = time.perf_counter() - t0_a
 
-    # 7. Record Telemetry
-    eval_type = "REAL_MODEL_WITH_ADAPTER" if adapter_path else "REAL_MODEL_ZERO_SHOT_BASE"
-    result_data = {
+    report_a = {
         "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "arm": "Arm A (plain)",
+        "decode_mode": "plain",
         "game_id": chosen_game,
         "evaluation_type": eval_type,
         "is_real_model": True,
-        "adapter_loaded": bool(adapter_path),
-        "adapter_path": adapter_path,
-        "adapter_bytes": prereqs["adapter_bytes"],
+        "adapter_loaded": False,
+        "adapter_path": None,
+        "adapter_bytes": 0,
         "base_model": base_model_path,
-        "steps_taken": summary.total_steps,
-        "levels_completed": summary.levels_completed,
-        "final_state": summary.final_state,
-        "success": summary.success,
-        "verification_failures": summary.verification_failures,
-        "elapsed_seconds": elapsed_time,
+        "steps_taken": summary_a.total_steps,
+        "levels_completed": summary_a.levels_completed,
+        "final_state": summary_a.final_state,
+        "success": summary_a.success,
+        "verification_failures": summary_a.verification_failures,
+        "elapsed_seconds": elapsed_a,
         "action_history": [
             {"step": s.step_idx, "action": s.executed_action, "status": s.verification_status.value}
-            for s in summary.steps_history
+            for s in summary_a.steps_history
         ],
         "steps_telemetry": [
-            step.telemetry.to_dict() for step in summary.steps_history if step.telemetry is not None
+            step.telemetry.to_dict() for step in summary_a.steps_history if step.telemetry is not None
         ],
     }
 
+    with open(out_path / "smoke_trace_arm_a.jsonl", "a", encoding="utf-8") as f:
+        f.write(json.dumps(report_a) + "\n")
+    with open(out_path / "smoke_summary_arm_a.json", "w", encoding="utf-8") as f:
+        json.dump(report_a, f, indent=2)
+
+    results["arm_a"] = report_a
+
+    # --- CHECK WALL-CLOCK LIMIT BEFORE ARM B ---
+    time_spent = time.perf_counter() - start_kernel_time
+    if time_spent >= WALL_CLOCK_LIMIT_SECONDS:
+        print(f"\n[WALL_CLOCK_LIMIT] Elapsed {time_spent:.2f}s >= {WALL_CLOCK_LIMIT_SECONDS}s. Skipping Arm B.")
+        report_b = {
+            "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "arm": "Arm B (think_commit)",
+            "decode_mode": "think_commit",
+            "game_id": chosen_game,
+            "evaluation_type": eval_type,
+            "final_state": "WALL_CLOCK_LIMIT",
+            "skipped": True,
+            "reason": "WALL_CLOCK_LIMIT",
+        }
+        results["arm_b"] = report_b
+        with open(out_path / "smoke_summary_arm_b.json", "w", encoding="utf-8") as f:
+            json.dump(report_b, f, indent=2)
+    else:
+        # --- ARM B: Think-Then-Commit Decoding ---
+        print("\n" + "=" * 80)
+        print("STARTING ARM B: THINK-THEN-COMMIT DECODING (decode_mode='think_commit')")
+        print("=" * 80)
+        agent_b = SAMARC3Agent(
+            model_runner=model_runner,
+            enable_verification_guard=True,
+            enable_failure_memory=False,
+            is_real_model=True,
+            temperature=0.6,
+            top_p=0.95,
+            seed=42,
+            max_tokens=3072,
+            use_system_prompt=False,
+            stop_on_parse_failure=True,
+            decode_mode="think_commit",
+        )
+        env_b = arcade.make(game_id=chosen_game, seed=0)
+        if env_b is None:
+            raise RuntimeError(f"arcade.make returned None for game '{chosen_game}' (Arm B)")
+
+        t0_b = time.perf_counter()
+        summary_b = agent_b.run_session(
+            env_b,
+            game_id=chosen_game,
+            max_steps=max_steps,
+            wall_clock_limit_seconds=WALL_CLOCK_LIMIT_SECONDS,
+            kernel_start_time=start_kernel_time,
+        )
+        elapsed_b = time.perf_counter() - t0_b
+
+        report_b = {
+            "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "arm": "Arm B (think_commit)",
+            "decode_mode": "think_commit",
+            "game_id": chosen_game,
+            "evaluation_type": eval_type,
+            "is_real_model": True,
+            "adapter_loaded": False,
+            "adapter_path": None,
+            "adapter_bytes": 0,
+            "base_model": base_model_path,
+            "steps_taken": summary_b.total_steps,
+            "levels_completed": summary_b.levels_completed,
+            "final_state": summary_b.final_state,
+            "success": summary_b.success,
+            "verification_failures": summary_b.verification_failures,
+            "elapsed_seconds": elapsed_b,
+            "action_history": [
+                {"step": s.step_idx, "action": s.executed_action, "status": s.verification_status.value}
+                for s in summary_b.steps_history
+            ],
+            "steps_telemetry": [
+                step.telemetry.to_dict() for step in summary_b.steps_history if step.telemetry is not None
+            ],
+        }
+
+        with open(out_path / "smoke_trace_arm_b.jsonl", "a", encoding="utf-8") as f:
+            f.write(json.dumps(report_b) + "\n")
+        with open(out_path / "smoke_summary_arm_b.json", "w", encoding="utf-8") as f:
+            json.dump(report_b, f, indent=2)
+
+        results["arm_b"] = report_b
+
     with open(raw_jsonl_path, "a", encoding="utf-8") as f:
-        f.write(json.dumps(result_data) + "\n")
+        f.write(json.dumps(results) + "\n")
 
     with open(summary_path, "w", encoding="utf-8") as f:
-        json.dump(result_data, f, indent=2)
+        json.dump(results, f, indent=2)
 
     print("\n" + "=" * 80)
-    print("SMOKE TEST COMPLETE")
-    print(f"Type: {eval_type} | Game: {chosen_game} | Steps: {summary.total_steps} | State: {summary.final_state}")
-    print(f"Raw Trace: {raw_jsonl_path}")
-    print(f"Summary:   {summary_path}")
+    print("TWO-ARM SMOKE TEST COMPLETE")
+    print(f"Arm A: Steps={results['arm_a'].get('steps_taken')} | State={results['arm_a'].get('final_state')}")
+    print(f"Arm B: Steps={results['arm_b'].get('steps_taken', 0)} | State={results['arm_b'].get('final_state')}")
+    print(f"Summary: {summary_path}")
     print("=" * 80)
-    return result_data
+    return results
 
 
 if __name__ == "__main__":

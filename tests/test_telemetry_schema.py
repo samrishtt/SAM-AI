@@ -13,6 +13,9 @@ def test_telemetry_schema_fields():
         parse_valid=True,
         latency_ms=123.456,
         seed=42,
+        prompt_ends_with_think=False,
+        think_prefix_added=True,
+        decode={"think_budget": 3072, "action_text": "{\"action\": \"ACTION1\"}", "think_ended_by": "close_tag"},
     )
 
     data = tel.to_dict()
@@ -29,11 +32,16 @@ def test_telemetry_schema_fields():
     assert data["seed"] == 42
     assert isinstance(data["repo_commit_hash"], str)
     assert isinstance(data["package_versions"], dict)
+    assert data["prompt_ends_with_think"] is False
+    assert data["think_prefix_added"] is True
+    assert isinstance(data["decode"], dict)
+    assert data["decode"]["think_budget"] == 3072
 
     # Verify JSON serializability
     serialized = json.dumps(data)
     loaded = json.loads(serialized)
     assert loaded["prompt_tokens"] == 150
+    assert loaded["decode"]["think_budget"] == 3072
 
 
 def test_telemetry_think_closing_tag_detection():

@@ -100,6 +100,7 @@ class SAMARC3Agent:
         max_tokens: int = 3072,
         use_system_prompt: bool = True,
         stop_on_parse_failure: bool = False,
+        decode_mode: str = "plain",
     ):
         self.model = model_runner
         self.enable_verification_guard = enable_verification_guard
@@ -112,6 +113,7 @@ class SAMARC3Agent:
         self.max_tokens = max_tokens
         self.use_system_prompt = use_system_prompt
         self.stop_on_parse_failure = stop_on_parse_failure
+        self.decode_mode = decode_mode
         self.memory = TaskFailureMemory()
 
     def build_step_prompt(self, obs: StructuredObservation) -> str:
@@ -191,7 +193,36 @@ class SAMARC3Agent:
             system_prompt=sys_prompt,
             temperature=self.temperature,
             max_tokens=self.max_tokens,
+            decode_mode=self.decode_mode,
         )
+
+        if getattr(model_out, "decode", None) and model_out.decode.get("status") == "BLOCKED_GRAMMAR":
+            parsed = ParsedAction(
+                action="BLOCKED_GRAMMAR",
+                is_valid=False,
+                validation_error=f"Grammar dead ends: {model_out.decode.get('dead_ends')}",
+            )
+            telemetry = CallTelemetry.create(
+                prompt_tokens=0,
+                completion_tokens=0,
+                model_text="",
+                parse_valid=False,
+                latency_ms=0.0,
+                seed=self.seed,
+                decode_mode=self.decode_mode,
+                decode=model_out.decode,
+            )
+            return AgentStepResult(
+                step_idx=step_idx,
+                parsed_action=parsed,
+                executed_action="BLOCKED_GRAMMAR",
+                executed_data={},
+                verification_status=VerificationStatus.FAIL,
+                verification_error="BLOCKED_GRAMMAR",
+                model_output=model_out,
+                latency_ms=0.0,
+                telemetry=telemetry,
+            )
 
         parsed = ActionParser.parse_and_validate(
             model_text=model_out.text,
@@ -215,6 +246,7 @@ class SAMARC3Agent:
                 system_prompt=sys_prompt,
                 temperature=0.1,
                 max_tokens=self.max_tokens,
+                decode_mode=self.decode_mode,
             )
             retry_parsed = ActionParser.parse_and_validate(
                 model_text=model_out_retry.text,
@@ -255,6 +287,8 @@ class SAMARC3Agent:
             seed=self.seed,
             prompt_ends_with_think=getattr(model_out, "prompt_ends_with_think", False),
             think_prefix_added=getattr(model_out, "think_prefix_added", False),
+            decode_mode=self.decode_mode,
+            decode=getattr(model_out, "decode", None),
         )
 
         return AgentStepResult(
@@ -275,6 +309,8 @@ class SAMARC3Agent:
         game_id: str = "unknown",
         max_steps: int = 50,
         step_callback: Optional[Callable[[AgentStepResult], None]] = None,
+        wall_clock_limit_seconds: Optional[float] = None,
+        kernel_start_time: Optional[float] = None,
     ) -> SessionSummary:
         """
         Executes an end-to-end interactive session with an environment wrapper.
@@ -291,6 +327,11 @@ class SAMARC3Agent:
         history: List[AgentStepResult] = []
 
         for step_idx in range(1, max_steps + 1):
+            if wall_clock_limit_seconds is not None and kernel_start_time is not None:
+                if (time.perf_counter() - kernel_start_time) >= wall_clock_limit_seconds:
+                    final_state = "WALL_CLOCK_LIMIT"
+                    break
+
             struct_obs = ObservationConverter.convert(
                 obs_data=raw_obs,
                 game_id=game_id,
@@ -318,9 +359,14 @@ class SAMARC3Agent:
                     step_callback(step_res)
                 break
 
-            # 2. Execute permitted action through environment
             state_before = struct_obs.state
             act_name = step_res.executed_action
+
+            if act_name in ("parse_failed", "BLOCKED_GRAMMAR"):
+                final_state = act_name
+                if step_callback:
+                    step_callback(step_res)
+                break
 
             # Convert action string to environment action (GameAction enum) if needed
             env_action = act_name

@@ -71,6 +71,7 @@ class ModelOutput:
     raw_response: Optional[Any] = None
     prompt_ends_with_think: bool = False
     think_prefix_added: bool = False
+    decode: Optional[Dict[str, Any]] = None
 
 
 class ModelRunner(ABC):

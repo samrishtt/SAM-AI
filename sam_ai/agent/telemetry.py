@@ -54,6 +54,8 @@ class CallTelemetry:
     - package_versions: Dict[str, str]
     - prompt_ends_with_think: bool
     - think_prefix_added: bool
+    - decode_mode: str
+    - decode: Optional[Dict[str, Any]]
     """
     prompt_tokens: int
     completion_tokens: int
@@ -65,6 +67,8 @@ class CallTelemetry:
     package_versions: Dict[str, str]
     prompt_ends_with_think: bool = False
     think_prefix_added: bool = False
+    decode_mode: str = "plain"
+    decode: Optional[Dict[str, Any]] = None
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -82,6 +86,8 @@ class CallTelemetry:
         package_versions: Optional[Dict[str, str]] = None,
         prompt_ends_with_think: bool = False,
         think_prefix_added: bool = False,
+        decode_mode: str = "plain",
+        decode: Optional[Dict[str, Any]] = None,
     ) -> "CallTelemetry":
         return cls(
             prompt_tokens=prompt_tokens,
@@ -94,4 +100,6 @@ class CallTelemetry:
             package_versions=package_versions or get_package_versions(),
             prompt_ends_with_think=prompt_ends_with_think,
             think_prefix_added=think_prefix_added,
+            decode_mode=decode_mode,
+            decode=decode,
         )

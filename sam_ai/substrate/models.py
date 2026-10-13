@@ -210,6 +210,7 @@ class HuggingFaceModelRunner(ModelRunner):
         load_in_4bit: bool = False,
         trust_remote_code: bool = True,
         local_files_only: bool = False,
+        decode_mode: str = "plain",
     ):
         self._model_name = model_name_or_path
         self.adapter_path = adapter_path
@@ -217,6 +218,10 @@ class HuggingFaceModelRunner(ModelRunner):
         self.load_in_4bit = load_in_4bit
         self.trust_remote_code = trust_remote_code
         self.local_files_only = local_files_only
+        self.decode_mode = decode_mode
+        self._grammar = None
+        self._token_index = None
+        self._dead_ends = None
 
         # Verify dependencies
         try:
@@ -372,15 +377,79 @@ class HuggingFaceModelRunner(ModelRunner):
         top_p: float = 0.95,
         seed: Optional[int] = None,
         assistant_prefix: Optional[str] = None,
+        decode_mode: Optional[str] = None,
         **kwargs: Any,
     ) -> ModelOutput:
         if not self._is_loaded:
             self.load_model()
 
+        mode = decode_mode or kwargs.get("decode_mode") or getattr(self, "decode_mode", "plain")
+
         if seed is not None:
             self.torch.manual_seed(seed)
 
         start_time = time.perf_counter()
+
+        if mode == "think_commit":
+            if getattr(self, "_token_index", None) is None:
+                from sam_ai.agent.think_commit import ActionGrammar, TokenIndex
+                self._grammar = ActionGrammar.arc3(
+                    click_template='{"action": "%s", "data": {"x": %d, "y": %d}}'
+                )
+                self._token_index = TokenIndex.from_tokenizer(self.tokenizer, self._grammar)
+                self._dead_ends = self._grammar.find_dead_ends(self._token_index)
+
+            if getattr(self, "_dead_ends", None):
+                return ModelOutput(
+                    text="",
+                    reasoning_trace="",
+                    prompt_tokens=0,
+                    completion_tokens=0,
+                    latency_ms=0.0,
+                    raw_response={"status": "BLOCKED_GRAMMAR", "dead_ends": self._dead_ends},
+                    prompt_ends_with_think=False,
+                    think_prefix_added=False,
+                    decode={"status": "BLOCKED_GRAMMAR", "dead_ends": self._dead_ends},
+                )
+
+            from sam_ai.agent.think_commit import HFThinkSource, HFLogitsSource, think_then_commit
+            formatted_prompt, prompt_ends_with_think, think_prefix_added = self.render_prompt(
+                prompt=prompt, system_prompt=system_prompt
+            )
+            prompt_ids = self.tokenizer.encode(formatted_prompt, add_special_tokens=False)
+            t_temp = temperature if temperature > 0.0 else 0.6
+            t_topp = top_p if top_p is not None else 0.95
+            t_seed = seed if seed is not None else 42
+            think_source = HFThinkSource(self.model, self.tokenizer, temperature=t_temp, top_p=t_topp, seed=t_seed)
+            logits_source = HFLogitsSource(self.model)
+            tc_res = think_then_commit(
+                prompt_ids=prompt_ids,
+                think_source=think_source,
+                logits_source=logits_source,
+                tokenizer=self.tokenizer,
+                grammar=self._grammar,
+                index=self._token_index,
+                think_budget=max_tokens,
+                temperature=t_temp,
+                top_p=t_topp,
+                seed=t_seed,
+            )
+            completion_text = tc_res.completion_text
+            prompt_tokens = len(prompt_ids)
+            completion_tokens = tc_res.think_tokens + tc_res.injected_tokens + tc_res.commit_tokens
+            latency_ms = (time.perf_counter() - start_time) * 1000.0
+
+            return ModelOutput(
+                text=completion_text,
+                reasoning_trace=tc_res.think_text,
+                prompt_tokens=prompt_tokens,
+                completion_tokens=completion_tokens,
+                latency_ms=latency_ms,
+                raw_response={"finish_reason": tc_res.think_ended_by, "decode": tc_res.to_dict()},
+                prompt_ends_with_think=prompt_ends_with_think,
+                think_prefix_added=think_prefix_added,
+                decode=tc_res.to_dict(),
+            )
 
         formatted_prompt, prompt_ends_with_think, think_prefix_added = self.render_prompt(
             prompt=prompt, system_prompt=system_prompt
@@ -421,5 +490,6 @@ class HuggingFaceModelRunner(ModelRunner):
             raw_response={"finish_reason": "length" if completion_tokens >= max_tokens else "stop"},
             prompt_ends_with_think=prompt_ends_with_think,
             think_prefix_added=think_prefix_added,
+            decode={"mode": "plain"},
         )
 
