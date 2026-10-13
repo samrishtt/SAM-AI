@@ -69,6 +69,8 @@ class ModelOutput:
     completion_tokens: int = 0
     latency_ms: float = 0.0
     raw_response: Optional[Any] = None
+    prompt_ends_with_think: bool = False
+    think_prefix_added: bool = False
 
 
 class ModelRunner(ABC):

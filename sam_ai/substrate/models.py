@@ -19,7 +19,7 @@ import time
 import urllib.request
 import urllib.error
 from pathlib import Path
-from typing import Dict, Any, List, Optional, Callable
+from typing import Dict, Any, List, Optional, Callable, Tuple
 
 from sam_ai.substrate.interfaces import ModelRunner, ModelOutput
 
@@ -328,6 +328,40 @@ class HuggingFaceModelRunner(ModelRunner):
         elapsed = time.perf_counter() - start_time
         print(f"[OK] Model loaded successfully in {elapsed:.2f}s.")
 
+    def render_prompt(
+        self,
+        prompt: str,
+        system_prompt: Optional[str] = None,
+    ) -> Tuple[str, bool, bool]:
+        """
+        Renders prompt using tokenizer.apply_chat_template without a system prompt:
+        instructions go in the user turn.
+        Checks if rendered prompt ends with '<think>\\n'.
+        If not, appends '<think>\\n' exactly once.
+        Asserts rendered prompt does not end with duplicate '<think>\\n<think>\\n'.
+        Returns (formatted_prompt, prompt_ends_with_think, think_prefix_added).
+        """
+        user_content = f"{system_prompt}\n\n{prompt}" if system_prompt else prompt
+        messages = [{"role": "user", "content": user_content}]
+
+        if hasattr(self.tokenizer, "apply_chat_template") and self.tokenizer.chat_template:
+            rendered = self.tokenizer.apply_chat_template(
+                messages, tokenize=False, add_generation_prompt=True
+            )
+        else:
+            rendered = f"User: {user_content}\n\nAssistant:"
+
+        prompt_ends_with_think = rendered.endswith("<think>\n")
+        if not prompt_ends_with_think:
+            formatted_prompt = rendered + "<think>\n"
+            think_prefix_added = True
+        else:
+            formatted_prompt = rendered
+            think_prefix_added = False
+
+        assert not formatted_prompt.endswith("<think>\n<think>\n"), "Duplicate <think> prefix detected!"
+        return formatted_prompt, prompt_ends_with_think, think_prefix_added
+
     def generate(
         self,
         prompt: str,
@@ -337,7 +371,7 @@ class HuggingFaceModelRunner(ModelRunner):
         stop: Optional[List[str]] = None,
         top_p: float = 0.95,
         seed: Optional[int] = None,
-        assistant_prefix: Optional[str] = "<think>\n",
+        assistant_prefix: Optional[str] = None,
         **kwargs: Any,
     ) -> ModelOutput:
         if not self._is_loaded:
@@ -348,22 +382,9 @@ class HuggingFaceModelRunner(ModelRunner):
 
         start_time = time.perf_counter()
 
-        # Format chat prompt
-        messages = []
-        if system_prompt:
-            messages.append({"role": "system", "content": system_prompt})
-        messages.append({"role": "user", "content": prompt})
-
-        if hasattr(self.tokenizer, "apply_chat_template") and self.tokenizer.chat_template:
-            formatted_prompt = self.tokenizer.apply_chat_template(
-                messages, tokenize=False, add_generation_prompt=True
-            )
-        else:
-            sys_part = f"System: {system_prompt}\n\n" if system_prompt else ""
-            formatted_prompt = f"{sys_part}User: {prompt}\n\nAssistant:"
-
-        if assistant_prefix:
-            formatted_prompt = formatted_prompt + assistant_prefix
+        formatted_prompt, prompt_ends_with_think, think_prefix_added = self.render_prompt(
+            prompt=prompt, system_prompt=system_prompt
+        )
 
         inputs = self.tokenizer(formatted_prompt, return_tensors="pt")
         prompt_tokens = inputs["input_ids"].shape[1]
@@ -398,5 +419,7 @@ class HuggingFaceModelRunner(ModelRunner):
             completion_tokens=completion_tokens,
             latency_ms=latency_ms,
             raw_response={"finish_reason": "length" if completion_tokens >= max_tokens else "stop"},
+            prompt_ends_with_think=prompt_ends_with_think,
+            think_prefix_added=think_prefix_added,
         )
 

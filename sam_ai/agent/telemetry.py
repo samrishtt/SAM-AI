@@ -19,8 +19,14 @@ def get_git_commit_hash() -> str:
         return "UNKNOWN"
 
 
+_CACHED_VERSIONS: Optional[Dict[str, str]] = None
+
+
 def get_package_versions() -> Dict[str, str]:
     """Retrieve runtime versions of key dependencies."""
+    global _CACHED_VERSIONS
+    if _CACHED_VERSIONS is not None:
+        return dict(_CACHED_VERSIONS)
     packages = ["torch", "transformers", "arc_agi", "arcengine", "peft"]
     versions = {}
     for pkg in packages:
@@ -29,7 +35,8 @@ def get_package_versions() -> Dict[str, str]:
             versions[pkg] = getattr(mod, "__version__", "unknown")
         except Exception:
             versions[pkg] = "not_installed"
-    return versions
+    _CACHED_VERSIONS = versions
+    return dict(versions)
 
 
 @dataclass
@@ -45,6 +52,8 @@ class CallTelemetry:
     - seed: Optional[int]
     - repo_commit_hash: str
     - package_versions: Dict[str, str]
+    - prompt_ends_with_think: bool
+    - think_prefix_added: bool
     """
     prompt_tokens: int
     completion_tokens: int
@@ -54,6 +63,8 @@ class CallTelemetry:
     seed: Optional[int]
     repo_commit_hash: str
     package_versions: Dict[str, str]
+    prompt_ends_with_think: bool = False
+    think_prefix_added: bool = False
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -69,6 +80,8 @@ class CallTelemetry:
         seed: Optional[int] = None,
         commit_hash: Optional[str] = None,
         package_versions: Optional[Dict[str, str]] = None,
+        prompt_ends_with_think: bool = False,
+        think_prefix_added: bool = False,
     ) -> "CallTelemetry":
         return cls(
             prompt_tokens=prompt_tokens,
@@ -79,4 +92,6 @@ class CallTelemetry:
             seed=seed,
             repo_commit_hash=commit_hash or get_git_commit_hash(),
             package_versions=package_versions or get_package_versions(),
+            prompt_ends_with_think=prompt_ends_with_think,
+            think_prefix_added=think_prefix_added,
         )

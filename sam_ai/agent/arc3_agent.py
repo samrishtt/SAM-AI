@@ -253,6 +253,8 @@ class SAMARC3Agent:
             parse_valid=parsed.is_valid,
             latency_ms=model_out.latency_ms or latency,
             seed=self.seed,
+            prompt_ends_with_think=getattr(model_out, "prompt_ends_with_think", False),
+            think_prefix_added=getattr(model_out, "think_prefix_added", False),
         )
 
         return AgentStepResult(
