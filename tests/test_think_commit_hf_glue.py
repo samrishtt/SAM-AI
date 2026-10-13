@@ -49,6 +49,25 @@ def test_kv_cache_logits_match_full_recompute(stack):
     assert torch.allclose(cached, full, atol=1e-4)
 
 
+def test_start_logits_match_full_recompute_before_any_step(stack):
+    tok, model, g, idx = stack
+    ids = tok.encode('PROMPT {"action": "ACT', add_special_tokens=False)
+    src = tc.HFLogitsSource(model)
+    src.start(ids)  # no step() calls: the first commit token is scored from start() alone
+    cached = torch.tensor(src.gather(list(range(50))))
+    with torch.no_grad():
+        full = model(input_ids=torch.tensor([ids])).logits[0, -1][:50].float()
+    assert torch.allclose(cached, full, atol=1e-4)
+
+
+def test_hf_think_is_reproducible_by_seed(stack):
+    tok, model, g, idx = stack
+    prompt = tok.encode("Choose an action.", add_special_tokens=False)
+    run = lambda seed: tc.HFThinkSource(model, tok, 0.6, 0.95, seed).think(prompt, 24, "</think>")  # noqa: E731
+    assert run(3) == run(3) and run(4) == run(4)
+    assert len({tuple(run(s)) for s in range(6)}) >= 2  # different seeds really sample differently
+
+
 @pytest.mark.parametrize("seed", [0, 1, 2, 3])
 def test_end_to_end_budget_path_is_valid(stack, seed):
     tok, model, g, idx = stack

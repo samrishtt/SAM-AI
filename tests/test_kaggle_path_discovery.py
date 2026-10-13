@@ -34,7 +34,8 @@ def test_flat_layout():  # old-style /kaggle/input/<slug>
         mk(f"{r}/arc-prize-2026-arc-agi-3/environment_files/g/metadata.json", "{}")
         m = f"{r}/unsloth-deepseek-r1-distill-qwen-14b-bnb-4bit/transformers/v1"
         mk(f"{m}/config.json", "{}"); mk(f"{m}/w.safetensors")
-        assert k.discover_inputs(r, verbose=False)["base_model_dir"] == m
+        got = k.discover_inputs(r, verbose=False)["base_model_dir"]
+        assert os.path.normpath(got) == os.path.normpath(m)  # os.walk uses "\\" on Windows
 
 def test_tarball():
     with tempfile.TemporaryDirectory() as r, tempfile.TemporaryDirectory() as ex:

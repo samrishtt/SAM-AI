@@ -139,9 +139,14 @@ def test_grammar_rejects_out_of_grammar(grammar, bad):
     assert not grammar.accepts(bad)
 
 
-def test_prefix_strings_are_refused():
+@pytest.mark.parametrize(
+    "strings",
+    [["ab", "abc"], ["abc", "ab"], ["a", "ab", "abc"], ["abc", "ab", "a"], ["xy", "abc", "ab"]],
+)
+def test_prefix_strings_are_refused(strings):
+    # both insertion orders matter: the conflict is detected in two different places
     with pytest.raises(ValueError):
-        tc.ActionGrammar(["ab", "abc"])
+        tc.ActionGrammar(strings)
 
 
 # ------------------------------------------------------------------ tokens
@@ -204,6 +209,34 @@ def test_pick_is_deterministic_and_respects_top_p():
         tc.pick([float("-inf"), float("-inf")], 0.6, 0.95, random.Random(0))
 
 
+def _freq(scores, temperature, top_p, n=6000, seed0=0):
+    rng = random.Random(seed0)
+    counts = [0] * len(scores)
+    for _ in range(n):
+        counts[tc.pick(scores, temperature, top_p, rng)] += 1
+    return [c / n for c in counts]
+
+
+def test_pick_follows_softmax_distribution():
+    # scores [2,1,0] at T=1 -> p = 0.665, 0.245, 0.090 (exact softmax)
+    f = _freq([2.0, 1.0, 0.0], 1.0, 1.0)
+    assert abs(f[0] - 0.665) < 0.03 and abs(f[1] - 0.245) < 0.03 and abs(f[2] - 0.090) < 0.03
+
+
+def test_pick_temperature_changes_the_distribution():
+    # scores [1,0]: p(best) = 0.982 at T=0.25, 0.731 at T=1, 0.562 at T=4
+    cold, mid, hot = (_freq([1.0, 0.0], t, 1.0)[0] for t in (0.25, 1.0, 4.0))
+    assert abs(cold - 0.982) < 0.02 and abs(mid - 0.731) < 0.03 and abs(hot - 0.562) < 0.03
+
+
+def test_pick_top_p_truncates_the_tail_exactly():
+    scores = [2.0, 1.0, 0.0]  # p = 0.665, 0.245, 0.090
+    assert set(_freq(scores, 1.0, 0.60, n=500)) == {1.0, 0.0}  # nucleus = {0} only
+    f = _freq(scores, 1.0, 0.80)  # nucleus = {0, 1}: never index 2, renormalised 0.731 / 0.269
+    assert f[2] == 0.0 and abs(f[0] - 0.731) < 0.03
+    assert _freq(scores, 1.0, 1.0)[2] > 0.05  # top_p=1 keeps the whole tail
+
+
 # ------------------------------------------------------------------ think phase
 def _run(tokenizer, grammar, index, think_text, budget, target='{"action": "ACTION2"}', seed=1):
     prompt = tokenizer.encode("PROMPT ", add_special_tokens=False)
@@ -231,6 +264,14 @@ def test_budget_exhaustion_injects_close(tokenizer, grammar, index):
     assert res.think_tokens == 30 and res.injected_tokens > 0
     sent = tokenizer.decode(logits.started_with, skip_special_tokens=False, clean_up_tokenization_spaces=False)
     assert sent.endswith("\n</think>\n\n") and grammar.accepts(res.action_text)
+
+
+def test_budget_path_think_text_has_no_trailing_whitespace(tokenizer, grammar, index):
+    text = "alpha beta gamma \n\n  "
+    n = len(tokenizer.encode(text, add_special_tokens=False))
+    _p, _t, _l, res = _run(tokenizer, grammar, index, text, n)
+    assert res.think_ended_by == "budget"
+    assert res.think_text == res.think_text.rstrip() and res.think_text.startswith("alpha")
 
 
 def test_model_stops_early_without_close(tokenizer, grammar, index):
