@@ -102,23 +102,30 @@ def check_prerequisites(
 
     # 2. Path Discovery via content-based discover_inputs()
     discovered_paths = None
-    input_dir_env = os.environ.get("KAGGLE_INPUT_PATH", "/kaggle/input")
-    if Path(input_dir_env).exists() or not Path(base_model_path).exists():
+    target_env_dir = env_dir
+    from scripts.kaggle_path_discovery import discover_inputs, INPUT_ROOT
+    if Path(INPUT_ROOT).exists() or not base_model_path or not env_dir:
         try:
-            from scripts.kaggle_path_discovery import discover_inputs
-            discovered_paths = discover_inputs(input_dir=input_dir_env)
-            if "sam_ai_parent" in discovered_paths:
+            discovered_paths = discover_inputs(verbose=True)
+            if "sam_ai_parent" in discovered_paths and discovered_paths["sam_ai_parent"]:
                 parent_str = str(discovered_paths["sam_ai_parent"])
                 if parent_str not in sys.path:
                     sys.path.insert(0, parent_str)
-            base_model_path = str(discovered_paths["base_model"])
-            target_env_dir = str(discovered_paths["environment_files"])
+            if not base_model_path and discovered_paths.get("base_model_dir"):
+                base_model_path = str(discovered_paths["base_model_dir"])
+            if not target_env_dir and discovered_paths.get("environment_files"):
+                target_env_dir = str(discovered_paths["environment_files"])
         except Exception as e:
-            if not Path(base_model_path).exists():
+            if not base_model_path or not Path(str(base_model_path)).exists():
                 missing.append(f"Content discovery failed: {e}")
             target_env_dir = env_dir or os.environ.get("ENVIRONMENTS_DIR", "environment_files")
     else:
         target_env_dir = env_dir or os.environ.get("ENVIRONMENTS_DIR", "environment_files")
+
+    if not base_model_path:
+        missing.append("Base model path not provided and could not be discovered.")
+    elif not Path(base_model_path).exists():
+        missing.append(f"Base model path does not exist: {base_model_path}")
 
     # 3. Check Adapter Compatibility & Size
     if adapter_path:
@@ -144,7 +151,7 @@ def check_prerequisites(
 
 
 def run_smoke_test(
-    base_model_path: str,
+    base_model_path: Optional[str] = None,
     adapter_path: Optional[str] = None,
     env_dir: Optional[str] = None,
     game_id: Optional[str] = None,
@@ -166,6 +173,7 @@ def run_smoke_test(
         print("\nAborting without executing mock fallbacks. Status: BLOCKED.")
         sys.exit(1)
 
+    base_model_path = prereqs["base_model_path"]
     gpu = prereqs["gpu_info"]
     print(f"[✓] Accelerator: {gpu.get('gpu_name')} ({gpu.get('vram_free_gb', 0):.2f} GB Free / {gpu.get('vram_total_gb', 0):.2f} GB Total)")
     print(f"[✓] Base Model: {base_model_path}")
@@ -281,8 +289,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="SAM-AI Real-Model Smoke Test")
     parser.add_argument(
         "--base-model",
-        default="/kaggle/input/deepseek-r1-distill-qwen-14b-bnb-4bit",
-        help="Path to pre-quantized 4-bit base model weights",
+        default=None,
+        help="Path to pre-quantized 4-bit base model weights (auto-discovered if None)",
     )
     parser.add_argument(
         "--adapter",

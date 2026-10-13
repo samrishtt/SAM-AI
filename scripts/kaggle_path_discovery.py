@@ -1,212 +1,169 @@
-"""Kaggle input path discovery module for SAM-AI smoke tests.
+"""Find Kaggle inputs by what they contain, not by a guessed path.
 
-Standard-library only. Discovers input paths by content rather than brittle
-hard-coded path assumptions. Finds:
-- sam_ai_parent: directory containing the sam_ai package directory
-- environment_files: directory containing ARC-AGI-3 environment metadata and game files
-- base_model: directory containing model config.json and weights
+Why: the smoke test halted on a path guess ("sam_ai not found", "environment
+data not found"). Kaggle mounts differ by runtime (/kaggle/input/<slug> vs
+/kaggle/input/datasets/<owner>/<slug> vs /kaggle/input/competitions/<slug> vs
+/kaggle/input/models/<owner>/<slug>/<framework>/<variation>/<version>), and a
+dataset uploaded as .tar.gz may be mounted already extracted. This module
+searches for the thing itself, always prints the layout it saw, and raises with
+that layout if anything is missing. It never falls back silently.
+
+Usage (first cell of the notebook, and in scripts/run_real_model_smoke_test.py):
+
+    from kaggle_path_discovery import discover_inputs
+    paths = discover_inputs()          # prints tree, raises if anything is missing
+    sys.path.insert(0, paths["sam_ai_parent"])
+    ENV_DIR   = paths["environment_files"]
+    MODEL_DIR = paths["base_model_dir"]
+
+Stdlib only. Does not download anything and does not touch the network.
 """
-
+import json
 import os
 import sys
-import json
 import tarfile
-import zipfile
-import re
-from pathlib import Path
-from typing import Dict, List, Optional, Any, Tuple
+
+INPUT_ROOT = "/kaggle/input"
+EXTRACT_DIR = "/kaggle/working/sam_ai_src"
+MAX_DEPTH = 8
 
 
-def print_layout(root: Path, max_entries: int = 150) -> str:
-    """Scan and format the directory layout for diagnostics."""
-    lines = [f"=== INPUT LAYOUT ({root}) ==="]
-    if not root.exists():
-        lines.append(f"  <Directory does not exist: {root}>")
-        text = "\n".join(lines)
-        print(text)
-        return text
-
-    count = 0
-    for current, dirs, files in os.walk(root):
-        rel = os.path.relpath(current, root)
-        if rel != ".":
-            lines.append(f"  [DIR]  {rel}")
-            count += 1
-        for f in files:
-            rel_file = os.path.normpath(os.path.join(rel if rel != "." else "", f))
-            lines.append(f"  [FILE] {rel_file}")
-            count += 1
-            if count >= max_entries:
-                lines.append(f"  ... [truncated at {max_entries} entries]")
-                break
-        if count >= max_entries:
-            break
-
-    text = "\n".join(lines)
-    print(text)
-    return text
-
-
-def _is_valid_env_dir(d: Path) -> bool:
-    """Check if directory contains at least one metadata.json with game files."""
-    if not d.is_dir():
-        return False
-    metas = list(d.rglob("metadata.json"))
-    if not metas:
-        return False
-    for m in metas:
-        try:
-            with open(m, "r", encoding="utf-8") as f:
-                data = json.load(f)
-            game_id = data.get("game_id")
-            class_name = data.get("class_name") or (game_id[0].upper() + game_id[1:] if game_id else "Game")
-            candidates = [
-                m.parent / f"{class_name.lower()}.py",
-                m.parent / f"{class_name}.py",
-                m.parent / f"{game_id}.py",
-            ]
-            if any(c.is_file() for c in candidates):
-                return True
-        except Exception:
+def _walk(root, max_depth=MAX_DEPTH):
+    """os.walk that follows symlinks safely and stops at max_depth."""
+    seen = set()
+    root = os.path.abspath(root)
+    base = root.rstrip(os.sep).count(os.sep)
+    for dirpath, dirnames, filenames in os.walk(root, followlinks=True):
+        real = os.path.realpath(dirpath)
+        if real in seen:
+            dirnames[:] = []
             continue
-    return False
+        seen.add(real)
+        if dirpath.count(os.sep) - base >= max_depth:
+            dirnames[:] = []
+        dirnames.sort()
+        yield dirpath, dirnames, sorted(filenames)
 
 
-def _is_valid_model_dir(d: Path) -> bool:
-    """Check if directory contains a Qwen/DeepSeek config.json and weights."""
-    if not d.is_dir():
-        return False
-    cfg_file = d / "config.json"
-    if not cfg_file.is_file():
-        return False
-    try:
-        with open(cfg_file, "r", encoding="utf-8") as f:
-            cfg = json.load(f)
-        model_type = cfg.get("model_type", "").lower()
-        if model_type not in ("qwen2", "deepseek_v2", "deepseek_v3"):
-            return False
-        weights = list(d.glob("*.safetensors")) + list(d.glob("*.bin"))
-        return len(weights) > 0
-    except Exception:
-        return False
+def tree(root=INPUT_ROOT, max_depth=5, files_per_dir=6, max_lines=300):
+    """Human-readable layout, so a failed run still tells us what was mounted."""
+    if not os.path.isdir(root):
+        return f"{root} does not exist"
+    lines, base = [], root.rstrip(os.sep).count(os.sep)
+    for dirpath, dirnames, filenames in _walk(root, max_depth):
+        depth = dirpath.count(os.sep) - base
+        if depth >= max_depth:
+            dirnames[:] = []
+        lines.append(f"{'  ' * depth}{os.path.basename(dirpath) or dirpath}/")
+        shown = filenames[:files_per_dir]
+        for f in shown:
+            lines.append(f"{'  ' * (depth + 1)}{f}")
+        if len(filenames) > len(shown):
+            lines.append(f"{'  ' * (depth + 1)}... (+{len(filenames) - len(shown)} files)")
+        if len(lines) >= max_lines:
+            lines.append("... (tree truncated)")
+            break
+    return "\n".join(lines)
 
 
-def discover_inputs(
-    input_dir: str | Path = "/kaggle/input",
-    working_dir: str | Path = "/kaggle/working",
-) -> Dict[str, Path]:
-    """Discover paths to sam_ai, environment_files, and base_model by content.
+def _safe_extract(tar_path, dest):
+    """Extract a tarball, refusing links, devices and path escapes."""
+    os.makedirs(dest, exist_ok=True)
+    dest_real = os.path.realpath(dest)
+    with tarfile.open(tar_path) as tar:
+        members = tar.getmembers()
+        for m in members:
+            if not (m.isfile() or m.isdir()):
+                raise RuntimeError(f"refusing non-regular tar member: {m.name}")
+            target = os.path.realpath(os.path.join(dest_real, m.name))
+            if target != dest_real and not target.startswith(dest_real + os.sep):
+                raise RuntimeError(f"refusing tar member outside destination: {m.name}")
+        tar.extractall(dest_real, members=members)
+    return dest_real
 
-    Prints the /kaggle/input layout first. Raises FileNotFoundError with layout
-    if any required prerequisite is missing.
+
+def find_sam_ai_parent(root=INPUT_ROOT, extract_dir=EXTRACT_DIR):
+    """Directory to put on sys.path so `import sam_ai` works.
+
+    Prefers an already-extracted package (Kaggle usually unpacks archives);
+    falls back to extracting sam_ai_source_bundle*.tar.gz.
     """
-    input_root = Path(input_dir).resolve()
-    working_root = Path(working_dir).resolve()
-    working_root.mkdir(parents=True, exist_ok=True)
+    for dirpath, dirnames, filenames in _walk(root):
+        if os.path.basename(dirpath) == "sam_ai" and "__init__.py" in filenames:
+            return os.path.dirname(dirpath)
+    for dirpath, _, filenames in _walk(root):
+        for f in filenames:
+            if f.startswith("sam_ai_source_bundle") and f.endswith((".tar.gz", ".tgz")):
+                parent = _safe_extract(os.path.join(dirpath, f), extract_dir)
+                if os.path.isfile(os.path.join(parent, "sam_ai", "__init__.py")):
+                    return parent
+    return None
 
-    # 1. Print full input layout for diagnostics
-    layout_str = print_layout(input_root)
 
-    sam_ai_parent: Optional[Path] = None
-    env_dir: Optional[Path] = None
-    base_model: Optional[Path] = None
+def find_environment_files(root=INPUT_ROOT):
+    """A directory named environment_files that really contains game metadata."""
+    for dirpath, dirnames, _ in _walk(root):
+        if os.path.basename(dirpath) == "environment_files":
+            for sub, _, files in _walk(dirpath, max_depth=4):
+                if "metadata.json" in files:
+                    return dirpath
+    return None
 
-    if input_root.exists():
-        # A. Find sam_ai package directory
-        for current, dirs, files in os.walk(input_root):
-            depth = len(Path(current).relative_to(input_root).parts)
-            if depth > 6:
-                dirs.clear()
+
+def find_base_model(root=INPUT_ROOT, name_hint="deepseek-r1-distill-qwen-14b"):
+    """A directory with config.json + safetensors whose path mentions the model.
+
+    Returns (dir, summary) where summary records what the config says, so the
+    run log shows exactly which weights were found. Never picks a directory
+    that does not match name_hint (no silent substitution).
+    """
+    for dirpath, _, filenames in _walk(root):
+        if "config.json" in filenames and any(f.endswith(".safetensors") for f in filenames):
+            if name_hint.lower() not in dirpath.lower():
                 continue
-            if "sam_ai" in dirs:
-                candidate = Path(current) / "sam_ai"
-                if (candidate / "__init__.py").is_file():
-                    sam_ai_parent = Path(current)
-                    break
-
-        # A2. Archive fallback if sam_ai directory not found
-        if not sam_ai_parent:
-            for current, dirs, files in os.walk(input_root):
-                for f in files:
-                    if ("sam_ai" in f.lower() or "source" in f.lower()) and f.endswith((".tar.gz", ".tgz")):
-                        arch_path = Path(current) / f
-                        extract_dest = working_root / "sam_ai_extracted"
-                        extract_dest.mkdir(parents=True, exist_ok=True)
-                        with tarfile.open(arch_path, "r:*") as tar:
-                            for m in tar.getmembers():
-                                if m.issym() or m.islnk() or ".." in m.name:
-                                    raise RuntimeError(f"Unsafe archive member: {m.name}")
-                            tar.extractall(extract_dest)
-                        for c_root, c_dirs, _ in os.walk(extract_dest):
-                            if "sam_ai" in c_dirs and (Path(c_root) / "sam_ai" / "__init__.py").is_file():
-                                sam_ai_parent = Path(c_root)
-                                break
-                        if sam_ai_parent:
-                            break
-                if sam_ai_parent:
-                    break
-
-        # B. Find environment_files
-        # Prioritize explicit environment_files directories
-        for current, dirs, files in os.walk(input_root):
-            depth = len(Path(current).relative_to(input_root).parts)
-            if depth > 6:
-                dirs.clear()
+            try:
+                with open(os.path.join(dirpath, "config.json"), encoding="utf-8") as fh:
+                    cfg = json.load(fh)
+            except (OSError, ValueError):
                 continue
-            if Path(current).name == "environment_files" and _is_valid_env_dir(Path(current)):
-                env_dir = Path(current)
-                break
-        if not env_dir:
-            for current, dirs, files in os.walk(input_root):
-                p = Path(current)
-                if _is_valid_env_dir(p):
-                    env_dir = p
-                    break
+            q = cfg.get("quantization_config") or {}
+            return dirpath, {
+                "model_type": cfg.get("model_type"),
+                "hidden_size": cfg.get("hidden_size"),
+                "num_hidden_layers": cfg.get("num_hidden_layers"),
+                "quant_method": q.get("quant_method"),
+                "load_in_4bit": q.get("load_in_4bit"),
+                "bnb_4bit_quant_type": q.get("bnb_4bit_quant_type"),
+            }
+    return None, None
 
-        # C. Find base_model directory
-        for current, dirs, files in os.walk(input_root):
-            depth = len(Path(current).relative_to(input_root).parts)
-            if depth > 6:
-                dirs.clear()
-                continue
-            p = Path(current)
-            if _is_valid_model_dir(p):
-                base_model = p
-                break
 
-    # Validate findings
-    missing = []
-    if not sam_ai_parent:
-        missing.append("sam_ai package (directory containing sam_ai/__init__.py)")
-    if not env_dir:
-        missing.append("ARC-3 environment_files (directory with metadata.json and game .py)")
-    if not base_model:
-        missing.append("Base model directory (directory with config.json and weights)")
-
-    if missing:
-        err_msg = (
-            f"Failed to discover required Kaggle input paths: {', '.join(missing)}\n\n"
-            f"{layout_str}"
-        )
-        raise FileNotFoundError(err_msg)
-
-    print(f"[OK] Discovered sam_ai_parent:   {sam_ai_parent}")
-    print(f"[OK] Discovered environment_dir: {env_dir}")
-    print(f"[OK] Discovered base_model:      {base_model}")
-
-    return {
-        "sam_ai_parent": sam_ai_parent,
+def discover_inputs(root=INPUT_ROOT, verbose=True):
+    layout = tree(root)
+    if verbose:
+        print(f"--- layout of {root} ---\n{layout}\n--- end layout ---")
+    sam_parent = find_sam_ai_parent(root)
+    env_dir = find_environment_files(root)
+    model_dir, model_cfg = find_base_model(root)
+    found = {
+        "sam_ai_parent": sam_parent,
         "environment_files": env_dir,
-        "base_model": base_model,
-        "env_dir": env_dir,  # alias for backwards compatibility
+        "base_model_dir": model_dir,
+        "base_model_config": model_cfg,
     }
+    missing = [k for k in ("sam_ai_parent", "environment_files", "base_model_dir") if not found[k]]
+    if missing:
+        raise RuntimeError(
+            f"Missing inputs: {missing}. Nothing was substituted. Layout seen:\n{layout}"
+        )
+    if verbose:
+        print(json.dumps(found, indent=2))
+    return found
 
 
 if __name__ == "__main__":
     try:
-        inp = sys.argv[1] if len(sys.argv) > 1 else "/kaggle/input"
-        res = discover_inputs(input_dir=inp)
-        print("Discovery succeeded:", res)
-    except Exception as e:
-        print("Discovery failed:", e)
+        discover_inputs()
+    except RuntimeError as e:
+        print(e, file=sys.stderr)
         sys.exit(1)
