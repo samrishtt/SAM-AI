@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 """
 Pre-commit hook to prevent any secret or credential from being committed.
-Checks staged files for API keys, bearer tokens, private keys, and platform credentials.
+Checks staged files for API keys, bearer tokens, private keys, platform credentials,
+and reversed string literals used to obfuscate secrets.
 Fails with exit code 1 if any pattern matches. Never prints the secret value.
 """
 
 import subprocess
 import sys
 import re
+from typing import List, Tuple
 
 PATTERNS = [
     ("Hugging Face Token", re.compile(r"hf_[a-zA-Z0-9]{25,}")),
@@ -18,9 +20,30 @@ PATTERNS = [
     ("GitHub Personal Access Token", re.compile(r"gh[pousr]_[a-zA-Z0-9]{30,}")),
     ("Anthropic API Key", re.compile(r"sk-ant-api[a-zA-Z0-9_-]{20,}")),
     ("Generic Private Key", re.compile(r"-----BEGIN (?:RSA |EC )?PRIVATE KEY-----")),
+    ("Reversed String Secret", re.compile(r'''(?:"[^"\n]{30,}"|'[^'\n]{30,}')\s*\[::-1\]''')),
 ]
 
-def main():
+
+def scan_line(line: str) -> List[str]:
+    """Check a single line against all security patterns. Returns list of matched pattern names."""
+    matches = []
+    for name, pat in PATTERNS:
+        if pat.search(line):
+            matches.append(name)
+    return matches
+
+
+def scan_content(content: str, filepath: str = "") -> List[Tuple[str, int, str]]:
+    """Scan content line by line. Returns list of (filepath, line_number, pattern_name)."""
+    violations = []
+    for line_idx, line in enumerate(content.splitlines(), 1):
+        for name, pat in PATTERNS:
+            if pat.search(line):
+                violations.append((filepath, line_idx, name))
+    return violations
+
+
+def main() -> int:
     try:
         staged_files = subprocess.check_output(
             ["git", "diff", "--cached", "--name-only", "--diff-filter=ACM"],
@@ -44,10 +67,7 @@ def main():
         except Exception:
             continue
 
-        for line_idx, line in enumerate(content.splitlines(), 1):
-            for name, pat in PATTERNS:
-                if pat.search(line):
-                    violations.append((filepath, line_idx, name))
+        violations.extend(scan_content(content, filepath))
 
     if violations:
         print("\n" + "!" * 80, file=sys.stderr)
@@ -60,6 +80,7 @@ def main():
         return 1
 
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(main())
