@@ -22,6 +22,11 @@ from pathlib import Path
 from typing import Dict, Any, List, Optional, Callable, Tuple
 
 from sam_ai.substrate.interfaces import ModelRunner, ModelOutput
+from sam_ai.models.loader import (
+    PRIMARY_MODEL_ID,
+    BASELINE_MODEL_ID,
+    get_model_spec,
+)
 
 
 class DeterministicModelRunner(ModelRunner):
@@ -99,13 +104,13 @@ class DeterministicModelRunner(ModelRunner):
 class OpenAICompatibleModelRunner(ModelRunner):
     """
     Connects to any OpenAI-compatible HTTP server:
-    vLLM, SGLang, Ollama, DeepSeek-R1-Distill-Qwen-14B server.
+    vLLM, SGLang, Ollama, Qwen/Qwen3.8-27B server, or DeepSeek baseline.
     """
 
     def __init__(
         self,
         base_url: str = "http://localhost:8000/v1",
-        model: str = "deepseek-ai/DeepSeek-R1-Distill-Qwen-14B",
+        model: str = PRIMARY_MODEL_ID,
         api_key: str = "EMPTY",
         timeout_seconds: float = 60.0,
     ):
@@ -164,6 +169,17 @@ class OpenAICompatibleModelRunner(ModelRunner):
                 content = choice.get("message", {}).get("content", "")
                 reasoning = choice.get("message", {}).get("reasoning_content")
 
+                # If reasoning was not separately extracted in JSON, check for inline <think> tags
+                if not reasoning and content:
+                    if "<think>" in content and "</think>" in content:
+                        parts = content.split("</think>", 1)
+                        reasoning = parts[0].replace("<think>", "").strip()
+                        content = parts[1].strip()
+                    elif "</think>" in content:
+                        parts = content.split("</think>", 1)
+                        reasoning = parts[0].strip()
+                        content = parts[1].strip()
+
                 usage = data.get("usage", {})
                 p_tokens = usage.get("prompt_tokens", 0)
                 c_tokens = usage.get("completion_tokens", 0)
@@ -203,7 +219,7 @@ class HuggingFaceModelRunner(ModelRunner):
 
     def __init__(
         self,
-        model_name_or_path: str,
+        model_name_or_path: str = PRIMARY_MODEL_ID,
         adapter_path: Optional[str] = None,
         device_map: str = "auto",
         torch_dtype: Optional[Any] = None,
@@ -211,6 +227,7 @@ class HuggingFaceModelRunner(ModelRunner):
         trust_remote_code: bool = True,
         local_files_only: bool = False,
         decode_mode: str = "plain",
+        requires_thinking_prefix: Optional[bool] = None,
     ):
         self._model_name = model_name_or_path
         self.adapter_path = adapter_path
@@ -219,6 +236,7 @@ class HuggingFaceModelRunner(ModelRunner):
         self.trust_remote_code = trust_remote_code
         self.local_files_only = local_files_only
         self.decode_mode = decode_mode
+        self.requires_thinking_prefix = requires_thinking_prefix
         self._grammar = None
         self._token_index = None
         self._dead_ends = None
@@ -341,9 +359,10 @@ class HuggingFaceModelRunner(ModelRunner):
         """
         Renders prompt using tokenizer.apply_chat_template without a system prompt:
         instructions go in the user turn.
-        Checks if rendered prompt ends with '<think>\\n'.
-        If not, appends '<think>\\n' exactly once.
-        Asserts rendered prompt does not end with duplicate '<think>\\n<think>\\n'.
+        For models requiring thinking prefix (legacy DeepSeek-R1 checkpoint), appends '<think>\n'
+        once if not already present.
+        For models with native reasoning templates (Qwen/Qwen3.8-27B), does not add manual prefix.
+        Asserts rendered prompt does not end with duplicate '<think>\n<think>\n'.
         Returns (formatted_prompt, prompt_ends_with_think, think_prefix_added).
         """
         user_content = f"{system_prompt}\n\n{prompt}" if system_prompt else prompt
@@ -356,8 +375,18 @@ class HuggingFaceModelRunner(ModelRunner):
         else:
             rendered = f"User: {user_content}\n\nAssistant:"
 
+        req_prefix = getattr(self, "requires_thinking_prefix", None)
+        if req_prefix is None:
+            model_name = getattr(self, "_model_name", None)
+            if model_name:
+                spec = get_model_spec(model_name)
+                req_prefix = spec.requires_thinking_prefix
+            else:
+                # Default for stub tokenizer fixtures without model_name
+                req_prefix = True
+
         prompt_ends_with_think = rendered.endswith("<think>\n")
-        if not prompt_ends_with_think:
+        if req_prefix and not prompt_ends_with_think:
             formatted_prompt = rendered + "<think>\n"
             think_prefix_added = True
         else:
@@ -477,13 +506,25 @@ class HuggingFaceModelRunner(ModelRunner):
             outputs = self.model.generate(**inputs, **gen_kwargs)
 
         completion_ids = outputs[0][prompt_tokens:]
-        completion_text = self.tokenizer.decode(completion_ids, skip_special_tokens=True)
+        raw_completion = self.tokenizer.decode(completion_ids, skip_special_tokens=True)
         completion_tokens = len(completion_ids)
         latency_ms = (time.perf_counter() - start_time) * 1000.0
 
+        # Separate reasoning trace from completion text when present
+        reasoning_trace = None
+        completion_text = raw_completion
+        if "<think>" in completion_text and "</think>" in completion_text:
+            parts = completion_text.split("</think>", 1)
+            reasoning_trace = parts[0].replace("<think>", "").strip()
+            completion_text = parts[1].strip()
+        elif "</think>" in completion_text:
+            parts = completion_text.split("</think>", 1)
+            reasoning_trace = parts[0].strip()
+            completion_text = parts[1].strip()
+
         return ModelOutput(
             text=completion_text,
-            reasoning_trace=None,
+            reasoning_trace=reasoning_trace,
             prompt_tokens=prompt_tokens,
             completion_tokens=completion_tokens,
             latency_ms=latency_ms,

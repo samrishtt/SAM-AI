@@ -319,6 +319,8 @@ class SAMARC3Agent:
         session_start = time.perf_counter()
         raw_obs = env.reset()
         prev_grid: Optional[List[List[int]]] = None
+        struct_obs: Optional[StructuredObservation] = None
+        final_state: Optional[Any] = None
 
         total_prompt_tokens = 0
         total_completion_tokens = 0
@@ -354,6 +356,7 @@ class SAMARC3Agent:
 
             # P1c: If an action cannot be parsed, stop the episode without fallback
             if step_res.executed_action == "parse_failed":
+                final_state = "parse_failed"
                 history.append(step_res)
                 if step_callback:
                     step_callback(step_res)
@@ -430,9 +433,24 @@ class SAMARC3Agent:
             if state_after_str.upper() == "WIN":
                 break
 
-        final_state = struct_obs.state if raw_obs is None else getattr(raw_obs, "state", struct_obs.state)
+        if final_state is None:
+            if raw_obs is not None:
+                default_state = struct_obs.state if struct_obs is not None else "NOT_FINISHED"
+                final_state = getattr(raw_obs, "state", default_state)
+            elif struct_obs is not None:
+                final_state = struct_obs.state
+            else:
+                final_state = "NOT_FINISHED"
+
         final_state_str = final_state.name if hasattr(final_state, "name") else str(final_state)
-        levels_completed = struct_obs.levels_completed if raw_obs is None else getattr(raw_obs, "levels_completed", struct_obs.levels_completed)
+
+        if raw_obs is not None:
+            default_levels = struct_obs.levels_completed if struct_obs is not None else 0
+            levels_completed = getattr(raw_obs, "levels_completed", default_levels)
+        elif struct_obs is not None:
+            levels_completed = struct_obs.levels_completed
+        else:
+            levels_completed = 0
 
         return SessionSummary(
             game_id=game_id,

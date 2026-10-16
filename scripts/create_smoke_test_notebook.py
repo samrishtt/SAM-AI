@@ -30,9 +30,10 @@ metadata = {
         "arc-prize-2026-arc-agi-3"
     ],
     "kernel_sources": [],
-    "model_sources": [
-        "gowillgo/unsloth-deepseek-r1-distill-qwen-14b-bnb-4bit/transformers/v1/1"
-    ],
+    # Notice: Exact Kaggle model slug for Qwen3.8-27B is currently UNRESOLVED.
+    # Set to empty list to fail closed rather than guessing or mounting DeepSeek.
+    # Model must be mounted explicitly via Kaggle notebook settings prior to remote execution.
+    "model_sources": [],
     "keywords": [
         "gpu"
     ],
@@ -55,16 +56,17 @@ nb = {
             "cell_type": "markdown",
             "metadata": {},
             "source": [
-                "# SAM-AI Sovereign Agent: Real Base-Model Smoke Test (Zero-Shot Baseline)\n",
+                "# SAM-AI Sovereign Agent: Real Base-Model Smoke Test (Qwen3.8-27B Zero-Shot Base)\n",
                 "\n",
-                "**Objective:** Verify that the sovereign SAM-AI agent (`sam_ai.agent`) loads authentic 4-bit base model weights (`DeepSeek-R1-Distill-Qwen-14B-bnb-4bit`) via `HuggingFaceModelRunner`, connects to the official ARC-3 `Arcade` environment interface, and executes a strictly budgeted 5-step interactive loop.\n",
+                "**Objective:** Verify that the sovereign SAM-AI agent (`sam_ai.agent`) loads authentic base model weights (`Qwen/Qwen3.8-27B`) via `HuggingFaceModelRunner`, connects to the official ARC-3 `Arcade` environment interface, and executes a strictly budgeted 5-step interactive loop.\n",
                 "\n",
                 "> **Hard Rules:**\n",
                 "> 1. **Zero competition submission:** Does not create `submission.parquet` or invoke submission APIs.\n",
                 "> 2. **Base-Model Only:** Does not mount, load, or evaluate the SAM-AI adapter. All results labeled `REAL_MODEL_ZERO_SHOT_BASE`.\n",
                 "> 3. **No mock fallback:** If weights, GPU, or environment data are absent, halts cleanly with `[BLOCKED]`.\n",
-                "> 4. **Small compute footprint:** Bounded to 5 environment steps total (< 2 minutes GPU runtime).\n",
-                "> 5. **Architectural Parity:** Uses identical `HuggingFaceModelRunner` and telemetry schema as the local `scripts/run_real_model_smoke_test.py`.\n"
+                "> 4. **No silent substitution:** Refuses to evaluate DeepSeek or other checkpoints when Qwen is requested.\n",
+                "> 5. **Small compute footprint:** Bounded to 5 environment steps total (< 2 minutes GPU runtime).\n",
+                "> 6. **Architectural Parity:** Uses identical `HuggingFaceModelRunner` and telemetry schema as the local `scripts/run_real_model_smoke_test.py`.\n"
             ]
         },
         {
@@ -94,8 +96,9 @@ nb = {
                 "print('  SAM-AI REAL BASE-MODEL SMOKE TEST: STATIC PRECONDITION AUDIT')\n",
                 "print('=' * 75)\n",
                 "\n",
-                "# 0. Discover input paths by content\n",
-                "paths = discover_inputs()\n",
+                "# 0. Explicit Model Selection & Content Discovery\n",
+                "TARGET_MODEL = 'qwen3.8-27b'  # Explicit primary checkpoint. Baseline requires explicit change to 'deepseek_r1_distill_14b'\n",
+                "paths = discover_inputs(target_model=TARGET_MODEL, name_hint=TARGET_MODEL)\n",
                 "sam_ai_parent = str(paths['sam_ai_parent'])\n",
                 "if sam_ai_parent not in sys.path:\n",
                 "    sys.path.insert(0, sam_ai_parent)\n",
@@ -103,6 +106,10 @@ nb = {
                 "base_model_path = str(paths['base_model_dir'])\n",
                 "ENV_DATA_DIR = str(paths['environment_files'])\n",
                 "\n",
+                "# Strict Model Identity Verification: reject silent DeepSeek substitution\n",
+                "model_verif = verify_model_identity(base_model_path, paths.get('base_model_config'), expected_model=TARGET_MODEL)\n",
+                "print(f'[OK] Target Model Configured: {TARGET_MODEL}')\n",
+                "print(f'[OK] Model Identity Verified: {model_verif[\"family\"]} ({base_model_path})')\n",
                 "print(f'[OK] sam_ai parent resolved:   {sam_ai_parent}')\n",
                 "print(f'[OK] Base Model resolved:      {base_model_path}')\n",
                 "print(f'[OK] Environment dir resolved: {ENV_DATA_DIR}')\n",
@@ -252,7 +259,7 @@ nb = {
                 "    'arm': 'Arm A (plain)',\n",
                 "    'decode_mode': 'plain',\n",
                 "    'game_id': chosen_game,\n",
-                "    'evaluation_type': 'REAL_MODEL_ZERO_SHOT_BASE_PLAIN',\n",
+                "    'evaluation_type': eval_type,\n",
                 "    'is_real_model': True,\n",
                 "    'adapter_loaded': False,\n",
                 "    'adapter_path': None,\n",
@@ -296,7 +303,7 @@ nb = {
                 "        'arm': 'Arm B (think_commit)',\n",
                 "        'decode_mode': 'think_commit',\n",
                 "        'game_id': chosen_game,\n",
-                "        'evaluation_type': 'REAL_MODEL_ZERO_SHOT_BASE_TC',\n",
+                "        'evaluation_type': eval_type,\n",
                 "        'final_state': 'WALL_CLOCK_LIMIT',\n",
                 "        'skipped': True,\n",
                 "        'reason': 'WALL_CLOCK_LIMIT',\n",
@@ -339,7 +346,7 @@ nb = {
                 "        'arm': 'Arm B (think_commit)',\n",
                 "        'decode_mode': 'think_commit',\n",
                 "        'game_id': chosen_game,\n",
-                "        'evaluation_type': 'REAL_MODEL_ZERO_SHOT_BASE_TC',\n",
+                "        'evaluation_type': eval_type,\n",
                 "        'is_real_model': True,\n",
                 "        'adapter_loaded': False,\n",
                 "        'adapter_path': None,\n",

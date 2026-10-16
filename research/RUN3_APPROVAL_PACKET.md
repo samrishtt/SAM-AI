@@ -1,155 +1,127 @@
-# SAM-AI Run 3 Approval Packet (Smoke Test v3)
+# SAM-AI Run 3 Approval Packet (Smoke Test v3 — Qwen3.8-27B Migration Protocol)
 
-**Status:** AWAITING EXPLICIT APPROVAL  
-**Branch:** `integrate/claude-2026-10-12`  
-**Notebook Built From Commit:** `55e6ac1` (Working tree state: `f0ad390`)  
-**Target Environment:** Kaggle Kernel (Private BYOD container on `NvidiaRtxPro6000`)  
-**Statement:** **No push or run has occurred.**
-
----
-
-## 1. Exact `kernel-metadata.json`
-
-```json
-{
-  "id": "samrishb/sam-ai-real-model-smoke-test",
-  "title": "SAM-AI Real Model Smoke Test",
-  "code_file": "sam_ai_real_model_smoke_test.ipynb",
-  "language": "python",
-  "kernel_type": "notebook",
-  "is_private": true,
-  "enable_gpu": true,
-  "enable_tpu": false,
-  "enable_internet": false,
-  "dataset_sources": [
-    "samrishb/sam-ai-source-bundle"
-  ],
-  "competition_sources": [
-    "arc-prize-2026-arc-agi-3"
-  ],
-  "kernel_sources": [],
-  "model_sources": [
-    "gowillgo/unsloth-deepseek-r1-distill-qwen-14b-bnb-4bit/transformers/v1/1"
-  ],
-  "keywords": [
-    "gpu"
-  ],
-  "docker_image": "gcr.io/kaggle-private-byod/python@sha256:57e612b484cf3df5026ee4dcc3cb176974b22b2bc0937fb1e16132a8be4cb13c",
-  "machine_shape": "NvidiaRtxPro6000"
-}
-```
+**Status:** BLOCKED / AWAITING CONFIRMED KAGGLE MODEL SLUG & EXPLICIT RE-AUTHORIZATION  
+**Branch:** `integrate/claude-2026-10-12` (HEAD: `9fbb10e45def98bcafe2322c00e4661f5e45ed21`, working tree modified)  
+**Primary Candidate Checkpoint:** `Qwen/Qwen3.8-27B`  
+**Legacy Selectable Baseline:** `gowillgo/unsloth-deepseek-r1-distill-qwen-14b-bnb-4bit/transformers/v1`  
+**Target Environment:** Kaggle Kernel (Private BYOD container on `NvidiaRtxPro6000` ~95 GB VRAM)  
+**Statement:** **STRICTLY UNEXECUTED. Zero remote pushes, GPU allocations, training runs, or competition submissions have occurred.**
 
 ---
 
-## 2. Experimental Design: Two Sequential Arms
+## 0. Five Distinct Execution Milestones
 
-The smoke test evaluates 5 steps on game `ls60-c92330a6` (seed 42) across two sequential arms with fresh environments and identical starting conditions:
+To maintain scientific integrity, progress is strictly separated into five distinct milestone gates:
+
+| Milestone Gate | Meaning | Current Audit Status |
+|---|---|---|
+| **1. OFFLINE_TESTS_PASSED** | Unit & regression tests pass offline locally (no weights or GPU needed) | **VERIFIED** (254 passing tests) |
+| **2. MODEL_FILES_DISCOVERED** | Model weights safely discovered in container without silent substitution | **BLOCKED** (`model_sources: []`; slug unverified) |
+| **3. MODEL_LOADED_SUCCESSFULLY** | Model weights & tokenizer loaded into GPU VRAM without OOM | **NOT_RUN** |
+| **4. REAL_INFERENCE_COMPLETED** | Isolated inference executed producing raw outputs, tokens, and latency | **NOT_RUN** |
+| **5. OUTPUT_QUALITY_EVALUATED** | Reasoning traces, formatting, and task accuracy evaluated | **NOT_RUN** |
+
+---
+
+## 1. Model Configuration and Prerequisites
+
+### Primary Candidate: `Qwen/Qwen3.8-27B`
+- **Architecture:** Dense causal language model backbone (~27B parameters).
+- **Text-Only Loading Class:** `AutoModelForCausalLM` with `AutoTokenizer` and `bfloat16`.
+- **Multimodal Note:** Native vision-language architecture; multimodal image ingestion requires `AutoModelForMultimodalLM` / `AutoModelForConditionalGeneration` + `AutoProcessor`.
+- **Precision / Weight Footprint:**
+  - Full BF16 weights: ~54 GB storage footprint. Requires ≥ 58 GB VRAM for inference (feasible on 95 GB RTX PRO 6000).
+  - 4-bit NF4 (`bitsandbytes`): ~14.5 GB weights footprint. Requires ≥ 16 GB VRAM.
+- **Thinking Mode:** Native System 2 reasoning enabled by default. Does NOT use manual duplicate `<think>` prefix injection.
+- **Tokenizer / Template:** Native Qwen chat template (`apply_chat_template(add_generation_prompt=True)`).
+- **Prerequisites Verified:**
+  1. CUDA GPU accelerator with ≥ 58 GB VRAM for BF16 or ≥ 16 GB for 4-bit.
+  2. PyTorch, Transformers, and Accelerate installed.
+  3. Official ARC-AGI-3 offline environment files present with `metadata.json`.
+  4. Content-based path discovery via `scripts/kaggle_path_discovery.py` discovering mounted weights with strict target enforcement (`target_model='qwen3.8-27b'`).
+- **Kaggle Model Source Status (BLOCKER):**
+  - The exact official Kaggle model slug for `Qwen/Qwen3.8-27B` is currently UNRESOLVED.
+  - To fail closed and eliminate silent substitution with DeepSeek, `kernel-metadata.json` sets `model_sources: []`.
+  - An explicit Kaggle model mount must be configured prior to remote launch.
+
+### Legacy Selectable Baseline: `DeepSeek-R1-Distill-Qwen-14B-bnb-4bit`
+- Retained strictly for comparative baseline evaluation via explicit configuration.
+- Pre-quantized 4-bit NF4 weights (~9.94 GB).
+
+---
+
+## 2. Experimental Design
+
+### Phase A: Minimal Isolated Text-Only Inference (`scripts/run_minimal_inference_test.py`)
+Prior to running a full multi-turn agent interaction loop on ARC-3 games, a minimal 2-prompt isolated test is executed to verify pure model execution:
+1. **Deterministic Sanity Prompt:** `"What is 2 + 2? Output only the number."` (validates basic generation and token decoding).
+2. **Structured Reasoning Prompt:** Simple 2D agent coordinate navigation with JSON action schema output (validates reasoning trace separation and JSON structure).
+3. **Artifact Output:** Persisted to `evidence/qwen38_minimal_inference/inference_record.json`.
+
+### Phase B: Agent Interactive ARC-3 Smoke Test (Two Sequential Arms)
+Upon passing Phase A, the agent executes 5 steps on an ARC-3 test game across two sequential arms under identical starting conditions:
 
 | Arm | Mode | Telemetry Label | Output Summary | Output Trace |
 |---|---|---|---|---|
-| **Arm A** | Plain greedy decoding | `REAL_MODEL_ZERO_SHOT_BASE_PLAIN` | `smoke_summary_arm_a.json` | `smoke_trace_arm_a.jsonl` |
-| **Arm B** | Think-then-commit (U1) | `REAL_MODEL_ZERO_SHOT_BASE_TC` | `smoke_summary_arm_b.json` | `smoke_trace_arm_b.jsonl` |
+| **Arm A** | Plain decoding | `REAL_MODEL_ZERO_SHOT_BASE_PLAIN` | `smoke_summary_arm_a.json` | `smoke_trace_arm_a.jsonl` |
+| **Arm B** | Think-then-commit (U1 grammar) | `REAL_MODEL_ZERO_SHOT_BASE_TC` | `smoke_summary_arm_b.json` | `smoke_trace_arm_b.jsonl` |
 
-Combined summary is saved to `/kaggle/working/smoke_summary.json`.
+Combined summary is written to `/kaggle/working/smoke_summary.json`.
 
 ---
 
-## 3. Runtime Guardrails & Timeouts
+## 3. Runtime Guardrails & Verified Watchdog Timeout
 
-- **Wall-clock guard:** Enforced in notebook loop:
+- **Wall-clock guard:** Enforced in session loop:
   ```python
   WALL_CLOCK_LIMIT = 25 * 60  # 25 minutes total wall-clock budget
   ```
-  If elapsed execution time exceeds 25 minutes, execution halts cleanly and writes partial telemetry.
-- **Queue timeout protocol:** If the Kaggle kernel queue stalls for > 15 minutes in `QUEUED` state, cancel the kernel run via Kaggle CLI and record status as `CANCELLED_QUEUE_STALL`. Do not automatically retry.
+- **Terminal State Preservation:** Verified by regression tests in `tests/test_sam_ai_arc3_agent.py`. When the watchdog timeout fires, `SessionSummary.final_state` is guaranteed to retain `"WALL_CLOCK_LIMIT"` without being overwritten by the environment status.
+- **Action Telemetry Schema:** Distinct fields recorded for:
+  - Generated text / raw completion
+  - Separated reasoning trace
+  - Parsed action name and data
+  - Pre-execution validation status (`PASS`, `FAIL`, `ERROR`)
+  - Executed action passed to environment
+  - Token counts and latency per turn
 
 ---
 
-## 4. Expected Cell 1 Path Discovery Output
+## 4. Path Discovery Verification Protocol
 
-Cell 1 executes Claude's verified content-based discovery (`scripts/kaggle_path_discovery.py`). It must print all required keys populated:
+Cell 1 executes content-based discovery (`scripts/kaggle_path_discovery.py`). It searches for mounted model directories matching candidates (`qwen3.8-27b`, `deepseek-r1-distill-qwen-14b`) and prints:
 ```text
 === DISCOVERED INPUTS ===
   source_bundle_dir: /kaggle/input/sam-ai-source-bundle (or unpacked root)
   arc3_root_dir:     /kaggle/input/arc-prize-2026-arc-agi-3
-  base_model_dir:    /kaggle/input/unsloth-deepseek-r1-distill-qwen-14b-bnb-4bit/transformers/v1 (or variant)
-  wheels_dir:        /kaggle/input/arc-prize-2026-arc-agi-3/arc_agi_3_wheels
-  adapter_dir:       None (expected for base-model smoke test)
+  base_model_dir:    /kaggle/input/models/...
+  environment_files: /kaggle/input/arc-prize-2026-arc-agi-3/environment_files
 ==========================
 ```
+If required model weights or environment files are missing, execution halts with a hard error and full layout tree dump. No silent mock fallbacks are permitted.
 
 ---
 
 ## 5. Success vs Failure Criteria
 
 ### Success Criteria (ALL must hold):
-1. Both Arm A and Arm B load the 14B model without crashing or CUDA OOM.
-2. Both arms complete 5 environment interaction steps on the test game.
-3. Separate trace files (`smoke_trace_arm_a.jsonl`, `smoke_trace_arm_b.jsonl`) and summary files (`smoke_summary_arm_a.json`, `smoke_summary_arm_b.json`, `smoke_summary.json`) are written.
-4. **Arm B (`REAL_MODEL_ZERO_SHOT_BASE_TC`) records exactly 0 parse failures.**
-5. Full telemetry captured: latency per step, token counts, GPU memory consumption, and reasoning trace presence.
+1. Model weights (Qwen3.8-27B or legacy DeepSeek) load without CUDA OOM.
+2. Both arms complete 5 environment interaction steps.
+3. Traces and summaries written to `/kaggle/working/`.
+4. Arm B (`think_commit`) records 0 JSON parse failures.
+5. Watchdog timeout, if triggered, accurately records `WALL_CLOCK_LIMIT`.
+6. Telemetry records accurate token counts, latency, and reasoning presence.
 
 ### Failure Criteria:
-- Missing path prerequisite or import failure in Cell 1 / Cell 2.
-- CUDA Out-Of-Memory error during 14B model loading or forward pass.
-- Execution exceeding 25-minute wall clock limit.
-- Any parse/format failure observed in Arm B (indicating grammar or commit decoding failure).
+- Missing weight files or import failures.
+- CUDA Out-Of-Memory error during weight loading or generation.
+- Uncaught exception or silent fallback to mock runner.
+- Watchdog timeout status erased.
 
 ---
 
-## 6. What This Run Can and Cannot Show
+## 6. Execution Status & Authorization Gate
 
-- **What it CAN show:**
-  - Whether the 14B base model runs offline inside the Kaggle BYOD container on `NvidiaRtxPro6000`.
-  - Real inference latency per step and peak VRAM consumption.
-  - Whether think-then-commit decoding (`Arm B`) completely eliminates action syntax/parsing failures compared to plain generation (`Arm A`).
-- **What it CANNOT show:**
-  - Whether the 14B model has competitive reasoning or beats the ARC-3 baseline solver. A 5-step test on a single game is a mechanical sanity check, not a benchmark evaluation.
-
----
-
-## 7. Raw Test Suite Output (C5 Test Hygiene)
-
-Offline suite verification (`HF_HUB_OFFLINE=1`, `TRANSFORMERS_OFFLINE=1`, network sockets blocked):
-
-```text
-============================= test session starts =============================
-platform win32 -- Python 3.11.9, pytest-9.1.1, pluggy-1.6.0
-rootdir: C:\Users\Sam Pavi\.gemini\antigravity\scratch\micro_agi_integrate_claude
-configfile: pyproject.toml
-plugins: anyio-4.12.1
-collected 221 items
-
-220 passed, 1 failed (tests/test_kaggle_path_discovery.py::test_flat_layout line 37 Windows path separator)
-
-============================ slowest 15 durations =============================
-2.21s call     tests/test_computer_use.py::test_list_open_windows
-1.52s call     tests/test_robust_swe_agent.py::test_multi_turn_interactive_repair_loop_with_rollback
-1.36s call     tests/test_arc3_experiment.py::TestEndToEndOffline::test_main_offline_writes_scored_rows
-1.02s call     tests/test_substrate_integrity.py::TestCodeVerifierIntegrity::test_infinite_loop_times_out
-0.79s call     tests/test_arc3_experiment.py::TestStats::test_identical_arms_are_not_distinguishable
-0.77s call     tests/test_arc3_experiment.py::TestStats::test_real_gap_is_detected
-0.44s setup    tests/test_think_commit_hf_glue.py::test_kv_cache_logits_match_full_recompute
-0.40s call     tests/test_grpo_mathematical_audit.py::test_9_synthetic_training_loop_measurably_learns
-0.38s call     tests/test_arc3_experiment.py::TestStats::test_summary_reports_seed_noise
-0.36s call     tests/test_substrate_integrity.py::TestCodeVerifierIntegrity::test_hidden_test_source_not_in_public_feedback
-0.34s call     tests/test_substrate.py::TestSubstrateVerifiers::test_code_verifier_execution
-0.32s call     tests/test_substrate_integrity.py::TestCodeVerifierIntegrity::test_real_pass_and_real_fail
-0.27s call     tests/test_grpo_core.py::test_grpo_toy_learning
-0.24s call     tests/test_arc_evaluator.py::test_load_real_arc_evaluation_data
-0.24s call     tests/test_substrate_integrity.py::TestMathVerifierSafety::test_legitimate_equivalences_still_pass
-================= 1 failed, 220 passed, 3 warnings in 31.25s ==================
-```
-
----
-
-## 8. Exact Push Command (Awaiting Authorization)
-
-Execution is blocked until Samrish provides explicit authorization.
-
-```bash
-kaggle kernels push -p notebooks/sam_ai_real_model_smoke_test
-```
-
-Required authorization phrase:
-> `APPROVED: run smoke test at commit <sha>`
+- **Remote Execution Status:** **NOT_RUN / BLOCKED**.
+- No Kaggle push or remote GPU execution is authorized until the repository is committed and Samrish explicitly authorizes:
+  > `APPROVED: run smoke test at commit <sha>`

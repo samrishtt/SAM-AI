@@ -76,6 +76,7 @@ def check_prerequisites(
     base_model_path: str,
     adapter_path: Optional[str] = None,
     env_dir: Optional[str] = None,
+    target_model: str = "qwen3.8-27b",
 ) -> Dict[str, Any]:
     """Verifies hardware, weight, and environment prerequisites with zero mock fallbacks."""
     missing = []
@@ -103,10 +104,10 @@ def check_prerequisites(
     # 2. Path Discovery via content-based discover_inputs()
     discovered_paths = None
     target_env_dir = env_dir
-    from scripts.kaggle_path_discovery import discover_inputs, INPUT_ROOT
+    from scripts.kaggle_path_discovery import discover_inputs, verify_model_identity, INPUT_ROOT
     if Path(INPUT_ROOT).exists() or not base_model_path or not env_dir:
         try:
-            discovered_paths = discover_inputs(verbose=True)
+            discovered_paths = discover_inputs(verbose=True, target_model=target_model, name_hint=target_model)
             if "sam_ai_parent" in discovered_paths and discovered_paths["sam_ai_parent"]:
                 parent_str = str(discovered_paths["sam_ai_parent"])
                 if parent_str not in sys.path:
@@ -126,14 +127,21 @@ def check_prerequisites(
         missing.append("Base model path not provided and could not be discovered.")
     elif not Path(base_model_path).exists():
         missing.append(f"Base model path does not exist: {base_model_path}")
+    else:
+        # 3. Model Identity Verification (prevent silent substitution)
+        try:
+            cfg = (discovered_paths or {}).get("base_model_config")
+            verify_model_identity(base_model_path, cfg, expected_model=target_model)
+        except Exception as e:
+            missing.append(f"Model identity verification failed: {e}")
 
-    # 3. Check Adapter Compatibility & Size
+    # 4. Check Adapter Compatibility & Size
     if adapter_path:
         valid_ad, ad_msg, adapter_bytes = audit_adapter_compatibility(adapter_path, base_model_path)
         if not valid_ad:
             missing.append(f"Adapter verification failed: {ad_msg}")
 
-    # 4. Check ARC-3 Public Environment Data
+    # 5. Check ARC-3 Public Environment Data
     env_p = Path(target_env_dir)
     if not env_p.exists() or not list(env_p.rglob("metadata.json")):
         missing.append(
@@ -147,6 +155,7 @@ def check_prerequisites(
         "target_env_dir": target_env_dir,
         "base_model_path": base_model_path,
         "adapter_bytes": adapter_bytes,
+        "target_model": target_model,
     }
 
 
@@ -157,6 +166,7 @@ def run_smoke_test(
     game_id: Optional[str] = None,
     max_steps: int = 5,
     output_dir: str = "evidence/real_model_smoke_test",
+    target_model: str = "qwen3.8-27b",
 ) -> Dict[str, Any]:
     """Executes the single-game real-model smoke test."""
     print("=" * 80)
@@ -164,7 +174,7 @@ def run_smoke_test(
     print("=" * 80)
 
     # 1. Prerequisite verification
-    prereqs = check_prerequisites(base_model_path, adapter_path, env_dir)
+    prereqs = check_prerequisites(base_model_path, adapter_path, env_dir, target_model=target_model)
     if not prereqs["is_ready"]:
         print("\n[BLOCKED] Real-model smoke test cannot proceed.")
         print("Missing prerequisites:")
@@ -260,7 +270,7 @@ def run_smoke_test(
         "arm": "Arm A (plain)",
         "decode_mode": "plain",
         "game_id": chosen_game,
-        "evaluation_type": "REAL_MODEL_ZERO_SHOT_BASE_PLAIN",
+        "evaluation_type": eval_type,
         "is_real_model": True,
         "adapter_loaded": False,
         "adapter_path": None,
@@ -297,7 +307,7 @@ def run_smoke_test(
             "arm": "Arm B (think_commit)",
             "decode_mode": "think_commit",
             "game_id": chosen_game,
-            "evaluation_type": "REAL_MODEL_ZERO_SHOT_BASE_TC",
+            "evaluation_type": eval_type,
             "final_state": "WALL_CLOCK_LIMIT",
             "skipped": True,
             "reason": "WALL_CLOCK_LIMIT",
@@ -342,7 +352,7 @@ def run_smoke_test(
             "arm": "Arm B (think_commit)",
             "decode_mode": "think_commit",
             "game_id": chosen_game,
-            "evaluation_type": "REAL_MODEL_ZERO_SHOT_BASE_TC",
+            "evaluation_type": eval_type,
             "is_real_model": True,
             "adapter_loaded": False,
             "adapter_path": None,

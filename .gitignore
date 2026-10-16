@@ -39,3 +39,9 @@ evidence/**/artifacts/
 evidence/**/*.jsonl
 predictions/**/
 
+# Web Application artifacts
+web/node_modules/
+web/.next/
+web/out/
+.env*.local
+.env.local

@@ -14,6 +14,7 @@ Validates:
 NOTE: All tests in this file run with deterministic fake runners and are strictly labeled TEST_ONLY.
 """
 
+import time
 import unittest
 from typing import Dict, Any, List, Optional
 import numpy as np
@@ -302,6 +303,145 @@ class TestAbsentModelHandling(unittest.TestCase):
         )
         with self.assertRaises(Exception):
             runner.load_model()
+
+
+class TestSessionTerminationAndWatchdogRegression(unittest.TestCase):
+    """
+    Regression test suite for watchdog timeout preservation and session finalization.
+    Verifies that WALL_CLOCK_LIMIT is preserved in SessionSummary when the watchdog fires,
+    while normal terminal states (WIN, GAME_OVER, NOT_FINISHED, parse_failed) remain intact.
+    """
+
+    def test_watchdog_timeout_at_step_one_preserves_wall_clock_limit(self):
+        """Proves that a timeout before step 1 preserves WALL_CLOCK_LIMIT and avoids unbound variables."""
+        fake_runner = DeterministicModelRunner(
+            name="fake-solver",
+            default_response='{"action": "ACTION1", "thought": "Up"}'
+        )
+        agent = SAMARC3Agent(model_runner=fake_runner, is_real_model=False)
+        env = MockArcEnvironment(target_coord=(2, 2))
+
+        # Kernel start time 100s ago with a 10s budget -> timeout immediately
+        summary = agent.run_session(
+            env,
+            game_id="timeout_game_s1",
+            max_steps=10,
+            wall_clock_limit_seconds=10.0,
+            kernel_start_time=time.perf_counter() - 100.0,
+        )
+
+        self.assertEqual(summary.final_state, "WALL_CLOCK_LIMIT")
+        self.assertFalse(summary.success)
+        self.assertEqual(summary.total_steps, 0)
+        self.assertEqual(summary.levels_completed, 0)
+
+    def test_watchdog_timeout_mid_session_preserves_wall_clock_limit(self):
+        """Proves that a timeout after partial execution preserves WALL_CLOCK_LIMIT over env state."""
+        def slow_generator(prompt):
+            return '{"action": "ACTION2", "thought": "Moving down"}'
+
+        fake_runner = DeterministicModelRunner(
+            name="fake-slow-solver",
+            generator_fn=slow_generator
+        )
+        agent = SAMARC3Agent(model_runner=fake_runner, is_real_model=False)
+        env = MockArcEnvironment(target_coord=(4, 2))
+
+        def step_cb_sleep(step_result):
+            time.sleep(0.06)
+
+        summary = agent.run_session(
+            env,
+            game_id="timeout_game_mid",
+            max_steps=10,
+            wall_clock_limit_seconds=0.05,
+            kernel_start_time=time.perf_counter(),
+            step_callback=step_cb_sleep,
+        )
+
+        self.assertEqual(summary.final_state, "WALL_CLOCK_LIMIT")
+        self.assertFalse(summary.success)
+        self.assertEqual(summary.total_steps, 1)
+
+    def test_normal_terminal_state_win_preserved(self):
+        """Proves that a winning game retains 'WIN' and success=True."""
+        responses = {
+            "Step 1": '{"action": "ACTION2", "thought": "Down 1"}',
+            "Step 2": '{"action": "ACTION2", "thought": "Down 2"}',
+            "Step 3": '{"action": "ACTION4", "thought": "Right 1"}',
+            "Step 4": '{"action": "ACTION4", "thought": "Right 2"}',
+        }
+        call_count = [0]
+        def generator(prompt):
+            call_count[0] += 1
+            return responses.get(f"Step {call_count[0]}", '{"action": "ACTION1"}')
+
+        agent = SAMARC3Agent(
+            model_runner=DeterministicModelRunner(name="solver", generator_fn=generator),
+            is_real_model=False
+        )
+        env = MockArcEnvironment(target_coord=(2, 2))
+        summary = agent.run_session(env, game_id="win_game", max_steps=10)
+
+        self.assertEqual(summary.final_state, "WIN")
+        self.assertTrue(summary.success)
+        self.assertEqual(summary.levels_completed, 1)
+        self.assertEqual(summary.total_steps, 4)
+
+    def test_normal_terminal_state_game_over_preserved(self):
+        """Proves that a trap triggering GAME_OVER is correctly preserved as the terminal state."""
+        # Trapping path: moving to [4, 4]
+        # (0,0) -> ACTION2 4 times -> (4,0), ACTION4 4 times -> (4,4)
+        moves = ["ACTION2"] * 4 + ["ACTION4"] * 4
+        call_count = [0]
+        def trap_generator(prompt):
+            act = moves[call_count[0]] if call_count[0] < len(moves) else "ACTION1"
+            call_count[0] += 1
+            return f'{{"action": "{act}", "thought": "Trapping"}}'
+
+        agent = SAMARC3Agent(
+            model_runner=DeterministicModelRunner(name="trap-runner", generator_fn=trap_generator),
+            is_real_model=False
+        )
+        env = MockArcEnvironment(target_coord=(2, 2))
+        summary = agent.run_session(env, game_id="game_over_game", max_steps=8)
+
+        self.assertEqual(summary.final_state, "GAME_OVER")
+        self.assertFalse(summary.success)
+
+    def test_max_steps_exhaustion_preserves_not_finished(self):
+        """Proves that running out of steps without winning or timing out preserves NOT_FINISHED."""
+        agent = SAMARC3Agent(
+            model_runner=DeterministicModelRunner(
+                name="loop-runner",
+                default_response='{"action": "ACTION1", "thought": "Up against wall"}'
+            ),
+            is_real_model=False
+        )
+        env = MockArcEnvironment(target_coord=(2, 2))
+        summary = agent.run_session(env, game_id="exhaust_game", max_steps=3)
+
+        self.assertEqual(summary.final_state, "NOT_FINISHED")
+        self.assertFalse(summary.success)
+        self.assertEqual(summary.total_steps, 3)
+
+    def test_parse_failure_termination_preserves_parse_failed(self):
+        """Proves that unparseable action stops session and records 'parse_failed'."""
+        agent = SAMARC3Agent(
+            model_runner=DeterministicModelRunner(
+                name="gibberish-runner",
+                default_response="Total nonsense without json"
+            ),
+            enable_verification_guard=False,
+            stop_on_parse_failure=True,
+            is_real_model=False
+        )
+        env = MockArcEnvironment(target_coord=(2, 2))
+        summary = agent.run_session(env, game_id="parse_fail_game", max_steps=5)
+
+        self.assertEqual(summary.final_state, "parse_failed")
+        self.assertFalse(summary.success)
+        self.assertEqual(summary.total_steps, 1)
 
 
 if __name__ == "__main__":

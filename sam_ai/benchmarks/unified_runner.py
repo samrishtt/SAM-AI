@@ -18,7 +18,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Any, Callable
 import torch
 
-from sam_ai.models.loader import SAMModelManager, ModelConfig
+from sam_ai.models.loader import SAMModelManager, ModelConfig, PRIMARY_MODEL_ID
 from sam_ai.benchmarks.arc_solver import ARCOfficialEvaluator, ARCTask, parse_grid_from_text
 from sam_ai.benchmarks.math_evaluator import MathOfficialEvaluator, MathProblem, extract_boxed_answer
 from sam_ai.leaderboard.swebench_runner import SWEBenchLeaderboardRunner
@@ -37,7 +37,7 @@ class BenchmarkRunSummary:
 
 class SAMUnifiedBenchmarkRunner:
     """
-    Connects DeepSeek-R1-Distill-Qwen-14B to all official evaluation harnesses.
+    Connects foundation model (default: Qwen/Qwen3.8-27B) to all official evaluation harnesses.
     """
 
     def __init__(
@@ -48,7 +48,7 @@ class SAMUnifiedBenchmarkRunner:
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.model_manager = model_manager or SAMModelManager(
-            ModelConfig(model_name_or_path="deepseek-ai/DeepSeek-R1-Distill-Qwen-14B")
+            ModelConfig(model_name_or_path=PRIMARY_MODEL_ID)
         )
 
     def generate_completion(

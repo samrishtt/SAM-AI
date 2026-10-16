@@ -110,41 +110,133 @@ def find_environment_files(root=INPUT_ROOT):
     return None
 
 
-def find_base_model(root=INPUT_ROOT, name_hint="deepseek-r1-distill-qwen-14b"):
+class ModelMismatchError(RuntimeError):
+    """Raised when discovered model contradicts the explicitly requested target model."""
+    pass
+
+
+def verify_model_identity(model_dir, config=None, expected_model="qwen3.8"):
+    """
+    Verifies that the discovered model directory and config match the expected model.
+    Fails closed if the expected model is missing, or if a different model
+    (such as DeepSeek) is discovered when Qwen was expected.
+    """
+    if not model_dir or not os.path.exists(model_dir):
+        raise FileNotFoundError(f"Model directory '{model_dir}' does not exist.")
+
+    if config is None:
+        cfg_path = os.path.join(model_dir, "config.json")
+        if os.path.exists(cfg_path):
+            try:
+                with open(cfg_path, encoding="utf-8") as fh:
+                    config = json.load(fh)
+            except Exception as e:
+                raise RuntimeError(f"Corrupt or unreadable config.json in '{model_dir}': {e}")
+        else:
+            config = {}
+
+    expected_lower = (expected_model or "").lower()
+    dir_lower = str(model_dir).lower()
+    name_or_path = str(config.get("_name_or_path", "")).lower()
+    model_type = str(config.get("model_type", "")).lower()
+
+    if any(k in expected_lower for k in ("qwen3.8", "qwen38", "qwen3", "qwen")):
+        # Refuse DeepSeek silent substitution
+        if "deepseek" in dir_lower or "deepseek" in name_or_path:
+            raise ModelMismatchError(
+                f"MODEL IDENTITY MISMATCH: Smoke test is explicitly configured for Qwen3.8 ('{expected_model}'), "
+                f"but discovered DeepSeek checkpoint in '{model_dir}'. "
+                f"Refusing silent model substitution. To evaluate DeepSeek, set target_model='deepseek' explicitly."
+            )
+        is_qwen = ("qwen" in dir_lower or "qwen" in model_type or "qwen" in name_or_path)
+        if not is_qwen:
+            raise ModelMismatchError(
+                f"MODEL IDENTITY MISMATCH: Expected Qwen model for target '{expected_model}', "
+                f"but discovered incompatible model in '{model_dir}' (model_type='{model_type}')."
+            )
+        return {
+            "verified": True,
+            "expected_model": expected_model,
+            "discovered_dir": model_dir,
+            "model_type": model_type,
+            "family": "qwen3.8" if ("qwen3.8" in dir_lower or "qwen3.8" in name_or_path) else "qwen",
+        }
+    elif any(k in expected_lower for k in ("deepseek", "unsloth-deepseek")):
+        is_deepseek = ("deepseek" in dir_lower or "deepseek" in name_or_path)
+        if not is_deepseek:
+            raise ModelMismatchError(
+                f"MODEL IDENTITY MISMATCH: Explicitly configured for DeepSeek baseline ('{expected_model}'), "
+                f"but discovered non-DeepSeek model in '{model_dir}'."
+            )
+        return {
+            "verified": True,
+            "expected_model": expected_model,
+            "discovered_dir": model_dir,
+            "model_type": model_type,
+            "family": "deepseek_r1_distill",
+        }
+    return {
+        "verified": True,
+        "expected_model": expected_model,
+        "discovered_dir": model_dir,
+        "model_type": model_type,
+        "family": "generic",
+    }
+
+
+def find_base_model(root=INPUT_ROOT, name_hint=None, target_model=None):
     """A directory with config.json + safetensors whose path mentions the model.
 
     Returns (dir, summary) where summary records what the config says, so the
     run log shows exactly which weights were found. Never picks a directory
-    that does not match name_hint (no silent substitution).
+    that does not match the candidate hints (no silent substitution with wrong models).
+    Prioritizes primary Qwen3.8-27B, then baseline DeepSeek-14B when unspecified.
+    When target_model is specified, searches strictly for that model family.
     """
-    for dirpath, _, filenames in _walk(root):
-        if "config.json" in filenames and any(f.endswith(".safetensors") for f in filenames):
-            if name_hint.lower() not in dirpath.lower():
-                continue
-            try:
-                with open(os.path.join(dirpath, "config.json"), encoding="utf-8") as fh:
-                    cfg = json.load(fh)
-            except (OSError, ValueError):
-                continue
-            q = cfg.get("quantization_config") or {}
-            return dirpath, {
-                "model_type": cfg.get("model_type"),
-                "hidden_size": cfg.get("hidden_size"),
-                "num_hidden_layers": cfg.get("num_hidden_layers"),
-                "quant_method": q.get("quant_method"),
-                "load_in_4bit": q.get("load_in_4bit"),
-                "bnb_4bit_quant_type": q.get("bnb_4bit_quant_type"),
-            }
+    if target_model:
+        t_lower = target_model.lower()
+        if any(k in t_lower for k in ("qwen3.8", "qwen38", "qwen3")):
+            hints = ["qwen3.8-27b", "qwen3.8", "qwen3"]
+        elif "deepseek" in t_lower:
+            hints = ["deepseek-r1-distill-qwen-14b", "unsloth-deepseek", "deepseek"]
+        else:
+            hints = [target_model]
+    elif name_hint:
+        hints = [name_hint]
+    else:
+        # Priority order when unspecified: primary research checkpoint first, then legacy baseline
+        hints = ["qwen3.8-27b", "qwen3.8", "deepseek-r1-distill-qwen-14b", "unsloth-deepseek"]
+
+    for hint in hints:
+        for dirpath, _, filenames in _walk(root):
+            if "config.json" in filenames and any(f.endswith(".safetensors") for f in filenames):
+                if hint.lower() not in dirpath.lower():
+                    continue
+                try:
+                    with open(os.path.join(dirpath, "config.json"), encoding="utf-8") as fh:
+                        cfg = json.load(fh)
+                except (OSError, ValueError):
+                    continue
+                q = cfg.get("quantization_config") or {}
+                return dirpath, {
+                    "matched_hint": hint,
+                    "model_type": cfg.get("model_type"),
+                    "hidden_size": cfg.get("hidden_size"),
+                    "num_hidden_layers": cfg.get("num_hidden_layers"),
+                    "quant_method": q.get("quant_method"),
+                    "load_in_4bit": q.get("load_in_4bit"),
+                    "bnb_4bit_quant_type": q.get("bnb_4bit_quant_type"),
+                }
     return None, None
 
 
-def discover_inputs(root=INPUT_ROOT, verbose=True):
+def discover_inputs(root=INPUT_ROOT, verbose=True, name_hint=None, target_model=None):
     layout = tree(root)
     if verbose:
         print(f"--- layout of {root} ---\n{layout}\n--- end layout ---")
     sam_parent = find_sam_ai_parent(root)
     env_dir = find_environment_files(root)
-    model_dir, model_cfg = find_base_model(root)
+    model_dir, model_cfg = find_base_model(root, name_hint=name_hint, target_model=target_model)
     found = {
         "sam_ai_parent": sam_parent,
         "environment_files": env_dir,
@@ -153,8 +245,9 @@ def discover_inputs(root=INPUT_ROOT, verbose=True):
     }
     missing = [k for k in ("sam_ai_parent", "environment_files", "base_model_dir") if not found[k]]
     if missing:
+        target_info = f" for target '{target_model or name_hint}'" if (target_model or name_hint) else ""
         raise RuntimeError(
-            f"Missing inputs: {missing}. Nothing was substituted. Layout seen:\n{layout}"
+            f"Missing inputs: {missing}{target_info}. Nothing was substituted. Layout seen:\n{layout}"
         )
     if verbose:
         print(json.dumps(found, indent=2))

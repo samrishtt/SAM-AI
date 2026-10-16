@@ -1,0 +1,60 @@
+{
+  "dataset_id": "gsm8k_verifiable_reasoning_v1",
+  "source": "Hand-curated problem fixtures inspired by OpenAI Grade School Math (MIT License)",
+  "version": "1.0.0",
+  "license": "MIT",
+  "provenance": {
+    "author": "SAM-AI Project (fixtures inspired by OpenAI GSM8K format)",
+    "source_url": "https://github.com/openai/grade-school-math",
+    "classification": "pipeline_smoke_test_fixture",
+    "is_canonical_gsm8k": false,
+    "purpose": "Hand-curated 20 train / 5 val / 10 eval problem fixtures designed strictly for pipeline smoke testing, tokenization verification, and preflight dry-run verification. NOT to be construed as or evaluated as canonical benchmark evidence of general reasoning improvement.",
+    "verification_method": "Regex exact match on #### <number> canonicalized to float/integer equality"
+  },
+  "is_synthetic": false,
+  "generator_id": null,
+  "filtering_criteria": [],
+  "schema_definition": {
+    "id": "str",
+    "question": "str",
+    "reasoning": "str",
+    "answer": "str",
+    "solution": "str"
+  },
+  "splits": {
+    "train": {
+      "name": "train",
+      "num_examples": 20,
+      "file_path": "C:\\Users\\Sam Pavi\\.gemini\\antigravity\\scratch\\micro_agi_integrate_claude\\evidence\\experiment_001\\dataset\\train.jsonl",
+      "sha256_hash": "3f2f8d711223ca81029193b87ab6a9a645cd6e801a3614ea730ce4b23497fbab",
+      "format": "jsonl"
+    },
+    "validation": {
+      "name": "validation",
+      "num_examples": 5,
+      "file_path": "C:\\Users\\Sam Pavi\\.gemini\\antigravity\\scratch\\micro_agi_integrate_claude\\evidence\\experiment_001\\dataset\\validation.jsonl",
+      "sha256_hash": "0f424e500e15b93accfd1bbf7b29a1639f46059edead740709d75e0425060df4",
+      "format": "jsonl"
+    },
+    "frozen_eval": {
+      "name": "frozen_eval",
+      "num_examples": 10,
+      "file_path": "C:\\Users\\Sam Pavi\\.gemini\\antigravity\\scratch\\micro_agi_integrate_claude\\evidence\\experiment_001\\dataset\\frozen_eval.jsonl",
+      "sha256_hash": "d9d34d59d7fb60efd06f28ba008f8fe34f1fe6558ace7e677db6e4dc49739ddb",
+      "format": "jsonl"
+    }
+  },
+  "is_test_fixture": false,
+  "validation_status": "VALIDATED",
+  "metadata": {
+    "answer_delimiter": "####",
+    "canonicalization_rules": [
+      "strip_whitespace",
+      "strip_currency_symbols",
+      "strip_commas",
+      "parse_to_float_or_int"
+    ],
+    "smoke_test_only": true,
+    "held_out_canonical_eval_required": "Must evaluate on canonical GSM8K test set (1,319 examples) before claiming capability improvements."
+  }
+}
