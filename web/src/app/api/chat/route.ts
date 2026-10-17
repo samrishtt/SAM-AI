@@ -1,5 +1,6 @@
 import { streamText } from "ai";
-import { getModelInstance, getGenerationTemperature, SAM_AI_SYSTEM_PROMPT } from "@/lib/model-adapter";
+import { getModelInstance, getGenerationTemperature, SAM_AI_SYSTEM_PROMPT, validateInferenceEndpoint } from "@/lib/model-adapter";
+import { isGradioEndpoint, streamGradioChat } from "@/lib/gradio-connector";
 import { validateSitePassword, getClientIp } from "@/lib/security";
 import { checkRateLimit } from "@/lib/rate-limiter";
 
@@ -89,7 +90,53 @@ export async function POST(req: Request) {
     }
   }
 
-  // 4. Instantiate Model Adapter
+  // 4. Check for Gradio Space Backend vs. OpenAI-compatible backend
+  const configuredBaseUrl = process.env.SAM_AI_BASE_URL?.trim();
+  if (configuredBaseUrl && isGradioEndpoint(configuredBaseUrl)) {
+    const validation = validateInferenceEndpoint(configuredBaseUrl);
+    if (!validation.isValid) {
+      const isProhibited = validation.errorCode === "PROHIBITED_THIRD_PARTY_PROVIDER";
+      return new Response(
+        JSON.stringify({
+          error: validation.error,
+          code: isProhibited ? "PROHIBITED_THIRD_PARTY_PROVIDER" : "UNTRUSTED_INFERENCE_HOST",
+        }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
+    try {
+      console.log(
+        `[SAM-AI Chat] Invoking Gradio Space='${configuredBaseUrl}', messagesCount=${messages.length}, clientHash=${clientIp.slice(0, 6)}...`
+      );
+      const temperature = getGenerationTemperature();
+      const apiKey = process.env.SAM_AI_API_KEY?.trim();
+      const gradioStream = await streamGradioChat({
+        baseUrl: configuredBaseUrl,
+        messages,
+        temperature,
+        apiKey,
+      });
+
+      return new Response(gradioStream, {
+        headers: {
+          "Content-Type": "text/plain; charset=utf-8",
+          "x-vercel-ai-data-stream": "v1",
+        },
+      });
+    } catch (gradioErr: any) {
+      console.error("[SAM-AI Chat] Gradio streaming error:", gradioErr?.message || gradioErr);
+      return new Response(
+        JSON.stringify({
+          error: gradioErr?.message || "Failed to generate stream response from Gradio Space",
+          code: "PROVIDER_STREAM_ERROR",
+        }),
+        { status: 502, headers: { "Content-Type": "application/json" } }
+      );
+    }
+  }
+
+  // 5. Instantiate OpenAI-Compatible Model Adapter
   let modelInstance;
   try {
     modelInstance = getModelInstance();

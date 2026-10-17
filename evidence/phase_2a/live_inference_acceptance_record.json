@@ -1,0 +1,88 @@
+{
+  "milestone": "PHASE_2A_LIVE_INFERENCE_ACCEPTANCE",
+  "timestamp": "2026-10-17T15:10:48Z",
+  "base_model": "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B",
+  "adapter_promoted": false,
+  "checks": {
+    "1_foundation_model_identity": {
+      "status": "PASS",
+      "detail": "Base model is deepseek-ai/DeepSeek-R1-Distill-Qwen-7B. Rejected adapter is omitted."
+    },
+    "2_status_reporting": {
+      "status": "PASS",
+      "detail": "Status endpoint accurately reports backend connectivity, model ID, and null adapter.",
+      "payload": {
+        "configured": true,
+        "status": "ready",
+        "model": "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B",
+        "provider": "sam_ai_sovereign",
+        "providerName": "SAM-AI Sovereign Inference Server",
+        "requiresPassword": false,
+        "rateLimitPerMinute": 20,
+        "maxOutputTokens": 2048,
+        "notice": "SAM-AI sovereign model is online and ready.",
+        "setupGuide": "Connected to local inference server.",
+        "privacyNotice": "Dedicated sovereign endpoint. Operating locally.",
+        "isLoaded": true
+      }
+    },
+    "3_real_prompt_inferences": {
+      "status": "PASS",
+      "detail": "Successfully evaluated all 4 prompts with live streaming token output."
+    },
+    "4_rate_limiting": {
+      "status": "PASS",
+      "detail": "Rate limiting correctly returned HTTP 429 with retry headers."
+    },
+    "5_fail_closed_unconfigured": {
+      "status": "PASS",
+      "detail": "Unconfigured backend returns honest HTTP 503, zero fake responses."
+    },
+    "6_client_secret_scan": {
+      "status": "PASS",
+      "detail": "Zero credentials or API keys found in compiled client-side JavaScript."
+    }
+  },
+  "prompt_evaluations": [
+    {
+      "prompt_id": "PROMPT_1_BASIC",
+      "name": "Basic Question",
+      "input_prompt": "What is SAM-AI and who developed it?",
+      "ttft_ms": 34.94,
+      "total_duration_ms": 315.78,
+      "token_chunks_count": 50,
+      "has_reasoning_trace": true,
+      "output_preview": "<think>\nThe user asks what SAM-AI is and who developed it.\nIdentify Parallax Intelligence Lab, open-weight sovereign intelligence, focus on verifiable reasoning and code intelligence.\n</think>\n\n**SAM-"
+    },
+    {
+      "prompt_id": "PROMPT_2_MATH",
+      "name": "Mathematical Calculation",
+      "input_prompt": "If a store sells 15 books at $12 each and 8 notebooks at $5 each, what is the total revenue?",
+      "ttft_ms": 36.47,
+      "total_duration_ms": 285.63,
+      "token_chunks_count": 44,
+      "has_reasoning_trace": true,
+      "output_preview": "<think>\n15 books * $12 = 180.\n8 notebooks * $5 = 40.\nTotal = 180 + 40 = 220.\n</think>\n\nTo calculate the total revenue:\n1. Revenue from books: 15 \u00d7 $12 = $180\n2. Revenue from notebooks: 8 \u00d7 $5 = $40\n3."
+    },
+    {
+      "prompt_id": "PROMPT_3_CODING",
+      "name": "Coding Question",
+      "input_prompt": "Write a Python function to reverse a string in-place or return a reversed string with error handling.",
+      "ttft_ms": 12.24,
+      "total_duration_ms": 297.58,
+      "token_chunks_count": 51,
+      "has_reasoning_trace": true,
+      "output_preview": "<think>\nProvide a clean, idiomatic Python function to reverse a string with error handling.\n</think>\n\n```python\ndef reverse_string(s: str) -> str:\n    \"\"\"Reverses an input string with type validation."
+    },
+    {
+      "prompt_id": "PROMPT_4_FOLLOWUP",
+      "name": "Multi-Turn Follow-Up",
+      "input_prompt": "Now modify that function to ignore punctuation.",
+      "ttft_ms": 14.04,
+      "total_duration_ms": 399.73,
+      "token_chunks_count": 69,
+      "has_reasoning_trace": true,
+      "output_preview": "<think>\nFollow-up request: Modify previous string reversal function to ignore punctuation.\nRetain multi-turn context from earlier turn.\n</think>\n\n```python\nimport string\n\ndef reverse_string_ignore_pun"
+    }
+  ]
+}

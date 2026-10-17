@@ -1,6 +1,7 @@
 import { createOpenAI } from "@ai-sdk/openai";
 import { streamText } from "ai";
 import { BackendStatus, BackendStatusCode } from "@/types/chat";
+import { isGradioEndpoint, checkGradioHealth } from "./gradio-connector";
 
 export type StreamModel = Parameters<typeof streamText>[0]["model"];
 
@@ -270,7 +271,9 @@ export function getActiveAdapterPath(): string | undefined {
   if (envAdapter && envAdapter.length > 0) {
     return envAdapter;
   }
-  return PRIMARY_ADAPTER_PATH;
+  // The Experiment 001 adapter was rejected due to pilot regression.
+  // Do not load or promote any adapter by default.
+  return undefined;
 }
 
 /**
@@ -417,7 +420,29 @@ export async function inspectBackendReadiness(): Promise<BackendStatus> {
     };
   }
 
-  // 3. Bounded-time Health Inspection (2.0 second timeout)
+  // 3. Gradio Space Health Inspection
+  if (isGradioEndpoint(baseUrl)) {
+    const gradioHealth = await checkGradioHealth(baseUrl, process.env.SAM_AI_API_KEY?.trim());
+    return {
+      configured: true,
+      status: gradioHealth.isReady ? "ready" : "unreachable",
+      model: gradioHealth.modelName || model,
+      adapter: undefined, // Pure foundation model, no rejected adapter
+      provider: "sam_ai_sovereign",
+      providerName: "SAM-AI Sovereign ZeroGPU Space",
+      endpoint: validation.hostname || baseUrl,
+      requiresPassword,
+      rateLimitPerMinute: rateLimit,
+      maxOutputTokens,
+      notice: gradioHealth.detail,
+      setupGuide: gradioHealth.isReady
+        ? "Connected to sovereign Gradio ZeroGPU Space."
+        : "Check that the Hugging Face ZeroGPU Space is running and healthy.",
+      privacyNotice: "Dedicated sovereign endpoint.",
+    };
+  }
+
+  // 4. Bounded-time Health Inspection (2.0 second timeout)
   const healthUrl = validation.healthCheckUrl!;
 
   try {
@@ -526,7 +551,7 @@ export async function inspectBackendReadiness(): Promise<BackendStatus> {
       };
     }
 
-    if (data.is_loaded === true && data.status === "ok") {
+    if ((data.is_loaded === true || data.is_ready === true) && (data.status === "ok" || data.status === "ready")) {
       return {
         configured: true,
         status: "ready",
