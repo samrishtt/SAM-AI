@@ -40,6 +40,18 @@ SYSTEM_PROMPT_CODE = (
 )
 
 
+try:
+    import spaces
+except ImportError:
+    class _MockSpaces:
+        def GPU(self, duration=60):
+            def decorator(fn):
+                return fn
+            return decorator
+    spaces = _MockSpaces()
+
+
+@spaces.GPU(duration=20)
 def chat_respond(user_message, chat_history, temperature, top_p, max_tokens):
     """Handles multi-turn conversation streaming in SAM-AI Chat."""
     if not user_message or not user_message.strip():
@@ -70,6 +82,7 @@ def chat_respond(user_message, chat_history, temperature, top_p, max_tokens):
         yield new_history, ""
 
 
+@spaces.GPU(duration=20)
 def code_respond(user_prompt, code_context, task_type, temperature, max_tokens):
     """Handles coding tasks, explanations, and diff generation in SAM-AI Code."""
     if not user_prompt or not user_prompt.strip():

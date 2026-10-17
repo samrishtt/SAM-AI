@@ -167,13 +167,19 @@ class SamAiModelEngine:
                 trust_remote_code=True
             )
 
-            # In ZeroGPU, model is moved to cuda at module level
-            self.model = AutoModelForCausalLM.from_pretrained(
-                self.base_model_name,
-                torch_dtype=dtype,
-                device_map="auto" if has_cuda else None,
-                trust_remote_code=True,
-            )
+            # In ZeroGPU, model is explicitly placed on cuda
+            if has_cuda:
+                self.model = AutoModelForCausalLM.from_pretrained(
+                    self.base_model_name,
+                    torch_dtype=dtype,
+                    trust_remote_code=True,
+                ).to("cuda")
+            else:
+                self.model = AutoModelForCausalLM.from_pretrained(
+                    self.base_model_name,
+                    torch_dtype=dtype,
+                    trust_remote_code=True,
+                )
 
             if self.adapter_dir is not None:
                 self.status = ModelLifecycleStatus.ATTACHING_ADAPTER
@@ -198,7 +204,6 @@ class SamAiModelEngine:
             print(f"[ERROR] {self.status_detail}", file=sys.stderr)
             return False
 
-    @spaces.GPU(duration=60)
     def generate_stream(
         self,
         messages: list,
@@ -246,8 +251,8 @@ class SamAiModelEngine:
                 prompt_text += "<|im_start|>assistant\n"
 
             inputs = self.tokenizer(prompt_text, return_tensors="pt")
-            if torch.cuda.is_available():
-                inputs = {k: v.to("cuda") for k, v in inputs.items()}
+            device = next(self.model.parameters()).device
+            inputs = {k: v.to(device) for k, v in inputs.items()}
 
             streamer = TextIteratorStreamer(
                 self.tokenizer,
