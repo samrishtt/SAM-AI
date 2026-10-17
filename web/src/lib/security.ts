@@ -44,16 +44,23 @@ export function validateSitePassword(providedPassword?: string | null): {
 }
 
 /**
- * Extracts client IP address from standard reverse-proxy headers for rate limiting.
+ * Extracts client IP address for rate limiting.
+ * Only trusts forwarded headers (x-forwarded-for, x-real-ip) if SAM_AI_TRUST_PROXY is explicitly enabled.
+ * Otherwise defaults to loopback to prevent spoofed header rate-limiting bypass.
  */
 export function getClientIp(headers: Headers): string {
-  const forwardedFor = headers.get("x-forwarded-for");
-  if (forwardedFor) {
-    const firstIp = forwardedFor.split(",")[0]?.trim();
-    if (firstIp) return firstIp;
+  const trustProxy =
+    process.env.SAM_AI_TRUST_PROXY === "true" || process.env.SAM_AI_TRUST_PROXY === "1";
+
+  if (trustProxy) {
+    const forwardedFor = headers.get("x-forwarded-for");
+    if (forwardedFor) {
+      const firstIp = forwardedFor.split(",")[0]?.trim();
+      if (firstIp && /^[0-9a-fA-F:.]+$/.test(firstIp)) return firstIp;
+    }
+    const realIp = headers.get("x-real-ip");
+    if (realIp && /^[0-9a-fA-F:.]+$/.test(realIp.trim())) return realIp.trim();
   }
-  const realIp = headers.get("x-real-ip");
-  if (realIp) return realIp.trim();
 
   return "127.0.0.1";
 }

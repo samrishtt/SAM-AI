@@ -11,7 +11,7 @@ export function isBrowser(): boolean {
 export function getStoredPassword(): string {
   if (!isBrowser()) return "";
   try {
-    return localStorage.getItem(SITE_PASSWORD_KEY) || "";
+    return sessionStorage.getItem(SITE_PASSWORD_KEY) || localStorage.getItem(SITE_PASSWORD_KEY) || "";
   } catch {
     return "";
   }
@@ -20,13 +20,16 @@ export function getStoredPassword(): string {
 export function setStoredPassword(password: string): void {
   if (!isBrowser()) return;
   try {
-    localStorage.setItem(SITE_PASSWORD_KEY, password);
+    sessionStorage.setItem(SITE_PASSWORD_KEY, password);
+    // Remove from long-term localStorage to prevent permanent disk persistence
+    localStorage.removeItem(SITE_PASSWORD_KEY);
   } catch {}
 }
 
 export function clearStoredPassword(): void {
   if (!isBrowser()) return;
   try {
+    sessionStorage.removeItem(SITE_PASSWORD_KEY);
     localStorage.removeItem(SITE_PASSWORD_KEY);
   } catch {}
 }

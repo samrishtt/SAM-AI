@@ -19,6 +19,7 @@ import {
 } from "@/lib/storage";
 import { Conversation, Message, BackendStatus } from "@/types/chat";
 import { Sparkles, MessageSquare, Terminal, Lightbulb, Compass, Loader2, AlertTriangle } from "lucide-react";
+import { CodeWorkspace } from "./CodeWorkspace";
 
 export const ChatInterface: React.FC = () => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -26,12 +27,13 @@ export const ChatInterface: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [storedPassword, setStoredPasswordState] = useState("");
+  const [activeTab, setActiveTab] = useState<"chat" | "code">("chat");
   const [status, setStatus] = useState<BackendStatus>({
     configured: false,
     status: "not_configured",
-    model: "Qwen/Qwen3.8-27B",
-    provider: "qwen_openai_compatible",
-    providerName: "Qwen Sovereign Inference Endpoint",
+    model: "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B",
+    provider: "sam_ai_sovereign",
+    providerName: "SAM-AI Sovereign Inference Engine",
     requiresPassword: false,
     rateLimitPerMinute: 20,
     notice: "Initializing SAM-AI backend...",
@@ -209,25 +211,30 @@ export const ChatInterface: React.FC = () => {
 
   return (
     <div className="flex h-[100dvh] w-full bg-slate-950 overflow-hidden">
-      {/* Sidebar Navigation */}
-      <Sidebar
-        conversations={conversations}
-        activeId={activeConvId}
-        onSelectConversation={handleSelectConversation}
-        onNewConversation={handleNewConversation}
-        onDeleteConversation={handleDeleteConversation}
-        isOpen={isSidebarOpen}
-        onClose={() => setIsSidebarOpen(false)}
-      />
+      {/* Sidebar Navigation (Chat mode only) */}
+      {activeTab === "chat" && (
+        <Sidebar
+          conversations={conversations}
+          activeId={activeConvId}
+          onSelectConversation={handleSelectConversation}
+          onNewConversation={handleNewConversation}
+          onDeleteConversation={handleDeleteConversation}
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
+        />
+      )}
 
-      {/* Main Chat Stage */}
+      {/* Main Stage */}
       <div className="flex-1 flex flex-col h-full overflow-hidden">
         <Header
           modelId={status.model}
           providerName={status.providerName}
           isConfigured={status.configured}
+          backendStatus={status.status}
           hasPasswordGate={status.requiresPassword}
           isUnlocked={Boolean(storedPassword)}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
           onOpenPasswordModal={() => setIsPasswordModalOpen(true)}
           onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)}
           isSidebarOpen={isSidebarOpen}
@@ -235,8 +242,12 @@ export const ChatInterface: React.FC = () => {
 
         <NoticeBanners status={status} />
 
-        {/* Message Stream Scroll Area */}
-        <div className="flex-1 overflow-y-auto">
+        {activeTab === "code" ? (
+          <CodeWorkspace backendStatus={status} />
+        ) : (
+          <>
+            {/* Message Stream Scroll Area */}
+            <div className="flex-1 overflow-y-auto">
           {messages.length === 0 ? (
             <div className="max-w-3xl mx-auto px-4 py-8 sm:py-12 text-center">
               <div className="w-12 h-12 rounded-2xl bg-blue-600/10 border border-blue-500/20 text-blue-400 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-500/10">
@@ -342,6 +353,8 @@ export const ChatInterface: React.FC = () => {
           isUnlocked={Boolean(storedPassword)}
           onOpenPasswordModal={() => setIsPasswordModalOpen(true)}
         />
+          </>
+        )}
       </div>
 
       {/* Password Modal */}

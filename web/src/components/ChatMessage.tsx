@@ -58,7 +58,7 @@ const CodeBlock: React.FC<{ language?: string; children: React.ReactNode }> = ({
 
 export const ChatMessage: React.FC<ChatMessageProps> = ({
   message,
-  modelId = "Qwen/Qwen3.8-27B",
+  modelId = "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B",
   isLastAssistant = false,
   onRetry,
   isLoading = false,

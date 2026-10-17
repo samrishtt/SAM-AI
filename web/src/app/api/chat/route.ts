@@ -94,14 +94,27 @@ export async function POST(req: Request) {
   try {
     modelInstance = getModelInstance();
   } catch (err: any) {
+    const isProhibited = err?.code === "PROHIBITED_THIRD_PARTY_PROVIDER";
     const isBackendNotConfigured = err?.code === "MODEL_BACKEND_NOT_CONFIGURED";
+    const isUntrustedHost = err?.code === "UNTRUSTED_INFERENCE_HOST";
+
+    let statusCode = 500;
+    if (isProhibited || isUntrustedHost) statusCode = 400;
+    else if (isBackendNotConfigured) statusCode = 503;
+
     return new Response(
       JSON.stringify({
         error: err.message || "Model provider configuration error",
-        code: isBackendNotConfigured ? "MODEL_BACKEND_NOT_CONFIGURED" : "PROVIDER_CONFIG_ERROR",
+        code: isProhibited
+          ? "PROHIBITED_THIRD_PARTY_PROVIDER"
+          : isUntrustedHost
+          ? "UNTRUSTED_INFERENCE_HOST"
+          : isBackendNotConfigured
+          ? "MODEL_BACKEND_NOT_CONFIGURED"
+          : "PROVIDER_CONFIG_ERROR",
       }),
       {
-        status: isBackendNotConfigured ? 503 : 500,
+        status: statusCode,
         headers: { "Content-Type": "application/json" },
       }
     );
