@@ -1,0 +1,19 @@
+{
+  "suite_id": "sam_ai_math_reasoning_frozen_v1",
+  "name": "SAM-AI Math Reasoning & Format Compliance Frozen Suite",
+  "version": "1.0.0",
+  "metric_thresholds": {
+    "gsm8k_reasoning_accuracy": 0.5,
+    "format_compliance_rate": 0.9,
+    "numerical_precision": 0.9
+  },
+  "tolerance_margins": {
+    "gsm8k_reasoning_accuracy": 0.0,
+    "format_compliance_rate": 0.02,
+    "numerical_precision": 0.01
+  },
+  "benchmark_dataset_ids": [
+    "gsm8k_verifiable_reasoning_v1"
+  ],
+  "description": "Immutable 10-problem held-out mathematical reasoning benchmark with strict exact-match verification."
+}

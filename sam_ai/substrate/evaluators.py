@@ -49,6 +49,14 @@ class EvaluationReport:
     failure_distribution: Dict[str, int] = field(default_factory=dict)
     records: List[Dict[str, Any]] = field(default_factory=list)
     timestamp: float = field(default_factory=time.time)
+    search_budget: int = 1
+    # "unsupervised": grader scored one selected answer per task -> `accuracy` is accuracy.
+    # "oracle_pass_at_n": grader chose/stopped on a PASS in some tasks -> `accuracy` is pass@N.
+    selection_mode: str = "unsupervised"
+
+    @property
+    def metric_name(self) -> str:
+        return "accuracy" if self.selection_mode == "unsupervised" else f"pass@{self.search_budget} (oracle-selected)"
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -63,6 +71,9 @@ class EvaluationReport:
             "timeout_count": self.timeout_count,
             "not_run_count": self.not_run_count,
             "accuracy": round(self.accuracy, 4),
+            "metric_name": self.metric_name,
+            "selection_mode": self.selection_mode,
+            "search_budget": self.search_budget,
             "verification_rate": round(self.verification_rate, 4),
             "avg_latency_ms": round(self.avg_latency_ms, 2),
             "total_tokens": self.total_tokens,
@@ -77,7 +88,8 @@ class EvaluationReport:
             f"- **Model**: `{self.model_name}`",
             f"- **Strategy**: `{self.strategy_name}`",
             f"- **Total Tasks**: {self.total_tasks}",
-            f"- **Pass**: {self.pass_count} ({self.accuracy * 100:.2f}%)",
+            f"- **Pass**: {self.pass_count} ({self.accuracy * 100:.2f}% {self.metric_name})",
+            f"- **Selection mode**: `{self.selection_mode}` (search budget {self.search_budget})",
             f"- **Fail**: {self.fail_count}",
             f"- **Error**: {self.error_count}",
             f"- **Timeout**: {self.timeout_count}",
@@ -123,6 +135,8 @@ class BenchmarkEvaluator:
         total_latency = 0.0
         failure_dist: Dict[str, int] = {}
         records_summary = []
+        strategy_counts: Dict[str, int] = {}
+        any_oracle = False
 
         for task in tasks:
             exec_rec = self.engine.solve(task=task, search_budget=search_budget)
@@ -145,11 +159,14 @@ class BenchmarkEvaluator:
 
             total_tokens += exec_rec.total_tokens
             total_latency += exec_rec.latency_ms
+            strategy_counts[exec_rec.strategy_name] = strategy_counts.get(exec_rec.strategy_name, 0) + 1
+            any_oracle = any_oracle or exec_rec.selection_mode != "unsupervised"
 
             records_summary.append({
                 "task_id": task.task_id,
                 "status": status.value,
                 "strategy": exec_rec.strategy_name,
+                "selection_mode": exec_rec.selection_mode,
                 "latency_ms": exec_rec.latency_ms,
                 "tokens": exec_rec.total_tokens,
                 "details": exec_rec.verification.details,
@@ -164,7 +181,10 @@ class BenchmarkEvaluator:
             domain=domain,
             benchmark_name=suite_name,
             model_name=self.engine.model.model_name,
-            strategy_name=tasks[0].metadata.get("strategy_override", "adaptive_heuristic"),
+            strategy_name=(
+                max(strategy_counts, key=strategy_counts.get) if len(strategy_counts) == 1
+                else "mixed(" + ",".join(f"{k}:{v}" for k, v in sorted(strategy_counts.items())) + ")"
+            ),
             total_tasks=total_tasks,
             pass_count=pass_cnt,
             fail_count=fail_cnt,
@@ -177,6 +197,8 @@ class BenchmarkEvaluator:
             total_tokens=total_tokens,
             failure_distribution=failure_dist,
             records=records_summary,
+            search_budget=search_budget,
+            selection_mode="oracle_pass_at_n" if any_oracle else "unsupervised",
         )
 
         if save_report:

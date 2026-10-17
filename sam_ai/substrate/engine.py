@@ -60,6 +60,7 @@ class ExecutionRecord:
     total_tokens: int = 0
     latency_ms: float = 0.0
     trace: List[Dict[str, Any]] = field(default_factory=list)
+    selection_mode: str = "unsupervised"
 
 
 class HeuristicReasoningRouter:
@@ -69,11 +70,12 @@ class HeuristicReasoningRouter:
     Note: Heuristic baseline; will be replaced by learned router once policy training is validated.
     """
 
-    def __init__(self):
+    def __init__(self, oracle: bool = False):
+        # oracle=False (default): strategies never consult the grader to select/stop.
         self._strategies = {
             "direct": DirectStrategy(),
-            "best_of_n": BestOfNStrategy(),
-            "search": SearchStrategy(),
+            "best_of_n": BestOfNStrategy(oracle=oracle),
+            "search": SearchStrategy(oracle=oracle),
             "planning": PlanningStrategy(),
         }
 
@@ -119,9 +121,9 @@ class HeuristicFailureClassifier:
         details = v_res.details.lower()
 
         # Dimension / syntax / structure flaws -> representation
-        if "syntaxerror" in details or "height mismatch" in details or "width mismatch" in details:
+        if "syntaxerror" in details or "dimension mismatch" in details or "height mismatch" in details or "width mismatch" in details:
             return FailureCategory.REPRESENTATION
-        if "matrix" in details and "not a 2d" in details:
+        if ("matrix" in details and "not a 2d" in details) or "rectangular 2d" in details:
             return FailureCategory.REPRESENTATION
 
         # State tracking / postcondition flaws -> state tracking or planning
@@ -132,7 +134,7 @@ class HeuristicFailureClassifier:
                 return FailureCategory.PLANNING
 
         # Search exhaustion
-        if budget > 2 and strategy_name in ("search", "best_of_n"):
+        if budget > 2 and strategy_name.startswith(("search", "best_of_n")):
             if "mismatch" in details or "test failure" in details:
                 return FailureCategory.SEARCH
 
@@ -246,4 +248,5 @@ class CognitiveEngine:
             total_tokens=strat_result.total_tokens,
             latency_ms=latency_ms,
             trace=strat_result.trace,
+            selection_mode=strat_result.selection_mode,
         )

@@ -1,0 +1,28 @@
+SAM-AI
+Copyright 2026 Parallax (Founder: Samrish B)
+
+This product includes software developed by Parallax (https://github.com/samrishtt/micro_agi).
+
+================================================================================
+Third-Party Software and Attribution Notices
+================================================================================
+
+1. Tufa Labs Duck Harness
+   Copyright (c) 2026 Tufa Labs
+   License: MIT License
+   Source: https://github.com/TufaLabs/duck-harness
+
+2. Franzen ARC-AGI-3 Solution
+   Copyright (c) 2026 Daniel Franzen
+   License: Apache License 2.0
+   Source: https://github.com/da-fr/arc-agi-3-solution
+
+3. Pennyroyal SGLang Kernels & Patches
+   Copyright (c) 2026 John Pezzulli
+   License: Apache License 2.0
+   Source: https://github.com/dfranzen/pennyroyal
+
+4. Intel Qwen 3.8B AutoRound & Albucino MTP Draft Weights
+   Copyright (c) 2026 Intel Corporation / Qwen Team / Daniel Franzen
+   License: Apache License 2.0
+   Source: Kaggle Models dfranzen/intel-qwen3.8-flash-next-w4a16-autoround

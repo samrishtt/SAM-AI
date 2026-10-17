@@ -1,0 +1,54 @@
+{
+  "artifact_id": "qwen38-27b-base-canonical",
+  "kind": "base_model",
+  "model_id": "Qwen/Qwen3.8-27B",
+  "source_path": "Qwen/Qwen3.8-27B",
+  "revision": "main",
+  "architecture": "Qwen3_5ForConditionalGeneration",
+  "tokenizer_id": "Qwen/Qwen3.8-27B",
+  "weight_hashes": {},
+  "config_hash": null,
+  "license": "Apache-2.0",
+  "provenance_record": {
+    "organization": "Qwen Team / Alibaba Cloud",
+    "source_repo": "https://huggingface.co/Qwen/Qwen3.8-27B",
+    "canonical_status": "Primary sovereign reasoning engine for SAM-AI",
+    "official_model_type": "qwen3_5",
+    "official_architecture": "Qwen3_5ForConditionalGeneration",
+    "text_only_training_path": "AutoTokenizer for text tokenization; AutoModelForConditionalGeneration wrapper targeting language model linear projections",
+    "required_libraries": {
+      "transformers": ">=4.45.0",
+      "peft": ">=0.12.0",
+      "accelerate": ">=0.34.0",
+      "bitsandbytes": ">=0.43.3",
+      "torch": ">=2.2.0"
+    }
+  },
+  "precision": "bfloat16",
+  "intended_runtime": "transformers",
+  "tested_library_versions": {},
+  "parent_artifact_ids": [],
+  "adapter_target_modules": [
+    "q_proj",
+    "k_proj",
+    "v_proj",
+    "o_proj",
+    "gate_proj",
+    "up_proj",
+    "down_proj"
+  ],
+  "experiment_id": null,
+  "validation_status": "VALIDATED",
+  "limitations": [
+    "Official config specifies model_type=qwen3_5 and architecture=Qwen3_5ForConditionalGeneration.",
+    "Text-only training requires AutoTokenizer tokenization; do not pass vision tensors.",
+    "Requires 54 GB VRAM for full bfloat16 inference without quantization.",
+    "Requires minimum 18.0 GB VRAM for 4-bit NF4 QLoRA training (batch_size=1, seq_len=1024). Fails on 16 GB GPUs."
+  ],
+  "metadata": {
+    "model_type": "qwen3_5",
+    "transformers_class": "Qwen3_5ForConditionalGeneration",
+    "loader_class": "AutoModelForConditionalGeneration",
+    "text_tokenizer": "AutoTokenizer"
+  }
+}

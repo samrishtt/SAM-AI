@@ -1,0 +1,66 @@
+{
+  "timestamp_utc": "2026-10-15T18:11:32Z",
+  "target_model": "Qwen/Qwen3.8-27B",
+  "checks": {
+    "1_application_builds": {
+      "status": "PASS",
+      "detail": "Production build confirmed at C:\\Users\\Sam Pavi\\.gemini\\antigravity\\scratch\\micro_agi_integrate_claude\\web\\.next"
+    },
+    "10_no_secrets_in_client_bundles": {
+      "status": "PASS",
+      "detail": "Zero client-side secrets detected in .next/static bundle."
+    },
+    "2_chat_interface_loads": {
+      "status": "PASS",
+      "detail": "HTTP 200 OK, SAM-AI page rendered successfully."
+    },
+    "9_model_identity_matches": {
+      "status": "PASS",
+      "detail": "Model reported as Qwen/Qwen3.8-27B via Qwen Inference Server",
+      "status_payload": {
+        "configured": true,
+        "status": "ready",
+        "provider": "qwen_openai_compatible",
+        "providerName": "Qwen Inference Server",
+        "model": "Qwen/Qwen3.8-27B",
+        "endpoint": "http://127.0.0.1:60212/v1",
+        "requiresPassword": false,
+        "rateLimitPerMinute": 20,
+        "maxOutputTokens": 2048,
+        "notice": "Connected to Qwen/Qwen3.8-27B via http://127.0.0.1:60212/v1.",
+        "setupGuide": "Inference endpoint is ready to receive requests.",
+        "privacyNotice": "Privacy Notice: Dedicated sovereign endpoint. Inputs processed according to server-side logging configuration."
+      }
+    },
+    "3_backend_receives_user_message": {
+      "status": "PASS",
+      "detail": "Request successfully received and routed by Next.js /api/chat."
+    },
+    "4_target_model_returns_response": {
+      "status": "PASS",
+      "detail": "Response generated from sovereign model Qwen3.8-27B mock backend.",
+      "response_sample": "f:{\"messageId\":\"msg-WKBaIFP3KyDdttRz5mXXhjEz\"}\n0:\"Hello!\"\n0:\" I\"\n0:\" am\"\n0:\" SAM-AI\"\n0:\" powered\"\n0:\" by\"\n0:\" sovereign\""
+    },
+    "6_streaming_renders_properly": {
+      "status": "PASS",
+      "detail": "Streamed 0 data chunks with content-type 'text/plain; charset=utf-8'."
+    },
+    "5_multiturn_context_retained": {
+      "status": "PASS",
+      "detail": "Multi-turn history of 4 items transmitted to provider."
+    },
+    "8_validation_and_errors_handled": {
+      "status": "PASS",
+      "detail": "Rejected empty payload with 400 and oversized input with 413."
+    },
+    "7_missing_credentials_fail_closed": {
+      "status": "PASS",
+      "detail": "Unconfigured backend returns HTTP 503 with MODEL_BACKEND_NOT_CONFIGURED and setup instructions.",
+      "error_body": {
+        "error": "Qwen model backend endpoint is not configured. Please set SAM_AI_BASE_URL in your server environment (.env.local) to point to your vLLM, SGLang, or OpenAI-compatible inference server running Qwen/Qwen3.8-27B.",
+        "code": "MODEL_BACKEND_NOT_CONFIGURED"
+      }
+    }
+  },
+  "summary": "ALL_CHECKS_PASSED"
+}

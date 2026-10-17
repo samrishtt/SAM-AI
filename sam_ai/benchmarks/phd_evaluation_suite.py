@@ -1,4 +1,7 @@
+# NOT A BENCHMARK: expected outputs are hand-written; no model is called.
 """PhD-Level Multi-Domain Evaluation Suite for SAM-AI-v2.
+
+WARNING: NOT A BENCHMARK: expected outputs are hand-written; no model is called.
 
 Evaluates SAM-AI-v2 across doctoral-grade challenges in 8 frontier capability domains:
 1. PhD Pure Mathematics (FrontierMath / Putnam / Complex Analysis / Galois / Differential Geometry / PDEs)

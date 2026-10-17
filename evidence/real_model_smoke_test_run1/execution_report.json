@@ -1,0 +1,49 @@
+{
+  "run_id": "samrishb/sam-ai-real-model-smoke-test/version-1",
+  "kernel_slug": "samrishb/sam-ai-real-model-smoke-test",
+  "pushed_at_utc": "2026-10-10T18:03:39.547000Z",
+  "kernel_metadata": {
+    "is_private": true,
+    "enable_gpu": true,
+    "enable_tpu": false,
+    "enable_internet": false,
+    "dataset_sources": ["samrishb/sam-ai-source-bundle"],
+    "competition_sources": ["arc-prize-2026-arc-agi-3"],
+    "model_sources": ["gowillgo/unsloth-deepseek-r1-distill-qwen-14b-bnb-4bit/transformers/v1/1"]
+  },
+  "final_status": "KernelWorkerStatus.CANCEL_ACKNOWLEDGED",
+  "failure_message": null,
+  "is_frozen": true,
+  "timeline": [
+    {
+      "timestamp_utc": "2026-10-10T18:03:39Z",
+      "status": "KernelWorkerStatus.QUEUED",
+      "event": "Kernel pushed to Kaggle GPU worker pool"
+    },
+    {
+      "timestamp_utc": "2026-10-10T18:10:05Z",
+      "status": "KernelWorkerStatus.QUEUED",
+      "event": "Status check: in queue waiting for GPU container allocation"
+    },
+    {
+      "timestamp_utc": "2026-10-10T18:11:55Z",
+      "status": "KernelWorkerStatus.QUEUED",
+      "event": "Status check: in queue waiting for GPU container allocation"
+    },
+    {
+      "timestamp_utc": "2026-10-10T18:14:14Z",
+      "status": "KernelWorkerStatus.CANCEL_ACKNOWLEDGED",
+      "event": "Run transitioned to CANCEL_ACKNOWLEDGED; no container booted"
+    }
+  ],
+  "execution_integrity": {
+    "genuine_code_execution": false,
+    "cells_executed": 0,
+    "model_loaded": false,
+    "adapter_loaded": false,
+    "environment_steps": 0,
+    "output_files_generated": 0,
+    "logs_recorded": 0
+  },
+  "verdict": "CANCELLED_IN_QUEUE_BEFORE_EXECUTION"
+}

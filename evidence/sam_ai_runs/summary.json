@@ -1,0 +1,27 @@
+{
+  "evaluation_timestamp": 1791651249.6775305,
+  "run_type": "TEST_ONLY",
+  "is_real_model": false,
+  "model_name": "deterministic-mock-runner-v1",
+  "git_commit": "6d580695a58df80145f74154d4bd841d911dbead",
+  "config_hash": "42cfb117a05ee82e",
+  "total_games": 2,
+  "n_passes": 2,
+  "total_runs": 4,
+  "overall_win_rate_percent": 100.0,
+  "mean_levels_completed": 1.0,
+  "mean_steps_per_run": 4.0,
+  "pass_breakdown": {
+    "0": {
+      "runs": 2,
+      "win_rate": 100.0,
+      "mean_levels": 1.0
+    },
+    "1": {
+      "runs": 2,
+      "win_rate": 100.0,
+      "mean_levels": 1.0
+    }
+  },
+  "raw_jsonl_file": "evidence\\sam_ai_runs\\runs_raw.jsonl"
+}

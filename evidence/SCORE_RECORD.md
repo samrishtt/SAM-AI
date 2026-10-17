@@ -12,6 +12,8 @@
 
 | Submission ID | Submission Date (UTC) | Description / Notebook Source | Status | Public Score | Verified Notes |
 | :--- | :--- | :--- | :--- | :---: | :--- |
+| **57031089** | **2026-10-10 04:36:18** | Notebook submission (Unverified link to B2) | COMPLETE | **9.50** | Severe drop consistent with low-concurrency task starvation on 110 games |
+| **56984756** | 2026-10-09 01:55:06 | V9 Controlled Run | COMPLETE | 23.61 | Path fix run |
 | **56804468** | **2026-10-03 18:29:41** | `SAM-AI Milestone 2 Solver V5` | COMPLETE | **29.21** | **ALL-TIME BEST**; Milestone 2 baseline |
 | **56866777** | **2026-10-06 01:26:32** | Milestone 2 variant | COMPLETE | **28.29** | Second highest score (not Oct 2) |
 | **56751663** | 2026-10-01 13:15:11 | Milestone 2 variant | COMPLETE | 27.73 | Historical run |

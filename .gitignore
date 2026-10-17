@@ -35,3 +35,13 @@ kaggle_arc3x_output/
 *.pt
 *.tar.gz
 *.zip
+evidence/**/artifacts/
+evidence/**/*.jsonl
+predictions/**/
+
+# Web Application artifacts
+web/node_modules/
+web/.next/
+web/out/
+.env*.local
+.env.local

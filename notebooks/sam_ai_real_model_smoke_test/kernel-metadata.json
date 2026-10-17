@@ -1,0 +1,24 @@
+{
+  "id": "samrishb/sam-ai-real-model-smoke-test",
+  "title": "SAM-AI Real Model Smoke Test",
+  "code_file": "sam_ai_real_model_smoke_test.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_tpu": false,
+  "enable_internet": false,
+  "dataset_sources": [
+    "samrishb/sam-ai-source-bundle"
+  ],
+  "competition_sources": [
+    "arc-prize-2026-arc-agi-3"
+  ],
+  "kernel_sources": [],
+  "model_sources": [],
+  "keywords": [
+    "gpu"
+  ],
+  "docker_image": "gcr.io/kaggle-private-byod/python@sha256:57e612b484cf3df5026ee4dcc3cb176974b22b2bc0937fb1e16132a8be4cb13c",
+  "machine_shape": "NvidiaRtxPro6000"
+}

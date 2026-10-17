@@ -1,0 +1,78 @@
+{
+  "experiment_id": "EXP-SAM-QWEN38-MINIMAL-INFERENCE-01",
+  "target_model": "Qwen/Qwen3.8-27B",
+  "target_model_family": "qwen3.8",
+  "execution_state": "BLOCKED_NO_GPU",
+  "milestones": {
+    "OFFLINE_TESTS_PASSED": "VERIFIED",
+    "MODEL_FILES_DISCOVERED": "NOT_RUN",
+    "MODEL_LOADED_SUCCESSFULLY": "NOT_RUN",
+    "REAL_INFERENCE_COMPLETED": "NOT_RUN",
+    "OUTPUT_QUALITY_EVALUATED": "NOT_RUN"
+  },
+  "runtime_environment": {
+    "python_version": "3.11.9",
+    "os_platform": "Windows-10-10.0.26300-SP0",
+    "timestamp_utc": "2026-10-15T17:33:15Z",
+    "torch_version": "2.14.0+cpu",
+    "transformers_version": "5.17.0",
+    "accelerate_version": "NOT_INSTALLED",
+    "bitsandbytes_version": "NOT_INSTALLED",
+    "peft_version": "NOT_INSTALLED"
+  },
+  "hardware_telemetry": {
+    "gpu_available": false,
+    "gpu_name": "None",
+    "vram_free_gb": 0.0,
+    "vram_total_gb": 0.0
+  },
+  "generation_config": {
+    "temperature": 0.0,
+    "max_new_tokens": 512,
+    "top_p": 0.95,
+    "context_window": 2048,
+    "requires_thinking_prefix": false
+  },
+  "discovered_model_path": null,
+  "discovered_model_metadata": {},
+  "prompts_telemetry": [
+    {
+      "prompt_id": "prompt-1-deterministic",
+      "prompt_type": "deterministic_arithmetic",
+      "raw_prompt": "What is 2 + 2? Output only the number.",
+      "formatted_prompt": null,
+      "raw_output": "",
+      "reasoning_trace": null,
+      "clean_answer": "",
+      "prompt_tokens": 0,
+      "completion_tokens": 0,
+      "total_tokens": 0,
+      "latency_ms": 0.0,
+      "tokens_per_second": 0.0,
+      "status": "NOT_RUN",
+      "error_message": null
+    },
+    {
+      "prompt_id": "prompt-2-structured-reasoning",
+      "prompt_type": "structured_action_json",
+      "raw_prompt": "You are an agent in a 2D grid world. The goal is at coordinates (3, 5) and your position is at (3, 4). What action should you take to move closer to the goal? Output valid JSON in the format: {\"action\": \"UP\"|\"DOWN\"|\"LEFT\"|\"RIGHT\", \"reason\": \"<explanation>\"}",
+      "formatted_prompt": null,
+      "raw_output": "",
+      "reasoning_trace": null,
+      "clean_answer": "",
+      "prompt_tokens": 0,
+      "completion_tokens": 0,
+      "total_tokens": 0,
+      "latency_ms": 0.0,
+      "tokens_per_second": 0.0,
+      "status": "NOT_RUN",
+      "error_message": null
+    }
+  ],
+  "blockers": [
+    "CUDA GPU accelerator is not available (CPU only).",
+    "Model path was not specified and /kaggle/input does not exist. Specify model_path or run in a container with mounted weights.",
+    "Model path does not exist on filesystem: 'None'"
+  ],
+  "notes": "Static audit complete. Zero model weight downloads or GPU allocations occurred. Execution state: BLOCKED_NO_GPU."
+}
