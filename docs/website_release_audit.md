@@ -1,12 +1,13 @@
 # SAM-AI Website Release Audit & Scope Review
-## Phase 1B: Safe Website Release & Deployment Handoff
+## Phase 1C: Website Release Publication & Deployment Handoff
 
 **Date:** October 17, 2026
 **Auditor:** Parallax Intelligence Lab / SAM-AI Core Agent
 **Repository:** `samrishtt/SAM-AI`
-**Current Branch:** `integrate/claude-2026-10-12`
+**Branch:** `integrate/claude-2026-10-12`
+**Commit Hash:** `be1a3bc09eb8a4fd6a0748747f7fc2621632ecaa` (short: `be1a3bc`)
+**Push Status:** **SUCCESS** (`5dd1c9a..be1a3bc integrate/claude-2026-10-12 -> integrate/claude-2026-10-12`)
 **Deployment Target:** Vercel Hobby (Frontend) + Hugging Face Spaces ZeroGPU (Inference Backend)
-**External Actions Taken:** Zero remote GPU runs, zero external cloud deployments, zero git push/commit/reset operations.
 
 ---
 
@@ -224,17 +225,19 @@ These large files must NEVER be pushed to Git or deployed to Vercel:
 
 ---
 
-## 7. Remaining Blockers & Human Action Plan
+## 7. Remaining Blockers & Next Deployment Steps
 
-The local workspace is in an optimal state for deployment. The remaining steps require human authorization and external account actions:
+The website release commit (`be1a3bc`) has been published to GitHub origin on branch `integrate/claude-2026-10-12`. The remaining steps to obtain the public URL are:
 
-1. **Step 1: Staging & Committing Frontend Changes:**
-   Execute a focused Git commit containing only the Category 1 & 2 files (see [`docs/website_deployment_checklist.md`](file:///C:/Users/Sam%20Pavi/.gemini/antigravity/scratch/micro_agi_integrate_claude/docs/website_deployment_checklist.md)).
-2. **Step 2: Pushing to GitHub:**
-   Push the commit to `samrishtt/SAM-AI` on branch `integrate/claude-2026-10-12`.
-3. **Step 3: Creating the Vercel Hobby Project:**
-   Import `samrishtt/SAM-AI` into Vercel, set Root Directory to `web`, and deploy. This will generate your first live public URL (e.g., `https://sam-ai-xxx.vercel.app`).
-4. **Step 4: Deploying the Model Backend (When Ready):**
-   Initialize the Hugging Face Space repository and push `spaces/sam_ai_zerogpu/`.
-5. **Step 5: Binding Backend to Frontend:**
-   Configure `SAM_AI_BASE_URL` in the Vercel project settings with the live Space URL.
+1. **Step 1: Open Vercel Dashboard:**
+   Log in to [vercel.com/dashboard](https://vercel.com/dashboard).
+2. **Step 2: Import Project:**
+   Click **"Add New..."** → **"Project"** and select `samrishtt/SAM-AI`.
+3. **Step 3: Configure Root Directory:**
+   Set **Root Directory** to **`web`** *(Critical setting; do not leave as repository root)*. Set production branch to `integrate/claude-2026-10-12`.
+4. **Step 4: Deploy Frontend:**
+   Click **"Deploy"**. The site will build and publish within ~60 seconds to a live URL (e.g. `https://sam-ai-xxx.vercel.app`) with full multi-page navigation and truthful "Setup Needed" status.
+5. **Step 5: Deploy Model Space (When Ready):**
+   Push `spaces/sam_ai_zerogpu/` to Hugging Face Spaces (ZeroGPU Free Tier) to launch the sovereign inference backend.
+6. **Step 6: Bind Live Model to Vercel:**
+   Configure `SAM_AI_BASE_URL` in Vercel project environment variables with your Space HTTPS URL to enable live streaming chat.
