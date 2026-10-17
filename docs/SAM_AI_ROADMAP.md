@@ -1,0 +1,157 @@
+# 🗺️ SAM-AI Master Roadmap & Architectural Strategy
+
+**Company:** Parallax Intelligence Lab  
+**Project:** SAM-AI  
+**Foundation Model:** `deepseek-ai/DeepSeek-R1-Distill-Qwen-7B`  
+**Deployment:** Production Website ([sam-ai-lilac-six.vercel.app](https://sam-ai-lilac-six.vercel.app)) | ZeroGPU Space ([samrish2009-sam-ai-assistant.hf.space](https://samrish2009-sam-ai-assistant.hf.space))  
+**Last Updated:** October 17, 2026  
+
+---
+
+## 1. Production Status & Chat Streaming Reality Check
+
+### Verified Production Status
+1. **Public Website:** Live and verified operational at [https://sam-ai-lilac-six.vercel.app](https://sam-ai-lilac-six.vercel.app).
+2. **Space Runtime:** Synchronized at commit [`6b4d4a04`](https://huggingface.co/spaces/Samrish2009/sam-ai-assistant/commit/6b4d4a044a8f623acbff1d7d9bd09753adb162b9) on ZeroGPU (`zero-a10g`).
+3. **Chat Streaming Integrity:**
+   - **Correction:** A user screenshot showing an in-progress loading state (`Generating response...`) does **not** indicate a broken stream or a streaming defect. Subsequent user interaction and automated testing confirmed completed, formatted responses rendering cleanly on the client.
+   - Real model generation on ZeroGPU requires 4–30 seconds depending on sequence length. During the initial token-generation phase, `ReasoningStreamFilter` buffers internal `<think>...</think>` tokens server-side before emitting the first final answer token.
+   - Both the public website and the standalone Space UI have been independently verified across mathematical, coding, and multi-turn prompts with zero stream interruptions and zero exposed `<think>` tags.
+
+---
+
+## 2. Benchmark Audit: Experiment 001 Findings & Provenance
+
+### The Historical Math Pilot Audit
+In October 2026, a 20-question mathematical validation pilot was conducted on Kaggle (kernel `samrishb/sam-ai-r1-7b-pilot-evaluation`, Version 4) comparing the pure foundation model against the candidate model fine-tuned on GSM8K demonstrations (Experiment 001 adapter):
+
+```
++----------------------------------------------------------------------------------------------------+
+| Model Condition                                     | Accuracy (GSM8K Pilot) | Avg Tokens | Latency|
++----------------------------------------------------------------------------------------------------+
+| 1. Base Model (DeepSeek-R1-Distill-Qwen-7B)         | 95.00% (19 / 20)       | 560.9 toks | 43.8s  |
+| 2. Candidate Model (Base + Experiment 001 Adapter)  | 80.00% (16 / 20)       | 111.2 toks | 14.5s  |
++----------------------------------------------------------------------------------------------------+
+| Net Delta                                           | -15.00 percentage pts  | -80.2%     | -66.9% |
++----------------------------------------------------------------------------------------------------+
+```
+
+### Forensic Analysis of the Regression
+- **Formatting Overfitting:** The candidate adapter achieved 100% (20/20) emission of strict `####` delimiters, but drastically compressed reasoning length (5x reduction from 560.9 down to 111.2 tokens).
+- **Reasoning Shortcut Failure:** Bypassing DeepSeek-R1's chain-of-thought caused logical errors on constraint-heavy problems (`gsm8k_val_pilot_01`, `pilot_13`, `pilot_14`).
+- **Adapter Status:** **STRICTLY REJECTED.** The Experiment 001 adapter is permanently excluded from deployment.
+
+### Reproducibility Classification: `REPRODUCIBLE`
+The benchmark evidence in the repository is fully substantiated by primary artifacts:
+- **Test Set:** 20 fixed problems (`gsm8k_val_pilot_00` to `gsm8k_val_pilot_19`) with gold targets in [docs/phase_3c_pilot_execution_report.md](file:///C:/Users/Sam%20Pavi/.gemini/antigravity/scratch/micro_agi_integrate_claude/docs/phase_3c_pilot_execution_report.md#L61-L85).
+- **Raw Predictions:** Complete JSON outputs and execution logs in `evidence/intelligence_experiments/pilot_eval/v4_run/`.
+- **Generation Settings:** Greedy decoding (`temperature=0.0`, `max_new_tokens=2048`).
+- **Reproducibility Script:** Standalone runnable notebook at `notebooks/sam_ai_pilot_eval/sam_ai_pilot_eval.ipynb`.
+
+---
+
+## 3. Phase 3A: Multi-Domain Intelligence Baseline
+
+Phase 3A extends the pilot into a comprehensive, multi-domain evaluation benchmark. It builds upon the existing pilot infrastructure rather than starting from zero:
+
+### Evaluated Domains & Benchmarks:
+1. **Mathematical Reasoning:** GSM8K (held-out test split, 1,319 problems) and MATH-500 (Level 5 Olympiad problems).
+2. **Coding Correctness:** HumanEval (164 coding tasks) and MBPP.
+3. **Scientific & Factual Reasoning:** GPQA Diamond and ARC-Challenge.
+4. **Logical & Constraint Satisfaction:** Formal logic puzzles verified with Z3 / SymPy.
+5. **Instruction Following:** IFEval (strict formatting and constraints).
+6. **Multi-Turn Conversation:** Extended dialogue context tracking.
+7. **Grounded Factual QA:** Open-domain questions evaluated with and without web retrieval.
+
+### Evaluation Invariants:
+- **Primary Baseline:** Untouched foundation model `deepseek-ai/DeepSeek-R1-Distill-Qwen-7B`.
+- **Experimental Adapters:** Evaluated strictly as separate conditions against identical frozen challenge sets.
+- **Zero Test Contamination:** Strict hash verification ensuring no overlap between training pools and evaluation splits.
+
+---
+
+## 4. Phase 3B: Web Research & Browsing Architecture
+
+To enable SAM-AI to answer questions beyond its training cutoff and provide verifiable citations, a modular Web Research engine is integrated directly into the backend.
+
+```
+                      ┌──────────────────────────────────────────────┐
+                      │          SAM-AI CHAT FRONTEND & SDK          │
+                      │  (Displays answers with clickable citations) │
+                      └──────────────────────┬───────────────────────┘
+                                             │ User Prompt
+                                             ▼
+                      ┌──────────────────────────────────────────────┐
+                      │          SOVEREIGN BACKEND CONTROLLER        │
+                      │       (DeepSeek-R1-Distill-Qwen-7B)          │
+                      └──────────────────────┬───────────────────────┘
+                                             │
+                             Decides if web search is needed
+                                             │
+                      ┌──────────────────────┴──────────────────────┐
+                      │                                             │
+             No Search Needed                               Tool Call Request
+                      │                                             │
+                      ▼                                             ▼
+             Generate Direct Answer                ┌─────────────────────────────────┐
+                                                   │    WebSearchProvider Interface  │
+                                                   │   (SearXNG / DuckDuckGo / etc.) │
+                                                   └────────────────┬────────────────┘
+                                                                    │
+                                                            Queries & URLs
+                                                                    ▼
+                                                   ┌─────────────────────────────────┐
+                                                   │     SSRF & Sanitization Layer   │
+                                                   │   - Private CIDR block firewall │
+                                                   │   - 500 KB size limit, 5s timeout│
+                                                   │   - HTML to clean Markdown text │
+                                                   └────────────────┬────────────────┘
+                                                                    │
+                                                            Clean Document Chunks
+                                                                    ▼
+                                                   ┌─────────────────────────────────┐
+                                                   │    Context-Augmented Reasoning  │
+                                                   │  (Synthesizes with citations)   │
+                                                   └─────────────────────────────────┘
+```
+
+### Core Functional Capabilities:
+1. **Public Web Search:** Queries the public internet for current facts and documentation.
+2. **Page Content Retrieval:** Fetches and converts public HTML pages into clean, readable text.
+3. **Multi-Source Synthesis:** Synthesizes facts across multiple independent sources.
+4. **Clickable Citations:** Injects markdown reference badges `[1]`, `[2]` linking directly to verified source URLs.
+5. **Primary Source Preference:** Prioritizes official documentation, academic papers, and official releases.
+6. **Honest Uncertainty:** Explicitly reports failed searches, inaccessible domains, or outdated content.
+7. **Swappable Search Providers:** Pluggable interface (`WebSearchProvider`) allowing zero-downtime substitution between SearXNG, DuckDuckGo Lite, Brave Search, or Tavily.
+
+### Security, Safety & SSRF Defenses:
+- **SSRF Protection:** Strict IP allowlisting/blocklisting:
+  - Blocks loopback (`127.0.0.0/8`, `::1`), private networks (`10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`), link-local (`169.254.0.0/16`), and AWS metadata endpoints.
+  - Rejects private port numbers (blocks non-standard HTTP/HTTPS ports).
+- **Resource Constraints:** Enforces 5.0s fetch timeouts, 500 KB maximum payload limits, and max 5 outbound URLs per turn.
+- **Credential Protection:** Search API keys remain strictly server-side in backend environment variables (`SEARCH_PROVIDER_API_KEY`); never exposed in browser bundles or client code.
+- **Zero Commercial LLM Dependencies:** Search is performed as an external information retrieval tool. Generation remains 100% sovereign on `DeepSeek-R1-Distill-Qwen-7B`.
+
+### Web Research Phased Implementation Roadmap:
+
+| Stage | Focus Area | Deliverables |
+| :--- | :--- | :--- |
+| **Stage 1: Search Abstraction** | Provider Interface | Build `WebSearchProvider` abstract class with mock, SearXNG, and free DuckDuckGo drivers. |
+| **Stage 2: Retrieval & Firewall** | Fetcher & SSRF Guard | Implement `SafeWebFetcher` with private IP rejection, content extraction, and HTML sanitization. |
+| **Stage 3: Citation Synthesis** | Prompt & UI Grounding | Add citation formatting prompt rules and clickable frontend reference pills `[Source 1]`. |
+| **Stage 4: Comparative Evaluation** | A/B Benchmark Testing | Evaluate 100 contemporary factual questions comparing Model-Only vs. Model + Web Retrieval. |
+
+---
+
+## 5. Strategic 12-Month Progression
+
+```
+OCT 2026 ───────► NOV 2026 ───────► DEC 2026 ───────► Q1 2027 ────────► Q2-Q3 2027
+   │                 │                 │                 │                 │
+   ▼                 ▼                 ▼                 ▼                 ▼
+Phase 2H.1 Sync   Phase 3A Baseline  Phase 3B Web      Phase 4 GRPO     V4 Sovereign
+Parity Complete   Multi-Domain Eval  Research Tool     SFT Retraining   Frontier Release
+```
+
+- **Current Milestone (Complete):** Phase 2H.1 verified 100% parity on public website and Hugging Face Space.
+- **Immediate Next Task:** **Phase 3A Multi-Domain Baseline** — Executing initial zero-shot benchmark evaluations across GSM8K, HumanEval, and MATH on the sovereign foundation model.

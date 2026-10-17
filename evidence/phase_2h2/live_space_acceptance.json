@@ -1,0 +1,81 @@
+{
+  "phase": "2H.2",
+  "timestamp": "2026-10-17T18:01:00Z",
+  "space_repository": "Samrish2009/sam-ai-assistant",
+  "remote_commit_sha": "6b4d4a044a8f623acbff1d7d9bd09753adb162b9",
+  "historical_commit_sha": "3f07cf90fc7aab44475c6bbe15bf0159107f2623",
+  "commit_is_newer": true,
+  "canonical_foundation_model": "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B",
+  "runtime_verification": {
+    "stage": "RUNNING",
+    "hardware": "zero-a10g",
+    "restart_confirmed": true,
+    "theme_verified": "soft warm-light (#FAF8F5, #28231F, #D97745)",
+    "title_verified": "SAM-AI Sovereign Assistant",
+    "adapter_claim_removed": true
+  },
+  "file_hashes": {
+    "app.py": {
+      "remote_sha256": "50aa058225cf97112e7538d711be62a9804559db8ec1496d64d5096532ca2235",
+      "local_sha256": "50aa058225cf97112e7538d711be62a9804559db8ec1496d64d5096532ca2235",
+      "byte_match": true
+    },
+    "model_loader.py": {
+      "remote_sha256": "54978ca51990b386115e224fd36d7a38b5fbdbb3c5b48d2accacc80ec9f719e4",
+      "local_sha256": "54978ca51990b386115e224fd36d7a38b5fbdbb3c5b48d2accacc80ec9f719e4",
+      "byte_match": true
+    },
+    "requirements.txt": {
+      "remote_sha256": "1d6f88d2b65159721b67fa48655eef6a65640f57c0fd147a05cae0fe9d49c598",
+      "local_sha256": "1d6f88d2b65159721b67fa48655eef6a65640f57c0fd147a05cae0fe9d49c598",
+      "byte_match": true
+    }
+  },
+  "live_direct_space_tests": {
+    "prompt_1_identity": {
+      "prompt": "What is your name? Briefly explain what SAM-AI is built on.",
+      "duration_seconds": 16.25,
+      "chunks_received": 77,
+      "contains_think_tags": false,
+      "sample": "SAM-AI is named after the authors of the model it is built upon. It is constructed using the open-weight foundation model DeepSeek-R1-Distill-Qwen-7B...",
+      "status": "PASS"
+    },
+    "prompt_2_math": {
+      "prompt": "What is 2+2? Answer briefly.",
+      "duration_seconds": 30.92,
+      "chunks_received": 5,
+      "contains_think_tags": false,
+      "sample": "2 + 2 equals 4.",
+      "status": "PASS"
+    },
+    "prompt_3_coding": {
+      "prompt": "Write a Python function to check whether an integer is prime.",
+      "duration_seconds": 33.46,
+      "chunks_received": 208,
+      "contains_think_tags": false,
+      "sample": "To determine if an integer is prime, we can efficiently check divisibility up to its square root. Here's the Python function: ```python import math def is_prime(n): if n < 2: return False for i in range(2, int(math.sqrt(n)) + 1): if n % i == 0: return False return True```",
+      "status": "PASS"
+    },
+    "prompt_4_followup": {
+      "prompt": "Can you optimize that prime check function for large numbers?",
+      "duration_seconds": 21.49,
+      "chunks_received": 178,
+      "contains_think_tags": false,
+      "sample": "To optimize the prime checking function for large numbers, we can consider several approaches: 1. **Skip Even Numbers**... 2. **Miller-Rabin Primality Test**...",
+      "status": "PASS"
+    }
+  },
+  "regression_tests": {
+    "pytest_spaces": "17/17 PASSED",
+    "node_reasoning_filter": "10/10 PASSED",
+    "node_parse_message_content": "4/4 PASSED",
+    "git_diff_check": "0 errors"
+  },
+  "parity_verdict": {
+    "source_synced": true,
+    "runtime_running": true,
+    "ui_consistent": true,
+    "inference_clean": true,
+    "overall": "PHASE_2H_COMPLETE"
+  }
+}
