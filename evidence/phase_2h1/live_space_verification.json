@@ -1,0 +1,38 @@
+{
+  "prompt_1_identity": {
+    "prompt": "What is your name? Briefly explain what SAM-AI is built on.",
+    "duration_seconds": 16.25,
+    "chunks_received": 77,
+    "contains_think_tag": false,
+    "response_length": 525,
+    "response_sample": "SAM-AI is named after the authors of the model it is built upon. It is constructed using the open-weight foundation model DeepSeek-R1-Distill-Qwen-7B, which is a 7 billion parameter model derived from the Qwen-7B, a state-of-the-art Chinese language model developed by the Chinese company DeepSeek. T",
+    "status": "PASS"
+  },
+  "prompt_2_math": {
+    "prompt": "What is 2+2? Answer briefly.",
+    "duration_seconds": 30.92,
+    "chunks_received": 5,
+    "contains_think_tag": false,
+    "response_length": 15,
+    "response_sample": "2 + 2 equals 4.",
+    "status": "PASS"
+  },
+  "prompt_3_coding": {
+    "prompt": "Write a Python function to check whether an integer is prime.",
+    "duration_seconds": 33.46,
+    "chunks_received": 208,
+    "contains_think_tag": false,
+    "response_length": 1183,
+    "response_sample": "To determine if an integer is prime, we can efficiently check divisibility up to its square root. Here's the Python function:\n\n```python\nimport math\n\ndef is_prime(n):\n    if n < 2:\n        return False\n    for i in range(2, int(math.sqrt(n)) + 1):\n        if n % i == 0:\n            return False\n    ",
+    "status": "PASS"
+  },
+  "prompt_4_followup": {
+    "prompt": "Can you optimize that prime check function for large numbers?",
+    "duration_seconds": 21.49,
+    "chunks_received": 178,
+    "contains_think_tag": false,
+    "response_length": 1134,
+    "response_sample": "To optimize the prime checking function for large numbers, we can consider several approaches:\n\n1. **Skip Even Numbers**: After checking if the number is even, only check for odd divisors from 3 up to the square root of the number. This reduces the number of checks by half.\n\n2. **Miller-Rabin Primal",
+    "status": "PASS"
+  }
+}
