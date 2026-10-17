@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "SAM-AI — Web Chat MVP",
-  description: "Next-generation conversational intelligence interface for SAM-AI.",
+  title: "SAM-AI — Sovereign AI Research Platform",
+  description: "Open-weight artificial intelligence research on verifiable reasoning, code intelligence, and post-training dynamics by Parallax Intelligence Lab.",
 };
 
 export default function RootLayout({
@@ -12,8 +12,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark">
-      <body className="min-h-screen bg-slate-950 text-slate-100 antialiased selection:bg-blue-600 selection:text-white">
+    <html lang="en">
+      <body className="min-h-screen bg-[#FAF8F5] text-[#28231F] antialiased selection:bg-[#FBEBDD] selection:text-[#B95F34]">
         {children}
       </body>
     </html>

@@ -34,18 +34,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
       )}
 
       <aside
-        className={`fixed md:static inset-y-0 left-0 z-30 w-72 bg-slate-900 border-r border-slate-800 flex flex-col transition-transform duration-200 ease-in-out ${
+        className={`fixed md:static inset-y-0 left-0 z-30 w-72 bg-[#FFFFFF] border-r border-[#E8E1D9] flex flex-col transition-transform duration-200 ease-in-out ${
           isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         }`}
       >
         {/* New Chat Button */}
-        <div className="p-3.5 border-b border-slate-800 flex items-center gap-2">
+        <div className="p-3.5 border-b border-[#E8E1D9] flex items-center gap-2">
           <button
             onClick={() => {
               onNewConversation();
               onClose();
             }}
-            className="flex-1 flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-md shadow-blue-500/10 transition"
+            className="flex-1 flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-lg bg-[#D97745] hover:bg-[#B95F34] text-white text-xs font-semibold shadow-sm transition"
           >
             <Plus className="w-4 h-4" />
             <span>New Conversation</span>
@@ -53,7 +53,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <button
             onClick={onClose}
             aria-label="Close sidebar"
-            className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 md:hidden transition"
+            className="p-2 rounded-lg text-[#766B62] hover:text-[#28231F] hover:bg-[#F5F0EA] md:hidden transition"
           >
             <X className="w-5 h-5" />
           </button>
@@ -61,14 +61,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         {/* Conversation List */}
         <div className="flex-1 overflow-y-auto p-2 space-y-1">
-          <div className="px-2 py-1.5 text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
+          <div className="px-2 py-1.5 text-[11px] font-semibold tracking-wider text-[#766B62] uppercase">
             Local History
           </div>
 
           {conversations.length === 0 ? (
-            <div className="px-3 py-6 text-center text-xs text-slate-400 space-y-1">
-              <MessageSquare className="w-6 h-6 mx-auto text-slate-600 mb-2 opacity-60" />
-              <p>No conversations yet</p>
+            <div className="px-3 py-6 text-center text-xs text-[#766B62] space-y-1">
+              <MessageSquare className="w-6 h-6 mx-auto text-[#766B62]/50 mb-2" />
+              <p className="font-medium text-[#28231F]">No conversations yet</p>
               <p className="text-[11px]">Chat messages are stored locally in your browser.</p>
             </div>
           ) : (
@@ -83,12 +83,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   }}
                   className={`group flex items-center justify-between px-3 py-2 rounded-lg text-xs cursor-pointer transition ${
                     isActive
-                      ? "bg-slate-800 text-slate-100 font-medium"
-                      : "text-slate-400 hover:bg-slate-800/50 hover:text-slate-200"
+                      ? "bg-[#FBEBDD] text-[#D97745] font-semibold border border-[#D97745]/20"
+                      : "text-[#28231F] hover:bg-[#F5F0EA]"
                   }`}
                 >
                   <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                    <MessageSquare className={`w-3.5 h-3.5 flex-shrink-0 ${isActive ? "text-blue-400" : "text-slate-500"}`} />
+                    <MessageSquare className={`w-3.5 h-3.5 flex-shrink-0 ${isActive ? "text-[#D97745]" : "text-[#766B62]"}`} />
                     <span className="truncate">{conv.title}</span>
                   </div>
 
@@ -98,7 +98,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       onDeleteConversation(conv.id);
                     }}
                     title="Delete conversation"
-                    className="opacity-0 group-hover:opacity-100 p-1 text-slate-500 hover:text-rose-400 rounded transition"
+                    className="opacity-0 group-hover:opacity-100 p-1 text-[#766B62] hover:text-[#C53030] rounded transition"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -109,12 +109,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         {/* Local Storage Privacy Footer */}
-        <div className="p-3 border-t border-slate-800 text-[11px] text-slate-400 flex items-center justify-between bg-slate-950/40">
+        <div className="p-3 border-t border-[#E8E1D9] text-[11px] text-[#766B62] flex items-center justify-between bg-[#FAF8F5]">
           <div className="flex items-center gap-1.5">
-            <Database className="w-3.5 h-3.5 text-slate-500" />
+            <Database className="w-3.5 h-3.5 text-[#766B62]" />
             <span>Local Browser Storage</span>
           </div>
-          <span className="text-[10px] text-slate-400 font-mono">MVP v0.1</span>
+          <span className="text-[10px] text-[#766B62] font-mono">MVP v0.1</span>
         </div>
       </aside>
     </>

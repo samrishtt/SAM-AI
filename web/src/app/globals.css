@@ -3,8 +3,8 @@
 @tailwind utilities;
 
 :root {
-  --background: #0b0f19;
-  --foreground: #f3f4f6;
+  --background: #FAF8F5;
+  --foreground: #28231F;
 }
 
 body {
@@ -14,43 +14,47 @@ body {
   overflow-x: hidden;
 }
 
-/* Custom scrollbars */
+/* Custom warm scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: rgba(15, 23, 42, 0.6);
+  background: #FAF8F5;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(100, 116, 139, 0.4);
+  background: #E8E1D9;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.6);
+  background: #D6CDC4;
 }
 
 /* Markdown styling inside assistant message */
 .prose pre {
-  background-color: #0d1117;
-  border: 1px solid #30363d;
+  background-color: #F5F0EA;
+  border: 1px solid #E8E1D9;
   border-radius: 0.5rem;
   padding: 1rem;
   overflow-x: auto;
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
+  color: #28231F;
 }
 
 .prose code {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 0.875rem;
-  background-color: rgba(110, 118, 129, 0.2);
+  background-color: #F5F0EA;
+  border: 1px solid #E8E1D9;
   padding: 0.15rem 0.35rem;
   border-radius: 0.25rem;
+  color: #28231F;
 }
 
 .prose pre code {
   background-color: transparent;
+  border: none;
   padding: 0;
 }
 
@@ -89,12 +93,13 @@ body {
 }
 
 .prose th, .prose td {
-  border: 1px solid #30363d;
+  border: 1px solid #E8E1D9;
   padding: 0.5rem 0.75rem;
   text-align: left;
 }
 
 .prose th {
-  background-color: rgba(30, 41, 59, 0.5);
+  background-color: #F5F0EA;
   font-weight: 600;
+  color: #28231F;
 }
