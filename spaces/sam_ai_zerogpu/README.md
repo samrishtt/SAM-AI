@@ -8,7 +8,7 @@ sdk_version: 4.44.0
 app_file: app.py
 pinned: false
 license: apache-2.0
-short_description: SAM-AI Sovereign Chat and Code Assistant powered by DeepSeek-R1-Distill-Qwen-7B and GSM8K QLoRA.
+short_description: SAM-AI Sovereign Assistant on DeepSeek-R1-Distill-7B
 ---
 
 # SAM-AI Sovereign Assistant (ZeroGPU Cloud Edition)
