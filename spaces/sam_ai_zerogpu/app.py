@@ -99,7 +99,8 @@ def get_status_markdown():
     status = diag["status"]
     is_loaded = diag["is_loaded"]
     device = diag["device"].upper()
-    adapter_name = Path(diag["adapter_dir"]).name
+    adapter_name = Path(diag["adapter_dir"]).name if diag.get("adapter_dir") else "None (Pure Base)"
+    adapter_label = f" + <code>{adapter_name}</code>" if diag.get("adapter_dir") else " <em>(Pure Foundation Model)</em>"
 
     if is_loaded:
         badge = "🟢 **READY (SOVEREIGN ZERO-GPU)**"
@@ -114,7 +115,7 @@ def get_status_markdown():
     return (
         f"<div style='border: 1px solid #3b82f6; border-radius: 8px; padding: 12px 16px; background-color: #0f172a; color: #f8fafc; margin-bottom: 12px;'>"
         f"<div style='display: flex; justify-content: space-between; align-items: center;'>"
-        f"<div><strong>Model:</strong> <code>{diag['base_model']}</code> + <code>{adapter_name}</code></div>"
+        f"<div><strong>Model:</strong> <code>{diag['base_model']}</code>{adapter_label}</div>"
         f"<div><strong>Status:</strong> {badge} | <strong>Device:</strong> <code>{device}</code></div>"
         f"</div>"
         f"<div style='font-size: 0.85em; color: #94a3b8; margin-top: 4px;'>{diag['status_detail']}</div>"
