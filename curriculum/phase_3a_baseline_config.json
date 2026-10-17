@@ -1,0 +1,33 @@
+{
+  "phase": "3A",
+  "benchmark_title": "SAM-AI Multi-Domain Intelligence Baseline",
+  "foundation_model": "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B",
+  "adapter_attached": null,
+  "precision": "4bit_nf4_or_16bit_sharded",
+  "decoding": {
+    "temperature": 0.0,
+    "max_new_tokens": 2048,
+    "top_p": 1.0,
+    "do_sample": false
+  },
+  "fixtures_file": "curriculum\\phase_3a_baseline_fixtures.json",
+  "fixtures_sha256": "b7fc8795fa64c82a97a871efaee68491fc7aa93f3bb557a31197b710892caf3d",
+  "domains": {
+    "mathematics_gsm8k": 20,
+    "mathematics_math500": 20,
+    "coding_humaneval": 20,
+    "science_reasoning": 10,
+    "logic_constraints": 10,
+    "instruction_following": 10,
+    "multiturn_context": 5
+  },
+  "total_samples": 95,
+  "resumability": {
+    "checkpoint_file": "/kaggle/working/predictions.jsonl",
+    "state_file": "/kaggle/working/evaluation_checkpoint.json"
+  },
+  "sandbox_security": {
+    "humaneval_timeout_seconds": 3.0,
+    "network_blocked": true
+  }
+}
