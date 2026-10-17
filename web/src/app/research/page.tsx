@@ -279,8 +279,6 @@ export default function ResearchPage() {
             <span className="font-bold text-[#28231F]">SAM-AI</span>
             <span>&bull;</span>
             <span>Parallax Intelligence Lab</span>
-            <span>&bull;</span>
-            <span className="font-mono text-[11px]">integrate/claude-2026-10-12</span>
           </div>
           <div className="flex items-center gap-4">
             <Link href="/chat" className="hover:text-[#28231F] transition">Chat Demo</Link>

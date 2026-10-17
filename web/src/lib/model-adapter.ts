@@ -99,14 +99,24 @@ export function isLoopbackHostname(hostname: string): boolean {
  * Retrieves explicitly trusted remote self-hosted hostnames from environment.
  */
 export function getTrustedRemoteHosts(): Set<string> {
+  const hosts = new Set<string>();
   const envHosts = process.env.SAM_AI_TRUSTED_HOSTS?.trim();
-  if (!envHosts) return new Set();
-  return new Set(
-    envHosts
-      .split(",")
-      .map((h) => h.trim().toLowerCase())
-      .filter(Boolean)
-  );
+  if (envHosts) {
+    for (const h of envHosts.split(",").map((s) => s.trim().toLowerCase()).filter(Boolean)) {
+      hosts.add(h);
+    }
+  }
+  // Automatically trust configured project Space if on .hf.space
+  const baseUrl = process.env.SAM_AI_BASE_URL?.trim();
+  if (baseUrl) {
+    try {
+      const parsed = new URL(baseUrl);
+      if (parsed.hostname.toLowerCase().endsWith(".hf.space")) {
+        hosts.add(parsed.hostname.toLowerCase());
+      }
+    } catch {}
+  }
+  return hosts;
 }
 
 /**
@@ -301,19 +311,21 @@ export function getGenerationTemperature(): number {
       return parsed;
     }
   }
-  return 0.7;
+  return 0.6;
 }
 
 /**
- * System prompt establishing SAM-AI sovereign identity and boundaries.
+ * Canonical system prompt establishing SAM-AI sovereign identity and boundaries.
  */
-export const SAM_AI_SYSTEM_PROMPT = `You are SAM-AI, a self-hosted, sovereign artificial intelligence developed by Parallax Intelligence Lab.
-Guidelines:
-1. Provide accurate, clear, and well-structured answers with readable markdown formatting.
-2. Be technically precise and transparent about your capabilities and limitations.
-3. If code is requested, provide clean, idiomatic, well-commented code blocks.
-4. Transparency: Maintain strict scientific integrity and do not claim to possess abilities or training you do not have.
-5. Sovereign Operation: You run on a dedicated, owner-controlled inference backend.`;
+export const SAM_AI_SYSTEM_PROMPT = `You are SAM-AI, an experimental sovereign artificial intelligence assistant developed by Parallax Intelligence Lab, powered by the open-weight foundation model DeepSeek-R1-Distill-Qwen-7B.
+
+Core Operating Guidelines:
+1. Provide accurate, mathematically sound, evidence-backed, and clear responses.
+2. Offer helpful, step-by-step user-facing explanations when explaining calculations, code, or complex concepts.
+3. Keep final answers organized, readable, and directly responsive to the user's prompt.
+4. Do not falsely claim to be a different proprietary assistant or model.
+5. Do not claim unsupported tools, live web browsing, external execution environments, or autonomous capabilities unless specifically provided.
+6. Acknowledge limitations and uncertainties transparently.`;
 
 export interface ModelInstanceResult {
   model: StreamModel;

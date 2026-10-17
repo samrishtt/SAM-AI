@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { User, Sparkles, Check, Copy, RotateCw } from "lucide-react";
+import { User, Sparkles, Check, Copy, RotateCw, Brain, ChevronDown, ChevronRight } from "lucide-react";
 import { Message } from "@/types/chat";
 
 interface ChatMessageProps {
@@ -13,6 +13,107 @@ interface ChatMessageProps {
   onRetry?: () => void;
   isLoading?: boolean;
 }
+
+export interface ParsedMessageContent {
+  thought: string | null;
+  answer: string;
+  isThinking: boolean;
+}
+
+export function parseMessageContent(content: string, isStreaming: boolean): ParsedMessageContent {
+  if (!content) {
+    return { thought: null, answer: "", isThinking: isStreaming };
+  }
+
+  const closingTag = "</think>";
+  const closingIdx = content.indexOf(closingTag);
+
+  if (closingIdx !== -1) {
+    let rawThought = content.slice(0, closingIdx);
+    rawThought = rawThought.replace(/^\s*<think>\s*/i, "").trim();
+    const answer = content.slice(closingIdx + closingTag.length).trim();
+    return {
+      thought: rawThought.length > 0 ? rawThought : null,
+      answer,
+      isThinking: false,
+    };
+  }
+
+  // No </think> closing tag
+  const openTag = "<think>";
+  const openIdx = content.indexOf(openTag);
+  if (openIdx !== -1) {
+    const rawThought = content.slice(openIdx + openTag.length).trim();
+    return {
+      thought: rawThought.length > 0 ? rawThought : null,
+      answer: "",
+      isThinking: isStreaming,
+    };
+  }
+
+  if (isStreaming) {
+    return {
+      thought: content.trim(),
+      answer: "",
+      isThinking: true,
+    };
+  }
+
+  // Not streaming, no think tags
+  return {
+    thought: null,
+    answer: content.trim(),
+    isThinking: false,
+  };
+}
+
+const ThoughtProcess: React.FC<{
+  thought: string;
+  isThinking?: boolean;
+}> = ({ thought, isThinking = false }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="my-2.5 rounded-xl border border-[#E8E1D9] bg-[#FAF8F5] overflow-hidden text-xs transition-all">
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between px-3.5 py-2 bg-[#F5F0EA] hover:bg-[#EFE8DF] transition text-left select-none text-[#766B62]"
+      >
+        <div className="flex items-center gap-2 font-medium">
+          <Brain
+            className={`w-3.5 h-3.5 text-[#D97745] ${
+              isThinking ? "animate-pulse" : ""
+            }`}
+          />
+          <span className="text-xs text-[#28231F] font-medium">
+            {isThinking ? "Thinking..." : "Thought process"}
+          </span>
+          {isThinking && (
+            <span className="flex h-2 w-2 relative">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#D97745] opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#D97745]"></span>
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-1.5 text-[11px] text-[#766B62]">
+          <span>{isOpen ? "Hide" : "Show"}</span>
+          {isOpen ? (
+            <ChevronDown className="w-3.5 h-3.5 text-[#766B62]" />
+          ) : (
+            <ChevronRight className="w-3.5 h-3.5 text-[#766B62]" />
+          )}
+        </div>
+      </button>
+
+      {isOpen && (
+        <div className="p-3.5 text-xs text-[#524840] leading-relaxed border-t border-[#E8E1D9] bg-[#FAF8F5]/90 whitespace-pre-wrap font-sans max-h-80 overflow-y-auto">
+          {thought}
+        </div>
+      )}
+    </div>
+  );
+};
 
 const CodeBlock: React.FC<{ language?: string; children: React.ReactNode }> = ({
   language,
@@ -66,9 +167,15 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
   const isUser = message.role === "user";
   const [copied, setCopied] = useState(false);
 
+  const isStreamingThis = !isUser && isLastAssistant && isLoading;
+  const { thought, answer, isThinking } = isUser
+    ? { thought: null, answer: message.content, isThinking: false }
+    : parseMessageContent(message.content, isStreamingThis);
+
   const handleCopy = () => {
-    if (!message.content) return;
-    navigator.clipboard.writeText(message.content);
+    const textToCopy = answer || thought || "";
+    if (!textToCopy) return;
+    navigator.clipboard.writeText(textToCopy);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -136,86 +243,97 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
             </div>
           </div>
 
-          {/* Render Markdown */}
-          <div className="prose text-sm text-[#28231F] leading-relaxed break-words">
-            <ReactMarkdown
-              remarkPlugins={[remarkGfm]}
-              components={{
-                code({ node, className, children, ...props }) {
-                  const match = /language-(\w+)/.exec(className || "");
-                  const isInline = !match && !String(children).includes("\n");
-                  if (isInline) {
+          {/* Collapsible Thought Process (if present or currently thinking) */}
+          {thought && (
+            <ThoughtProcess thought={thought} isThinking={isThinking} />
+          )}
+
+          {/* Render Markdown Answer */}
+          {answer ? (
+            <div className="prose text-sm text-[#28231F] leading-relaxed break-words">
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                components={{
+                  code({ node, className, children, ...props }) {
+                    const match = /language-(\w+)/.exec(className || "");
+                    const isInline = !match && !String(children).includes("\n");
+                    if (isInline) {
+                      return (
+                        <code
+                          className="bg-[#F5F0EA] text-[#B95F34] px-1.5 py-0.5 rounded font-mono text-xs border border-[#E8E1D9]"
+                          {...props}
+                        >
+                          {children}
+                        </code>
+                      );
+                    }
                     return (
-                      <code
-                        className="bg-[#F5F0EA] text-[#B95F34] px-1.5 py-0.5 rounded font-mono text-xs border border-[#E8E1D9]"
-                        {...props}
-                      >
+                      <CodeBlock language={match ? match[1] : undefined}>
                         {children}
-                      </code>
+                      </CodeBlock>
                     );
-                  }
-                  return (
-                    <CodeBlock language={match ? match[1] : undefined}>
-                      {children}
-                    </CodeBlock>
-                  );
-                },
-                table({ children }) {
-                  return (
-                    <div className="overflow-x-auto my-3 border border-[#E8E1D9] rounded-lg">
-                      <table className="min-w-full divide-y divide-[#E8E1D9] text-xs text-left">
+                  },
+                  table({ children }) {
+                    return (
+                      <div className="overflow-x-auto my-3 border border-[#E8E1D9] rounded-lg">
+                        <table className="min-w-full divide-y divide-[#E8E1D9] text-xs text-left">
+                          {children}
+                        </table>
+                      </div>
+                    );
+                  },
+                  thead({ children }) {
+                    return (
+                      <thead className="bg-[#F5F0EA] text-[#28231F] font-semibold">
                         {children}
-                      </table>
-                    </div>
-                  );
-                },
-                thead({ children }) {
-                  return (
-                    <thead className="bg-[#F5F0EA] text-[#28231F] font-semibold">
-                      {children}
-                    </thead>
-                  );
-                },
-                th({ children }) {
-                  return (
-                    <th className="px-3.5 py-2.5 text-xs font-semibold text-[#28231F] border-b border-[#E8E1D9]">
-                      {children}
-                    </th>
-                  );
-                },
-                td({ children }) {
-                  return (
-                    <td className="px-3.5 py-2 text-xs text-[#28231F] border-b border-[#E8E1D9]/60">
-                      {children}
-                    </td>
-                  );
-                },
-                ul({ children }) {
-                  return (
-                    <ul className="list-disc list-outside ml-5 my-2 space-y-1 text-[#28231F]">
-                      {children}
-                    </ul>
-                  );
-                },
-                ol({ children }) {
-                  return (
-                    <ol className="list-decimal list-outside ml-5 my-2 space-y-1 text-[#28231F]">
-                      {children}
-                    </ol>
-                  );
-                },
-                blockquote({ children }) {
-                  return (
-                    <blockquote className="border-l-2 border-[#D97745] pl-3.5 my-2 text-[#766B62] italic bg-[#FBEBDD]/40 py-1 rounded-r">
-                      {children}
-                    </blockquote>
-                  );
-                },
-              }}
-            >
-              {message.content}
-            </ReactMarkdown>
-          </div>
+                      </thead>
+                    );
+                  },
+                  th({ children }) {
+                    return (
+                      <th className="px-3.5 py-2.5 text-xs font-semibold text-[#28231F] border-b border-[#E8E1D9]">
+                        {children}
+                      </th>
+                    );
+                  },
+                  td({ children }) {
+                    return (
+                      <td className="px-3.5 py-2 text-xs text-[#28231F] border-b border-[#E8E1D9]/60">
+                        {children}
+                      </td>
+                    );
+                  },
+                  ul({ children }) {
+                    return (
+                      <ul className="list-disc list-outside ml-5 my-2 space-y-1 text-[#28231F]">
+                        {children}
+                      </ul>
+                    );
+                  },
+                  ol({ children }) {
+                    return (
+                      <ol className="list-decimal list-outside ml-5 my-2 space-y-1 text-[#28231F]">
+                        {children}
+                      </ol>
+                    );
+                  },
+                  blockquote({ children }) {
+                    return (
+                      <blockquote className="border-l-2 border-[#D97745] pl-3.5 my-2 text-[#766B62] italic bg-[#FBEBDD]/40 py-1 rounded-r">
+                        {children}
+                      </blockquote>
+                    );
+                  },
+                }}
+              >
+                {answer}
+              </ReactMarkdown>
+            </div>
+          ) : isThinking ? null : (
+            <div className="text-sm text-[#766B62] italic">
+              *[Empty response]*
+            </div>
+          )}
         </div>
       </div>
     </div>

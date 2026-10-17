@@ -51,6 +51,78 @@ EXPECTED_ADAPTER_HASHES: Dict[str, str] = {
 
 BASE_MODEL_NAME = "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B"
 
+SAM_AI_SYSTEM_PROMPT = (
+    "You are SAM-AI, an experimental sovereign artificial intelligence assistant developed "
+    "by Parallax Intelligence Lab, powered by the open-weight foundation model "
+    "DeepSeek-R1-Distill-Qwen-7B.\n\n"
+    "Core Operating Guidelines:\n"
+    "1. Provide accurate, mathematically sound, evidence-backed, and clear responses.\n"
+    "2. Offer helpful, step-by-step user-facing explanations when explaining calculations, code, or complex concepts.\n"
+    "3. Keep final answers organized, readable, and directly responsive to the user's prompt.\n"
+    "4. Do not falsely claim to be a different proprietary assistant or model.\n"
+    "5. Do not claim unsupported tools, live web browsing, external execution environments, or autonomous capabilities unless specifically provided.\n"
+    "6. Acknowledge limitations and uncertainties transparently."
+)
+
+
+class ReasoningStreamFilter:
+    """
+    Suppresses <think>...</think> internal reasoning blocks during token streaming,
+    yielding only clean user-facing final answers. Handles delimiters split across chunks.
+    """
+    def __init__(self, interrupted_message: str = "\n\n*[SAM-AI Notice: The reasoning process was interrupted before a final answer could be generated. Please retry your request.]*"):
+        self.buffer = ""
+        self.has_seen_closing = False
+        self.answer_started = False
+        self.interrupted_message = interrupted_message
+
+    def process_chunk(self, chunk: str) -> Optional[str]:
+        if not chunk:
+            return None
+
+        if self.has_seen_closing:
+            return chunk
+
+        self.buffer += chunk
+        closing_tag = "</think>"
+        idx = self.buffer.find(closing_tag)
+
+        if idx != -1:
+            self.has_seen_closing = True
+            answer_part = self.buffer[idx + len(closing_tag):]
+            if not self.answer_started:
+                answer_part = answer_part.lstrip("\r\n\t ")
+                if answer_part:
+                    self.answer_started = True
+            self.buffer = ""
+            return answer_part if answer_part else None
+
+        return None
+
+    def finalize(self) -> Optional[str]:
+        if not self.has_seen_closing:
+            return self.interrupted_message
+        return None
+
+    def has_completed_reasoning(self) -> bool:
+        return self.has_seen_closing
+
+
+def filter_reasoning_from_text(raw_text: str) -> str:
+    """Pure function to strip reasoning traces from complete (non-streaming) text."""
+    if not raw_text:
+        return ""
+    closing_tag = "</think>"
+    idx = raw_text.find(closing_tag)
+    if idx != -1:
+        after = raw_text[idx + len(closing_tag):].strip()
+        if after:
+            return after
+        return "*[SAM-AI completed reasoning, but did not emit a final answer statement.]*"
+    if raw_text.strip().startswith("<think>"):
+        return "*[SAM-AI Notice: The reasoning process was interrupted before a final answer could be generated. Please retry your request.]*"
+    return raw_text.strip()
+
 
 class ModelLifecycleStatus:
     NOT_INITIALIZED = "NOT_INITIALIZED"
@@ -273,11 +345,18 @@ class SamAiModelEngine:
             # Run generation in background thread
             thread = threading.Thread(target=self.model.generate, kwargs=gen_kwargs)
             thread.start()
-
-            accumulated = ""
+            reasoning_filter = ReasoningStreamFilter()
+            accumulated_answer = ""
             for new_text in streamer:
-                accumulated += new_text
-                yield accumulated
+                clean_chunk = reasoning_filter.process_chunk(new_text)
+                if clean_chunk:
+                    accumulated_answer += clean_chunk
+                    yield accumulated_answer
+
+            final_notice = reasoning_filter.finalize()
+            if final_notice:
+                accumulated_answer += final_notice
+                yield accumulated_answer
 
             thread.join(timeout=65.0)
 

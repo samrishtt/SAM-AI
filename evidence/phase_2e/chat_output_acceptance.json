@@ -1,0 +1,76 @@
+{
+  "phase": "2E",
+  "task": "Unified Inference, Hidden Reasoning Handling, Duplicate-Response Fix and Chat Consistency",
+  "timestamp": "2026-10-17T21:51:50+05:30",
+  "foundation_model": "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B",
+  "adapter_status": "EXCLUDED_EXPERIMENT_001_REJECTED",
+  "verification_results": {
+    "node_reasoning_filter_unit_tests": {
+      "status": "PASSED",
+      "cases_tested": [
+        "standard_reasoning_and_answer",
+        "split_delimiter_across_two_chunks",
+        "multi_split_delimiter_across_three_chunks",
+        "truncated_generation_fails_closed",
+        "pure_filter_reasoning_from_text"
+      ],
+      "passed": 5,
+      "failed": 0
+    },
+    "python_reasoning_filter_unit_tests": {
+      "status": "PASSED",
+      "test_file": "spaces/sam_ai_zerogpu/tests/test_reasoning_filter.py",
+      "passed": 6,
+      "failed": 0
+    },
+    "space_components_unit_tests": {
+      "status": "PASSED",
+      "test_file": "spaces/sam_ai_zerogpu/tests/test_space_components.py",
+      "passed": 7,
+      "failed": 0
+    },
+    "typescript_strict_check": {
+      "status": "PASSED",
+      "command": "npx tsc --noEmit",
+      "exit_code": 0,
+      "errors": 0
+    }
+  },
+  "fixes_applied": [
+    {
+      "issue": "Raw <think>...</think> traces leaked in web chat and Space",
+      "fix": "ReasoningStreamFilter in TypeScript and Python + defense-in-depth filter in ChatMessage.tsx",
+      "files": [
+        "web/src/lib/reasoning-filter.ts",
+        "web/src/lib/gradio-connector.ts",
+        "web/src/components/ChatMessage.tsx",
+        "spaces/sam_ai_zerogpu/model_loader.py"
+      ]
+    },
+    {
+      "issue": "Duplicate assistant message in local storage and onFinish",
+      "fix": "Deduplication guard in ChatInterface.tsx onFinish checking messageAlreadyPresent",
+      "files": ["web/src/components/ChatInterface.tsx"]
+    },
+    {
+      "issue": "Duplicate assistant turn in Space chat on rapid submit",
+      "fix": "Deduplication guard in app.py chat_respond reusing turn if pending",
+      "files": ["spaces/sam_ai_zerogpu/app.py"]
+    },
+    {
+      "issue": "Cross-platform prompt and theme inconsistency",
+      "fix": "Canonical SAM_AI_SYSTEM_PROMPT shared everywhere, warm light theme applied in Space app.py",
+      "files": [
+        "spaces/sam_ai_zerogpu/model_loader.py",
+        "spaces/sam_ai_zerogpu/app.py",
+        "web/src/lib/model-adapter.ts"
+      ]
+    }
+  ],
+  "invariants_maintained": {
+    "zero_third_party_fallbacks": true,
+    "no_credential_leakage": true,
+    "rejected_adapter_omitted": true,
+    "clean_final_answers_only": true
+  }
+}

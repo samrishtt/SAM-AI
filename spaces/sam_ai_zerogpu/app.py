@@ -15,7 +15,7 @@ from pathlib import Path
 # Add current directory to path
 sys.path.insert(0, str(Path(__file__).parent.resolve()))
 
-from model_loader import engine, ModelLifecycleStatus
+from model_loader import engine, ModelLifecycleStatus, SAM_AI_SYSTEM_PROMPT
 
 # ZeroGPU requires model loading at module level
 print("[*] Starting SAM-AI ZeroGPU Space...")
@@ -25,12 +25,7 @@ except Exception as exc:
     print(f"[!] Warning: Initial model loading encountered exception: {exc}")
 
 
-SYSTEM_PROMPT_CHAT = (
-    "You are SAM-AI, a sovereign artificial intelligence assistant developed by "
-    "Parallax Intelligence Lab. You provide accurate, honest, mathematically rigorous, "
-    "and evidence-backed explanations. When reasoning through complex problems, think "
-    "step-by-step and encapsulate your internal rationale within <think> ... </think> tags."
-)
+SYSTEM_PROMPT_CHAT = SAM_AI_SYSTEM_PROMPT
 
 SYSTEM_PROMPT_CODE = (
     "You are SAM-AI Code, a specialized sovereign software engineering assistant developed "
@@ -68,8 +63,12 @@ def chat_respond(user_message, chat_history, temperature, top_p, max_tokens):
 
     messages.append({"role": "user", "content": user_message})
 
-    # Append pending message to history
-    new_history = list(chat_history or []) + [[user_message, ""]]
+    # Append pending message to history (with deduplication guard)
+    history_list = [list(turn) for turn in (chat_history or [])]
+    if history_list and history_list[-1][0] == user_message and not history_list[-1][1]:
+        new_history = history_list
+    else:
+        new_history = history_list + [[user_message, ""]]
 
     for partial_response in engine.generate_stream(
         messages=messages,
@@ -126,25 +125,29 @@ def get_status_markdown():
         color = "red"
 
     return (
-        f"<div style='border: 1px solid #3b82f6; border-radius: 8px; padding: 12px 16px; background-color: #0f172a; color: #f8fafc; margin-bottom: 12px;'>"
+        f"<div style='border: 1px solid #E8E2DA; border-radius: 8px; padding: 12px 16px; background-color: #FDFCFA; color: #28231F; margin-bottom: 12px; font-family: sans-serif;'>"
         f"<div style='display: flex; justify-content: space-between; align-items: center;'>"
         f"<div><strong>Model:</strong> <code>{diag['base_model']}</code>{adapter_label}</div>"
         f"<div><strong>Status:</strong> {badge} | <strong>Device:</strong> <code>{device}</code></div>"
         f"</div>"
-        f"<div style='font-size: 0.85em; color: #94a3b8; margin-top: 4px;'>{diag['status_detail']}</div>"
+        f"<div style='font-size: 0.85em; color: #6B5E55; margin-top: 4px;'>{diag['status_detail']}</div>"
         f"</div>"
     )
 
 
-# Build Gradio UI
+# Build Gradio UI with matching warm light theme (Ivory / Terracotta / Charcoal)
 custom_theme = gr.themes.Soft(
-    primary_hue="indigo",
-    secondary_hue="slate",
+    primary_hue="orange",
+    secondary_hue="stone",
+    neutral_hue="stone",
 ).set(
-    body_background_fill="#0b0f19",
-    body_text_color="#f3f4f6",
-    block_background_fill="#111827",
-    block_border_color="#1f2937",
+    body_background_fill="#FAF8F5",
+    body_text_color="#28231F",
+    block_background_fill="#FFFFFF",
+    block_border_color="#E8E2DA",
+    button_primary_background_fill="#D97745",
+    button_primary_background_fill_hover="#C86332",
+    button_primary_text_color="#FFFFFF",
 )
 
 with gr.Blocks(theme=custom_theme, title="SAM-AI Sovereign Assistant") as demo:

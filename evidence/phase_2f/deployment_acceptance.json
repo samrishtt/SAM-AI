@@ -1,0 +1,34 @@
+{
+  "phase": "2F",
+  "title": "Deploy Chat Fixes and Verify Genuine Production Inference",
+  "timestamp": "2026-10-17T22:22:00+05:30",
+  "production_url": "https://sam-ai-lilac-six.vercel.app/chat",
+  "space_url": "https://samrish2009-sam-ai-assistant.hf.space",
+  "base_model": "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B",
+  "adapter_status": "REJECTED_EXPERIMENT_001_EXCLUDED",
+  "checks": {
+    "node_reasoning_filter": "PASSED (5/5)",
+    "pytest_space_components": "PASSED (13/13)",
+    "pytest_phase_2b_runtime": "PASSED (14/14)",
+    "typescript_strict": "PASSED (0 errors)",
+    "next_production_build": "PASSED (8/8 routes compiled)",
+    "milestone_2_chat_acceptance": "PASSED (10/10 acceptance checks)",
+    "git_diff_check": "PASSED (0 whitespace errors)",
+    "parse_message_content_tests": "PASSED (4/4)"
+  },
+  "features_verified": {
+    "collapsible_thinking_bar": true,
+    "closable_by_default": true,
+    "live_streaming_thinking_state": true,
+    "clean_final_answer_rendering": true,
+    "copy_clean_answer_only": true,
+    "turn_deduplication": true,
+    "canonical_system_prompt": true,
+    "branch_labels_removed_from_ui": true
+  },
+  "security_invariants": {
+    "zero_commercial_api_fallbacks": true,
+    "zero_credentials_in_bundle": true,
+    "open_weight_foundation_model_only": true
+  }
+}

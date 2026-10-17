@@ -170,6 +170,8 @@ export async function streamGradioChat(options: GradioChatOptions): Promise<Read
 
   return new ReadableStream<Uint8Array>({
     async start(controller) {
+      let hasEmittedTokens = false;
+
       try {
         // Attempt Gradio 4 SSE protocol: POST /call/chat_respond -> GET /call/chat_respond/<event_id>
         const callPayload = {
@@ -246,6 +248,7 @@ export async function streamGradioChat(options: GradioChatOptions): Promise<Read
                         if (currentFullText.length > lastFullText.length) {
                           const delta = currentFullText.slice(lastFullText.length);
                           lastFullText = currentFullText;
+                          hasEmittedTokens = true;
                           // Emit AI SDK token chunk: 0:"<delta>"\n
                           controller.enqueue(encoder.encode(`0:${JSON.stringify(delta)}\n`));
                         }
@@ -265,6 +268,13 @@ export async function streamGradioChat(options: GradioChatOptions): Promise<Read
           }
 
           // Finish stream if loop terminates
+          controller.enqueue(encoder.encode(`d:{"finishReason":"stop"}\n`));
+          controller.close();
+          return;
+        }
+
+        // Only fall back to /api/predict if no tokens have been streamed yet
+        if (hasEmittedTokens) {
           controller.enqueue(encoder.encode(`d:{"finishReason":"stop"}\n`));
           controller.close();
           return;
@@ -309,8 +319,10 @@ export async function streamGradioChat(options: GradioChatOptions): Promise<Read
         controller.enqueue(encoder.encode(`d:{"finishReason":"stop"}\n`));
         controller.close();
       } catch (err: any) {
-        const errorMsg = err?.message || "Failed to communicate with Gradio inference backend";
-        controller.enqueue(encoder.encode(`0:${JSON.stringify(`\n\n[Inference Error]: ${errorMsg}`)}\n`));
+        if (!hasEmittedTokens) {
+          const errorMsg = err?.message || "Failed to communicate with Gradio inference backend";
+          controller.enqueue(encoder.encode(`0:${JSON.stringify(`\n\n[Inference Error]: ${errorMsg}`)}\n`));
+        }
         controller.enqueue(encoder.encode(`d:{"finishReason":"error"}\n`));
         controller.close();
       }

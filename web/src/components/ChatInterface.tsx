@@ -98,10 +98,14 @@ export const ChatInterface: React.FC = () => {
     },
     initialMessages: activeConversation ? (activeConversation.messages as any) : [],
     onFinish: (message) => {
-      // Sync messages to local conversation
+      // Sync messages to local conversation with deduplication check
       setConversations((prev) => {
         const targetId = activeConvId || createNewConversation(message.content).id;
         const existing = prev.find((c) => c.id === targetId);
+
+        // Prevent duplicate turns if message is already in messages array
+        const messageAlreadyPresent = messages.some((m) => m.id === message.id);
+        const mergedMessages = messageAlreadyPresent ? messages : [...messages, message];
 
         let updatedList: Conversation[];
         if (existing) {
@@ -110,7 +114,7 @@ export const ChatInterface: React.FC = () => {
               ? {
                   ...c,
                   updatedAt: Date.now(),
-                  messages: [...messages, message] as Message[],
+                  messages: mergedMessages as Message[],
                 }
               : c
           );
@@ -120,7 +124,7 @@ export const ChatInterface: React.FC = () => {
             title: message.content.slice(0, 30) || "Conversation",
             createdAt: Date.now(),
             updatedAt: Date.now(),
-            messages: [...messages, message] as Message[],
+            messages: mergedMessages as Message[],
           };
           updatedList = [newConv, ...prev];
         }
