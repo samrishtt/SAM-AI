@@ -134,14 +134,21 @@ Evaluated via the automated live acceptance suite (`scripts/test_phase_2a_live_i
 2. **Hugging Face ZeroGPU Free Quota:**
    - Free Hugging Face user accounts receive 5 minutes of daily active GPU compute time (2 minutes for unauthenticated visitors).
    - Once daily quota is exhausted, inference requests queue or return 429 until daily reset.
-3. **Space Deployment Status:**
-   - The ZeroGPU deployment bundle is prepared at `dist/sam_ai_zerogpu_deployment.zip` (144.72 MB) and `spaces/sam_ai_zerogpu/`.
-   - When ready, the user can push this Space to their Hugging Face account and add its direct URL (`https://<user>-sam-ai-assistant.hf.space`) to `SAM_AI_BASE_URL` and `SAM_AI_TRUSTED_HOSTS`.
+3. **Space Deployment Status: LIVE & VERIFIED**
+   - Space URL: `https://huggingface.co/spaces/Samrish2009/sam-ai-assistant`
+   - Direct Backend URL: `https://samrish2009-sam-ai-assistant.hf.space`
+   - Hardware: NVIDIA RTX Pro 6000 (ZeroGPU, `zero-a10g`)
+   - Model: `deepseek-ai/DeepSeek-R1-Distill-Qwen-7B` (Pure Foundation Model)
+   - Live Cloud Token Generation: Tested & Verified (`2 + 2 = 4` with full reasoning trace; prime number check with chain-of-thought).
 
 ---
 
 ## 7. Recommended Next Tasks
 
-1. **Phase 2B (Cloud Model Space Push)**: Push `spaces/sam_ai_zerogpu` to Hugging Face with ZeroGPU hardware allocation to activate the 24/7 cloud backend.
-2. **Phase 2C (Vercel Environment Variable Binding)**: Configure `SAM_AI_BASE_URL` and `SAM_AI_TRUSTED_HOSTS` in Vercel project settings to link the live production website (`https://sam-ai-lilac-six.vercel.app`) to the cloud Space.
-3. **Phase 3 (Experiment 002 Fine-Tuning Execution)**: Execute the prepared Experiment 002 training job on authorized Kaggle GPU quota.
+1. **Vercel Production Environment Variable Binding**:
+   - In Vercel Project Settings for `sam-ai` (`https://sam-ai-lilac-six.vercel.app`):
+     - Set `SAM_AI_BASE_URL` = `https://samrish2009-sam-ai-assistant.hf.space`
+     - Set `SAM_AI_TRUSTED_HOSTS` = `samrish2009-sam-ai-assistant.hf.space`
+   - Trigger redeploy on Vercel to connect public web chat directly to live ZeroGPU inference.
+2. **Phase 3 (Experiment 002 Fine-Tuning Execution)**:
+   - Execute the prepared Experiment 002 training job on authorized Kaggle GPU quota.
