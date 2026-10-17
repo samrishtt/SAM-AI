@@ -101,7 +101,15 @@ class ReasoningStreamFilter:
 
     def finalize(self) -> Optional[str]:
         if not self.has_seen_closing:
-            return self.interrupted_message
+            trimmed = self.buffer.strip()
+            if not trimmed:
+                return None
+            # If generation contained an opening <think> tag or Assistant token without </think>,
+            # it was truncated during reasoning: fail closed without leaking internal thoughts.
+            if "<think>" in self.buffer or "<｜Assistant｜>" in self.buffer:
+                return self.interrupted_message
+            # Otherwise, the output is a plain final response with absent delimiters.
+            return trimmed
         return None
 
     def has_completed_reasoning(self) -> bool:
@@ -119,7 +127,7 @@ def filter_reasoning_from_text(raw_text: str) -> str:
         if after:
             return after
         return "*[SAM-AI completed reasoning, but did not emit a final answer statement.]*"
-    if raw_text.strip().startswith("<think>"):
+    if "<think>" in raw_text:
         return "*[SAM-AI Notice: The reasoning process was interrupted before a final answer could be generated. Please retry your request.]*"
     return raw_text.strip()
 

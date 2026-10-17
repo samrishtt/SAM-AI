@@ -3,8 +3,9 @@
 import React, { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { User, Sparkles, Check, Copy, RotateCw, Brain, ChevronDown, ChevronRight } from "lucide-react";
+import { User, Sparkles, Check, Copy, RotateCw } from "lucide-react";
 import { Message } from "@/types/chat";
+import { filterReasoningFromText } from "@/lib/reasoning-filter";
 
 interface ChatMessageProps {
   message: Message;
@@ -15,105 +16,25 @@ interface ChatMessageProps {
 }
 
 export interface ParsedMessageContent {
-  thought: string | null;
+  thought: null;
   answer: string;
   isThinking: boolean;
 }
 
+/**
+ * Returns clean final answer, ensuring zero raw reasoning traces are displayed.
+ */
 export function parseMessageContent(content: string, isStreaming: boolean): ParsedMessageContent {
   if (!content) {
     return { thought: null, answer: "", isThinking: isStreaming };
   }
-
-  const closingTag = "</think>";
-  const closingIdx = content.indexOf(closingTag);
-
-  if (closingIdx !== -1) {
-    let rawThought = content.slice(0, closingIdx);
-    rawThought = rawThought.replace(/^\s*<think>\s*/i, "").trim();
-    const answer = content.slice(closingIdx + closingTag.length).trim();
-    return {
-      thought: rawThought.length > 0 ? rawThought : null,
-      answer,
-      isThinking: false,
-    };
-  }
-
-  // No </think> closing tag
-  const openTag = "<think>";
-  const openIdx = content.indexOf(openTag);
-  if (openIdx !== -1) {
-    const rawThought = content.slice(openIdx + openTag.length).trim();
-    return {
-      thought: rawThought.length > 0 ? rawThought : null,
-      answer: "",
-      isThinking: isStreaming,
-    };
-  }
-
-  if (isStreaming) {
-    return {
-      thought: content.trim(),
-      answer: "",
-      isThinking: true,
-    };
-  }
-
-  // Not streaming, no think tags
+  const clean = filterReasoningFromText(content);
   return {
     thought: null,
-    answer: content.trim(),
-    isThinking: false,
+    answer: clean,
+    isThinking: isStreaming && !clean,
   };
 }
-
-const ThoughtProcess: React.FC<{
-  thought: string;
-  isThinking?: boolean;
-}> = ({ thought, isThinking = false }) => {
-  const [isOpen, setIsOpen] = useState(false);
-
-  return (
-    <div className="my-2.5 rounded-xl border border-[#E8E1D9] bg-[#FAF8F5] overflow-hidden text-xs transition-all">
-      <button
-        type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between px-3.5 py-2 bg-[#F5F0EA] hover:bg-[#EFE8DF] transition text-left select-none text-[#766B62]"
-      >
-        <div className="flex items-center gap-2 font-medium">
-          <Brain
-            className={`w-3.5 h-3.5 text-[#D97745] ${
-              isThinking ? "animate-pulse" : ""
-            }`}
-          />
-          <span className="text-xs text-[#28231F] font-medium">
-            {isThinking ? "Thinking..." : "Thought process"}
-          </span>
-          {isThinking && (
-            <span className="flex h-2 w-2 relative">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#D97745] opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#D97745]"></span>
-            </span>
-          )}
-        </div>
-        <div className="flex items-center gap-1.5 text-[11px] text-[#766B62]">
-          <span>{isOpen ? "Hide" : "Show"}</span>
-          {isOpen ? (
-            <ChevronDown className="w-3.5 h-3.5 text-[#766B62]" />
-          ) : (
-            <ChevronRight className="w-3.5 h-3.5 text-[#766B62]" />
-          )}
-        </div>
-      </button>
-
-      {isOpen && (
-        <div className="p-3.5 text-xs text-[#524840] leading-relaxed border-t border-[#E8E1D9] bg-[#FAF8F5]/90 whitespace-pre-wrap font-sans max-h-80 overflow-y-auto">
-          {thought}
-        </div>
-      )}
-    </div>
-  );
-};
 
 const CodeBlock: React.FC<{ language?: string; children: React.ReactNode }> = ({
   language,
@@ -167,15 +88,13 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
   const isUser = message.role === "user";
   const [copied, setCopied] = useState(false);
 
-  const isStreamingThis = !isUser && isLastAssistant && isLoading;
-  const { thought, answer, isThinking } = isUser
-    ? { thought: null, answer: message.content, isThinking: false }
-    : parseMessageContent(message.content, isStreamingThis);
+  // Client-side defense-in-depth sanitization: strips any legacy raw reasoning traces
+  const answer = isUser ? message.content : filterReasoningFromText(message.content);
+  const isStreamingThis = !isUser && isLastAssistant && isLoading && !answer;
 
   const handleCopy = () => {
-    const textToCopy = answer || thought || "";
-    if (!textToCopy) return;
-    navigator.clipboard.writeText(textToCopy);
+    if (!answer) return;
+    navigator.clipboard.writeText(answer);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -242,11 +161,6 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
               </button>
             </div>
           </div>
-
-          {/* Collapsible Thought Process (if present or currently thinking) */}
-          {thought && (
-            <ThoughtProcess thought={thought} isThinking={isThinking} />
-          )}
 
           {/* Render Markdown Answer */}
           {answer ? (
@@ -329,7 +243,15 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                 {answer}
               </ReactMarkdown>
             </div>
-          ) : isThinking ? null : (
+          ) : isStreamingThis ? (
+            <div className="flex items-center gap-2 text-xs text-[#766B62] italic py-1">
+              <span className="flex h-2 w-2 relative">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#D97745] opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#D97745]"></span>
+              </span>
+              <span>Generating response...</span>
+            </div>
+          ) : (
             <div className="text-sm text-[#766B62] italic">
               *[Empty response]*
             </div>

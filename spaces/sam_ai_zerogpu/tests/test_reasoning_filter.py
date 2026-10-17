@@ -141,3 +141,43 @@ def test_canonical_system_prompt():
     assert "Parallax Intelligence Lab" in SAM_AI_SYSTEM_PROMPT
     assert "DeepSeek-R1-Distill-Qwen-7B" in SAM_AI_SYSTEM_PROMPT
     assert "Core Operating Guidelines:" in SAM_AI_SYSTEM_PROMPT
+
+
+def test_plain_final_response_streaming_absent_delimiters():
+    f = ReasoningStreamFilter()
+    c1 = f.process_chunk("42 is the answer to everything.")
+    assert c1 is None  # Buffers until </think> or finalize
+    final = f.finalize()
+    assert final == "42 is the answer to everything."
+    assert f.has_seen_closing is False
+
+
+def test_multi_chunk_plain_response_streaming():
+    f = ReasoningStreamFilter()
+    f.process_chunk("The prime numbers below 10 are: ")
+    f.process_chunk("2, 3, 5, 7.")
+    final = f.finalize()
+    assert final == "The prime numbers below 10 are: 2, 3, 5, 7."
+
+
+def test_malformed_unclosed_think_fails_closed():
+    f = ReasoningStreamFilter()
+    f.process_chunk("<think>malformed unclosed stream")
+    final = f.finalize()
+    assert final is not None
+    assert "interrupted" in final.lower()
+    assert "malformed" not in final
+
+
+def test_formatting_math_and_code_preserved():
+    raw = (
+        "<think>\nCompute function\n</think>\n\n"
+        "$$\\int 2x dx = x^2 + C$$\n\n"
+        "```python\ndef is_prime(n):\n    return n > 1\n```"
+    )
+    clean = filter_reasoning_from_text(raw)
+    assert "<think>" not in clean
+    assert "</think>" not in clean
+    assert "Compute function" not in clean
+    assert "$$\\int 2x dx = x^2 + C$$" in clean
+    assert "def is_prime(n):" in clean

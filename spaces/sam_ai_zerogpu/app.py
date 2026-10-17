@@ -2,8 +2,7 @@
 SAM-AI Cloud Interface (ZeroGPU Space Edition)
 ==============================================
 Dual-mode Gradio application offering SAM-AI Chat and SAM-AI Code, powered
-exclusively by sovereign open-weight model DeepSeek-R1-Distill-Qwen-7B with the
-verified SAM-AI GSM8K QLoRA adapter.
+exclusively by sovereign open-weight foundation model DeepSeek-R1-Distill-Qwen-7B.
 """
 
 import os
@@ -154,7 +153,7 @@ with gr.Blocks(theme=custom_theme, title="SAM-AI Sovereign Assistant") as demo:
     gr.Markdown(
         """
         # 🧠 SAM-AI Sovereign Assistant
-        **Self-Hosted Open-Weight Intelligence | DeepSeek-R1-Distill-Qwen-7B + SAM-AI QLoRA Adapter**  
+        **Self-Hosted Open-Weight Intelligence | DeepSeek-R1-Distill-Qwen-7B (Pure Sovereign Foundation Model)**\
         *Running on Hugging Face Spaces ZeroGPU (NVIDIA RTX Pro 6000 Blackwell)*
         """
     )

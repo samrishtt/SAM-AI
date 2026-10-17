@@ -103,9 +103,20 @@ export const ChatInterface: React.FC = () => {
         const targetId = activeConvId || createNewConversation(message.content).id;
         const existing = prev.find((c) => c.id === targetId);
 
-        // Prevent duplicate turns if message is already in messages array
-        const messageAlreadyPresent = messages.some((m) => m.id === message.id);
-        const mergedMessages = messageAlreadyPresent ? messages : [...messages, message];
+        // Strictly deduplicate messages by ID to prevent duplicate assistant or user turns
+        const allCandidates = messages.some((m) => m.id === message.id) ? messages : [...messages, message];
+        const seenIds = new Set<string>();
+        const mergedMessages: Message[] = [];
+        for (const m of allCandidates) {
+          if (m.id) {
+            if (!seenIds.has(m.id)) {
+              seenIds.add(m.id);
+              mergedMessages.push(m as Message);
+            }
+          } else {
+            mergedMessages.push(m as Message);
+          }
+        }
 
         let updatedList: Conversation[];
         if (existing) {

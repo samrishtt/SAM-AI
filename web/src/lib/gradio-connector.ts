@@ -12,6 +12,8 @@
  * 5. Formatting of output into Vercel AI SDK Data Stream protocol (`0:"chunk"\n`).
  */
 
+import { ReasoningStreamFilter, filterReasoningFromText } from "./reasoning-filter";
+
 export interface GradioChatOptions {
   baseUrl: string;
   messages: Array<{ role: string; content: string }>;
@@ -171,6 +173,7 @@ export async function streamGradioChat(options: GradioChatOptions): Promise<Read
   return new ReadableStream<Uint8Array>({
     async start(controller) {
       let hasEmittedTokens = false;
+      const reasoningFilter = new ReasoningStreamFilter();
 
       try {
         // Attempt Gradio 4 SSE protocol: POST /call/chat_respond -> GET /call/chat_respond/<event_id>
@@ -248,9 +251,12 @@ export async function streamGradioChat(options: GradioChatOptions): Promise<Read
                         if (currentFullText.length > lastFullText.length) {
                           const delta = currentFullText.slice(lastFullText.length);
                           lastFullText = currentFullText;
-                          hasEmittedTokens = true;
-                          // Emit AI SDK token chunk: 0:"<delta>"\n
-                          controller.enqueue(encoder.encode(`0:${JSON.stringify(delta)}\n`));
+                          const cleanChunk = reasoningFilter.processChunk(delta);
+                          if (cleanChunk) {
+                            hasEmittedTokens = true;
+                            // Emit AI SDK token chunk: 0:"<cleanChunk>"\n
+                            controller.enqueue(encoder.encode(`0:${JSON.stringify(cleanChunk)}\n`));
+                          }
                         }
                       }
                     }
@@ -259,7 +265,11 @@ export async function streamGradioChat(options: GradioChatOptions): Promise<Read
                   // Ignore parse errors on malformed heartbeat events
                 }
               } else if (trimmedLine.startsWith("event: complete")) {
-                // Stream finished
+                // Stream finished - emit any final notice or buffered answer
+                const finalNotice = reasoningFilter.finalize();
+                if (finalNotice) {
+                  controller.enqueue(encoder.encode(`0:${JSON.stringify(finalNotice)}\n`));
+                }
                 controller.enqueue(encoder.encode(`d:{"finishReason":"stop"}\n`));
                 controller.close();
                 return;
@@ -268,6 +278,10 @@ export async function streamGradioChat(options: GradioChatOptions): Promise<Read
           }
 
           // Finish stream if loop terminates
+          const finalNotice = reasoningFilter.finalize();
+          if (finalNotice) {
+            controller.enqueue(encoder.encode(`0:${JSON.stringify(finalNotice)}\n`));
+          }
           controller.enqueue(encoder.encode(`d:{"finishReason":"stop"}\n`));
           controller.close();
           return;
@@ -309,10 +323,13 @@ export async function streamGradioChat(options: GradioChatOptions): Promise<Read
           responseText = predictData.data;
         }
 
+        // Filter reasoning traces server-side from non-streaming response
+        const cleanResponse = filterReasoningFromText(responseText);
+
         // Stream complete text in chunks
         const chunkSize = 16;
-        for (let i = 0; i < responseText.length; i += chunkSize) {
-          const slice = responseText.slice(i, i + chunkSize);
+        for (let i = 0; i < cleanResponse.length; i += chunkSize) {
+          const slice = cleanResponse.slice(i, i + chunkSize);
           controller.enqueue(encoder.encode(`0:${JSON.stringify(slice)}\n`));
         }
 

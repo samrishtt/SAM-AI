@@ -81,21 +81,17 @@ export class ReasoningStreamFilter {
    */
   public finalize(): string | null {
     if (!this.hasSeenClosingTag) {
-      // Check if buffer contains no reasoning markers and no thinking characteristics
-      // (e.g., if a non-reasoning endpoint was used and never emitted <think> or </think>)
       const trimmed = this.buffer.trim();
-      const hasExplicitOpenTag = trimmed.includes("<think>");
-
-      if (!hasExplicitOpenTag && trimmed.length > 0 && !this.buffer.startsWith("<｜Assistant｜>")) {
-        // Safe check: If the output does NOT start with thinking and has no open tag,
-        // and doesn't look like an unclosed thinking trace, check if it's a direct response
-        // In DeepSeek-R1, reasoning always precedes the answer. If </think> was never emitted,
-        // it means max_tokens cut off the reasoning trace before the answer was formed.
+      if (!trimmed) {
+        return null;
+      }
+      // If generation contained an opening <think> tag or Assistant token without </think>,
+      // it was truncated during reasoning: fail closed without leaking internal thoughts.
+      if (this.buffer.includes("<think>") || this.buffer.includes("<｜Assistant｜>")) {
         return this.interruptedMessage;
       }
-
-      // Truncated during reasoning
-      return this.interruptedMessage;
+      // Otherwise, the output is a plain final response with absent delimiters.
+      return trimmed;
     }
 
     return null;
@@ -126,8 +122,8 @@ export function filterReasoningFromText(rawText: string): string {
     return "*[SAM-AI completed reasoning, but did not emit a final answer statement.]*";
   }
 
-  // If starts with <think> but no closing tag, it was truncated
-  if (rawText.trim().startsWith("<think>")) {
+  // If contains <think> but no closing tag, it was truncated during reasoning
+  if (rawText.includes("<think>")) {
     return "*[SAM-AI Notice: The reasoning process was interrupted before a final answer could be generated. Please retry your request.]*";
   }
 

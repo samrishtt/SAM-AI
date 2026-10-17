@@ -60,4 +60,55 @@ console.log("=== Testing ReasoningStreamFilter ===");
   console.log("[PASS] Test 5: filterReasoningFromText pure function");
 }
 
-console.log("ALL REASONING FILTER TESTS PASSED!");
+// Test 6: Plain final response with absent delimiters
+{
+  const filter = new ReasoningStreamFilter();
+  const c1 = filter.processChunk("42 is the answer to everything.");
+  assert.strictEqual(c1, null, "Buffers until </think> or finalize");
+  const final = filter.finalize();
+  assert.strictEqual(final, "42 is the answer to everything.", "Finalize emits plain response when no think tags were present");
+  console.log("[PASS] Test 6: Plain final response with absent delimiters");
+}
+
+// Test 7: Plain response split across multiple chunks
+{
+  const filter = new ReasoningStreamFilter();
+  filter.processChunk("The prime numbers below 10 are: ");
+  filter.processChunk("2, 3, 5, 7.");
+  const final = filter.finalize();
+  assert.strictEqual(final, "The prime numbers below 10 are: 2, 3, 5, 7.", "Finalize emits concatenated plain response");
+  console.log("[PASS] Test 7: Multi-chunk plain response without delimiters");
+}
+
+// Test 8: Malformed unclosed <think> with arbitrary content
+{
+  const filter = new ReasoningStreamFilter();
+  filter.processChunk("<think>malformed unclosed output");
+  const final = filter.finalize();
+  assert.ok(final !== null, "Must fail closed");
+  assert.ok(final.includes("interrupted"), "Must emit interrupted notice");
+  assert.ok(!final.includes("malformed"), "Must not leak internal text");
+  console.log("[PASS] Test 8: Malformed unclosed <think> fails closed");
+}
+
+// Test 9: Mathematical LaTeX and Code preserved in final answer
+{
+  const raw = "<think>\nComputing integral of 2x\n</think>\n\n$$\\int 2x dx = x^2 + C$$\n\n```python\ndef f(x):\n    return x**2\n```";
+  const clean = filterReasoningFromText(raw);
+  assert.ok(!clean.includes("<think>"));
+  assert.ok(!clean.includes("</think>"));
+  assert.ok(!clean.includes("Computing integral"));
+  assert.ok(clean.includes("$$\\int 2x dx = x^2 + C$$"));
+  assert.ok(clean.includes("```python\ndef f(x):\n    return x**2\n```"));
+  console.log("[PASS] Test 9: Mathematical LaTeX and code preserved");
+}
+
+// Test 10: Empty stream handling
+{
+  const filter = new ReasoningStreamFilter();
+  assert.strictEqual(filter.processChunk(""), null);
+  assert.strictEqual(filter.finalize(), null);
+  console.log("[PASS] Test 10: Empty stream handling");
+}
+
+console.log("ALL REASONING FILTER TESTS PASSED (10/10)!");
