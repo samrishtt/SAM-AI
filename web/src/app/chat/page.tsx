@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function ChatPage() {
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-[#FAF8F5] text-[#28231F] flex flex-col font-sans">
       <Navbar />
       <main className="flex-1 flex flex-col w-full h-[calc(100vh-4rem)]">
         <ChatInterface />

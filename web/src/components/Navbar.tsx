@@ -3,17 +3,16 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { MessageSquare, BookOpen, Activity, Github, Menu, X, ExternalLink, Shield } from "lucide-react";
+import { MessageSquare, BookOpen, Activity, Github, Menu, X, ArrowUpRight } from "lucide-react";
 
 export const Navbar: React.FC = () => {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navLinks = [
-    { href: "/", label: "Overview", icon: Shield },
-    { href: "/chat", label: "Chat & Code Demo", icon: MessageSquare },
-    { href: "/research", label: "Research & Audits", icon: BookOpen },
-    { href: "/status", label: "System Status", icon: Activity },
+    { href: "/chat", label: "Chat", icon: MessageSquare },
+    { href: "/research", label: "Research", icon: BookOpen },
+    { href: "/status", label: "Status", icon: Activity },
   ];
 
   const isActive = (href: string) => {
@@ -22,21 +21,18 @@ export const Navbar: React.FC = () => {
   };
 
   return (
-    <nav className="border-b border-slate-800 bg-slate-950/90 backdrop-blur sticky top-0 z-40">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+    <nav className="border-b border-[#E8E1D9] bg-[#FAF8F5]/90 backdrop-blur-md sticky top-0 z-40">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
         {/* Brand */}
         <Link href="/" className="flex items-center gap-2.5 group">
-          <div className="w-8 h-8 rounded-lg bg-blue-600 group-hover:bg-blue-500 transition flex items-center justify-center font-bold text-white text-base shadow-lg shadow-blue-500/20">
+          <div className="w-8 h-8 rounded-lg bg-[#D97745] group-hover:bg-[#B95F34] transition flex items-center justify-center font-serif font-bold text-white text-base shadow-sm">
             S
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-slate-100 tracking-wide text-sm sm:text-base">SAM-AI</span>
-              <span className="text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                Research MVP
-              </span>
-            </div>
-            <p className="text-[11px] text-slate-400 hidden sm:block">Parallax Intelligence Lab</p>
+          <div className="flex items-baseline gap-2">
+            <span className="font-semibold text-[#28231F] tracking-tight text-base sm:text-lg">SAM-AI</span>
+            <span className="text-[11px] text-[#766B62] font-normal hidden sm:inline">
+              Parallax Intelligence Lab
+            </span>
           </div>
         </Link>
 
@@ -49,65 +45,10 @@ export const Navbar: React.FC = () => {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition ${
                   active
-                    ? "bg-blue-600/15 text-blue-400 border border-blue-500/20"
-                    : "text-slate-400 hover:text-slate-200 hover:bg-slate-900"
-                }`}
-              >
-                <Icon className="w-3.5 h-3.5" />
-                <span>{link.label}</span>
-              </Link>
-            );
-          })}
-        </div>
-
-        {/* External Links & Actions */}
-        <div className="hidden md:flex items-center gap-2.5">
-          <a
-            href="https://github.com/samrishtt/SAM-AI"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 text-xs font-medium transition"
-          >
-            <Github className="w-3.5 h-3.5 text-slate-400" />
-            <span>GitHub</span>
-            <ExternalLink className="w-3 h-3 text-slate-500" />
-          </a>
-
-          <Link
-            href="/chat"
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-md bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-md shadow-blue-500/20 transition"
-          >
-            <span>Launch Chat</span>
-          </Link>
-        </div>
-
-        {/* Mobile menu button */}
-        <button
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          aria-label="Toggle navigation menu"
-          className="md:hidden p-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-900 transition"
-        >
-          {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-        </button>
-      </div>
-
-      {/* Mobile drawer */}
-      {mobileMenuOpen && (
-        <div className="md:hidden border-b border-slate-800 bg-slate-950 px-4 py-3 space-y-1">
-          {navLinks.map((link) => {
-            const Icon = link.icon;
-            const active = isActive(link.href);
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setMobileMenuOpen(false)}
-                className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition ${
-                  active
-                    ? "bg-blue-600/15 text-blue-400 border border-blue-500/20"
-                    : "text-slate-400 hover:text-slate-200 hover:bg-slate-900"
+                    ? "bg-[#FBEBDD] text-[#D97745]"
+                    : "text-[#766B62] hover:text-[#28231F] hover:bg-[#F5F0EA]"
                 }`}
               >
                 <Icon className="w-4 h-4" />
@@ -115,17 +56,83 @@ export const Navbar: React.FC = () => {
               </Link>
             );
           })}
-          <div className="pt-2 border-t border-slate-900 flex flex-col gap-2">
-            <a
-              href="https://github.com/samrishtt/SAM-AI"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-slate-900 text-slate-300 border border-slate-800 text-xs font-medium"
+        </div>
+
+        {/* Right Action */}
+        <div className="hidden md:flex items-center gap-3">
+          <a
+            href="https://github.com/samrishtt/SAM-AI"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="GitHub Repository"
+            className="p-2 rounded-lg text-[#766B62] hover:text-[#28231F] hover:bg-[#F5F0EA] transition"
+          >
+            <Github className="w-4 h-4" />
+          </a>
+          <Link
+            href="/chat"
+            className="flex items-center gap-1 px-3.5 py-1.5 rounded-lg text-xs font-medium bg-[#D97745] hover:bg-[#B95F34] text-white shadow-sm transition"
+          >
+            <span>Open Chat</span>
+            <ArrowUpRight className="w-3.5 h-3.5 opacity-80" />
+          </Link>
+        </div>
+
+        {/* Mobile Menu Button */}
+        <div className="flex items-center gap-2 md:hidden">
+          <Link
+            href="/chat"
+            className="px-3 py-1 rounded-lg text-xs font-medium bg-[#D97745] text-white"
+          >
+            Chat
+          </Link>
+          <button
+            onClick={() => setMobileMenuOpen((prev) => !prev)}
+            aria-label="Toggle Navigation"
+            className="p-2 rounded-lg text-[#766B62] hover:text-[#28231F] hover:bg-[#F5F0EA] transition"
+          >
+            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Menu Dropdown */}
+      {mobileMenuOpen && (
+        <div className="md:hidden border-b border-[#E8E1D9] bg-[#FFFFFF] px-4 py-3 space-y-1 shadow-sm">
+          <Link
+            href="/"
+            onClick={() => setMobileMenuOpen(false)}
+            className={`block px-3 py-2 rounded-lg text-sm font-medium ${
+              pathname === "/"
+                ? "bg-[#FBEBDD] text-[#D97745]"
+                : "text-[#766B62] hover:text-[#28231F] hover:bg-[#F5F0EA]"
+            }`}
+          >
+            Overview
+          </Link>
+          {navLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              onClick={() => setMobileMenuOpen(false)}
+              className={`block px-3 py-2 rounded-lg text-sm font-medium ${
+                isActive(link.href)
+                  ? "bg-[#FBEBDD] text-[#D97745]"
+                  : "text-[#766B62] hover:text-[#28231F] hover:bg-[#F5F0EA]"
+              }`}
             >
-              <Github className="w-4 h-4" />
-              <span>GitHub Repository</span>
-            </a>
-          </div>
+              {link.label}
+            </Link>
+          ))}
+          <a
+            href="https://github.com/samrishtt/SAM-AI"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium text-[#766B62] hover:text-[#28231F] hover:bg-[#F5F0EA]"
+          >
+            <span>GitHub Repository</span>
+            <Github className="w-4 h-4" />
+          </a>
         </div>
       )}
     </nav>
