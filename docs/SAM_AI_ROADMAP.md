@@ -134,12 +134,12 @@ To enable SAM-AI to answer questions beyond its training cutoff and provide veri
 
 ### Web Research Phased Implementation Roadmap:
 
-| Stage | Focus Area | Deliverables |
-| :--- | :--- | :--- |
-| **Stage 1: Search Abstraction** | Provider Interface | Build `WebSearchProvider` abstract class with mock, SearXNG, and free DuckDuckGo drivers. |
-| **Stage 2: Retrieval & Firewall** | Fetcher & SSRF Guard | Implement `SafeWebFetcher` with private IP rejection, content extraction, and HTML sanitization. |
-| **Stage 3: Citation Synthesis** | Prompt & UI Grounding | Add citation formatting prompt rules and clickable frontend reference pills `[Source 1]`. |
-| **Stage 4: Comparative Evaluation** | A/B Benchmark Testing | Evaluate 100 contemporary factual questions comparing Model-Only vs. Model + Web Retrieval. |
+| Stage | Focus Area | Status | Deliverables |
+| :--- | :--- | :--- | :--- |
+| **Stage 1: Search Abstraction** | Provider Interface | **COMPLETE** | Built `WebSearchProvider` interface with `MockSearchProvider`, `SearXNGSearchProvider`, and fail-closed `SearchNotConfiguredError`. |
+| **Stage 2: Retrieval & Firewall** | Fetcher & SSRF Guard | **COMPLETE** | Implemented `SafeWebFetcher` with private IP rejection, pinned-IP transport, 500 KB limit, HTML sanitization, and untrusted envelope tagging. |
+| **Stage 3: Citation Synthesis** | Prompt & UI Grounding | PENDING | Add citation formatting prompt rules and clickable frontend reference pills `[Source 1]`. |
+| **Stage 4: Comparative Evaluation** | A/B Benchmark Testing | PENDING | Evaluate 100 contemporary factual questions comparing Model-Only vs. Model + Web Retrieval. |
 
 ---
 
@@ -149,9 +149,9 @@ To enable SAM-AI to answer questions beyond its training cutoff and provide veri
 OCT 2026 ───────► NOV 2026 ───────► DEC 2026 ───────► Q1 2027 ────────► Q2-Q3 2027
    │                 │                 │                 │                 │
    ▼                 ▼                 ▼                 ▼                 ▼
-Phase 2H.1 Sync   Phase 3A Baseline  Phase 3B Web      Phase 4 GRPO     V4 Sovereign
-Parity Complete   Multi-Domain Eval  Research Tool     SFT Retraining   Frontier Release
+Phase 2J Chat     Phase 3A Baseline  Phase 3B Stage1/2 Phase 4 GRPO     V4 Sovereign
+Isolation Fixed   Audit & Rescore    Research Engine   SFT Retraining   Frontier Release
 ```
 
-- **Current Milestone (Complete):** Phase 2H.1 verified 100% parity on public website and Hugging Face Space.
-- **Immediate Next Task:** **Phase 3A Multi-Domain Baseline** — Executing initial zero-shot benchmark evaluations across GSM8K, HumanEval, and MATH on the sovereign foundation model.
+- **Current Milestone (Complete):** Phase 3B Stages 1 & 2 (Web Research Engine backend & SSRF firewall) verified and passing all unit/integration tests and production builds.
+- **Immediate Next Task:** **Phase 3B Stage 3 (Citation Synthesis & Frontend Source Cards)** or **Phase 4 Preparation**.
