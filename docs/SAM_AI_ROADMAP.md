@@ -50,29 +50,33 @@ The benchmark evidence in the repository is fully substantiated by primary artif
 
 ---
 
-## 3. Phase 3A: Multi-Domain Intelligence Baseline
+## 3. Phase 3A & Phase 3A.1: Certified Multi-Domain Intelligence Baseline
 
-Phase 3A extends the pilot into a comprehensive, multi-domain evaluation benchmark. It builds upon the existing pilot infrastructure rather than starting from zero:
+In October 2026, the frozen multi-domain baseline evaluation of `deepseek-ai/DeepSeek-R1-Distill-Qwen-7B` (zero adapters, zero retrieval) was completed on Kaggle GPU hardware (`samrishb/sam-ai-multi-domain-baseline`, dual Tesla T4, 7,682s runtime). Following a forensic LaTeX parser audit (Phase 3A.1), the ground-truth benchmark is certified at **84 / 95 (88.42%)**:
 
-### Evaluated Domains & Benchmarks:
-1. **Mathematical Reasoning:** GSM8K (held-out test split, 1,319 problems) and MATH-500 (Level 5 Olympiad problems).
-2. **Coding Correctness:** HumanEval (164 coding tasks) and MBPP.
-3. **Scientific & Factual Reasoning:** GPQA Diamond and ARC-Challenge.
-4. **Logical & Constraint Satisfaction:** Formal logic puzzles verified with Z3 / SymPy.
-5. **Instruction Following:** IFEval (strict formatting and constraints).
-6. **Multi-Turn Conversation:** Extended dialogue context tracking.
-7. **Grounded Factual QA:** Open-domain questions evaluated with and without web retrieval.
+| Domain | Subset Count | Initial Reported | Audited Certified Score | Notes |
+| :--- | :---: | :---: | :---: | :--- |
+| `mathematics_gsm8k` | 20 | 19 / 20 | **19 / 20 (95.0%)** | Replicates pilot failure item deterministically |
+| `mathematics_math500` | 20 | 18 / 20 | **20 / 20 (100.0%)** | Corrected +2 false negatives (`\dfrac` LaTeX macro) |
+| `coding_humaneval` | 20 | 17 / 20 | **17 / 20 (85.0%)** | Offline evaluation; not security sandbox certified |
+| `science_reasoning` | 10 | 9 / 10 | **9 / 10 (90.0%)** | Zero-shot physical/chemical reasoning |
+| `logic_constraints` | 10 | 7 / 10 | **7 / 10 (70.0%)** | Complex truth-teller/liar deductions |
+| `instruction_following`| 10 | 7 / 10 | **7 / 10 (70.0%)** | Negative formatting constraints |
+| `multiturn_context` | 5 | 5 / 5 | **5 / 5 (100.0%)** | Multi-turn context preservation |
+| **AGGREGATE TOTAL** | **95** | **82 / 95** | **84 / 95 (88.42%)** | **Locked Ground-Truth Reference** |
 
-### Evaluation Invariants:
-- **Primary Baseline:** Untouched foundation model `deepseek-ai/DeepSeek-R1-Distill-Qwen-7B`.
-- **Experimental Adapters:** Evaluated strictly as separate conditions against identical frozen challenge sets.
-- **Zero Test Contamination:** Strict hash verification ensuring no overlap between training pools and evaluation splits.
+### Benchmark Disclosures:
+- **Internal Challenge Set:** This 95-item suite is an internal challenge set designed for paired regression tracking, not a full standardized benchmark or proof of frontier performance.
+- **Coding Sandbox Security:** The HumanEval 17/20 result was executed in the standard offline Kaggle container without a dedicated security sandbox (gVisor/Docker); it is not a security-certified metric.
+- **Evaluation Invariant:** The baseline is immutable and permanently held out from training sets.
 
 ---
 
 ## 4. Phase 3B: Web Research & Browsing Architecture
 
-To enable SAM-AI to answer questions beyond its training cutoff and provide verifiable citations, a modular Web Research engine is integrated directly into the backend.
+To enable SAM-AI to answer questions beyond its training cutoff and provide verifiable citations, a modular Web Research engine is implemented in the server backend.
+
+> **Operational Disclosure:** Phase 3B Stage 1 and Stage 2 are **implemented locally** in backend modules and verified with 14/14 acceptance tests. The engine is **not** yet integrated into `/api/chat`, no live search provider is configured in production, and end-to-end web search is not active in the user chat interface. Real citation synthesis is scheduled for Stage 3.
 
 ```
                       ┌──────────────────────────────────────────────┐

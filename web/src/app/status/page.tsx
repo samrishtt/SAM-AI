@@ -192,56 +192,56 @@ export default function StatusPage() {
                 </div>
                 <div className="col-span-4 sm:col-span-3">
                   <span className="px-2 py-0.5 rounded-full bg-[#EBF5F0] text-[#2D6A4F] border border-[#B7E4C7] font-semibold text-[11px]">
-                    Implemented &bull; Tested
+                    Deployed and verified
                   </span>
                 </div>
                 <div className="col-span-3 sm:col-span-5 hidden sm:block text-[#766B62]">
-                  Build passes; streaming via Vercel AI SDK; 10/10 acceptance tests pass.
+                  Live on Vercel; SSE stream keepalive heartbeats (3.5s), conversation isolation, greeting fast-path.
                 </div>
               </div>
 
               {/* Row 2 */}
               <div className="grid grid-cols-12 px-4 py-3 items-center">
                 <div className="col-span-5 sm:col-span-4 font-semibold text-[#28231F]">
-                  Read-Only Code Workspace
+                  Hugging Face Space Backend
                 </div>
                 <div className="col-span-4 sm:col-span-3">
                   <span className="px-2 py-0.5 rounded-full bg-[#EBF5F0] text-[#2D6A4F] border border-[#B7E4C7] font-semibold text-[11px]">
-                    Implemented &bull; Tested
+                    Deployed and verified
                   </span>
                 </div>
                 <div className="col-span-3 sm:col-span-5 hidden sm:block text-[#766B62]">
-                  Isolated tree browsing; path traversal, symlink escapes, and secrets blocked.
+                  RUNNING on ZeroGPU (A10G); base DeepSeek-R1-7B serving with adapters detached.
                 </div>
               </div>
 
               {/* Row 3 */}
               <div className="grid grid-cols-12 px-4 py-3 items-center">
                 <div className="col-span-5 sm:col-span-4 font-semibold text-[#28231F]">
-                  Sovereign Endpoint Security
+                  Phase 3A Multi-Domain Baseline
                 </div>
                 <div className="col-span-4 sm:col-span-3">
-                  <span className="px-2 py-0.5 rounded-full bg-[#EBF5F0] text-[#2D6A4F] border border-[#B7E4C7] font-semibold text-[11px]">
-                    Implemented &bull; Tested
+                  <span className="px-2 py-0.5 rounded-full bg-[#ECFDF5] text-[#047857] border border-[#A7F3D0] font-semibold text-[11px]">
+                    Verified
                   </span>
                 </div>
                 <div className="col-span-3 sm:col-span-5 hidden sm:block text-[#766B62]">
-                  Third-party routers blocked; loopback and trusted HTTPS allowlist verified.
+                  84/95 (88.42%) across 7 domains audited; math parser corrected (+2); HumanEval not sandbox-certified.
                 </div>
               </div>
 
               {/* Row 4 */}
               <div className="grid grid-cols-12 px-4 py-3 items-center">
                 <div className="col-span-5 sm:col-span-4 font-semibold text-[#28231F]">
-                  Phase 4B Curated Dataset
+                  Phase 3B Web Research Engine
                 </div>
                 <div className="col-span-4 sm:col-span-3">
-                  <span className="px-2 py-0.5 rounded-full bg-[#EBF5F0] text-[#2D6A4F] border border-[#B7E4C7] font-semibold text-[11px]">
-                    Verified on Disk
+                  <span className="px-2 py-0.5 rounded-full bg-[#F5F3FF] text-[#5B21B6] border border-[#DDD6FE] font-semibold text-[11px]">
+                    Implemented locally
                   </span>
                 </div>
                 <div className="col-span-3 sm:col-span-5 hidden sm:block text-[#766B62]">
-                  250 examples with complete traces; 0% pilot leakage; SHA-256 authenticated.
+                  Stage 1 &amp; 2 pass 14/14 tests; SSRF firewall and IP pinning; not yet integrated into user chat.
                 </div>
               </div>
 
@@ -251,57 +251,72 @@ export default function StatusPage() {
                   Experiment 001 Adapter
                 </div>
                 <div className="col-span-4 sm:col-span-3">
-                  <span className="px-2 py-0.5 rounded-full bg-[#FEE2E2] text-[#C53030] border border-[#FECACA] font-semibold text-[11px]">
+                  <span className="px-2 py-0.5 rounded-full bg-[#FEF2F2] text-[#B91C1C] border border-[#FECACA] font-semibold text-[11px]">
                     Rejected &bull; Quarantined
                   </span>
                 </div>
                 <div className="col-span-3 sm:col-span-5 hidden sm:block text-[#766B62]">
-                  Regressed accuracy from 19/20 to 16/20 due to reasoning collapse.
+                  Regressed accuracy from 19/20 to 16/20 due to missing closing tags; permanently detached.
                 </div>
               </div>
 
               {/* Row 6 */}
               <div className="grid grid-cols-12 px-4 py-3 items-center">
                 <div className="col-span-5 sm:col-span-4 font-semibold text-[#28231F]">
-                  Experiment 002 (CoT-Preserving)
+                  Phase 4B Curated Dataset
                 </div>
                 <div className="col-span-4 sm:col-span-3">
-                  <span className="px-2 py-0.5 rounded-full bg-[#FBEBDD] text-[#D97745] border border-[#D97745]/30 font-semibold text-[11px]">
-                    Proposed &bull; Ready
+                  <span className="px-2 py-0.5 rounded-full bg-[#ECFDF5] text-[#047857] border border-[#A7F3D0] font-semibold text-[11px]">
+                    Verified
                   </span>
                 </div>
                 <div className="col-span-3 sm:col-span-5 hidden sm:block text-[#766B62]">
-                  Configuration complete; awaiting execution on free Kaggle GPU quota.
+                  250 examples from OpenR1-Math-220k with complete traces; 0% pilot leakage; SHA-256 authenticated.
                 </div>
               </div>
 
               {/* Row 7 */}
               <div className="grid grid-cols-12 px-4 py-3 items-center">
                 <div className="col-span-5 sm:col-span-4 font-semibold text-[#28231F]">
-                  Hugging Face Space Live URL
+                  Phase 3B Stage 3 (Citations)
                 </div>
                 <div className="col-span-4 sm:col-span-3">
-                  <span className="px-2 py-0.5 rounded-full bg-[#FEF3C7] text-[#B45309] border border-[#FDE68A] font-semibold text-[11px]">
-                    Pending User Push
+                  <span className="px-2 py-0.5 rounded-full bg-[#F1F5F9] text-[#475569] border border-[#CBD5E1] font-semibold text-[11px]">
+                    Planned
                   </span>
                 </div>
                 <div className="col-span-3 sm:col-span-5 hidden sm:block text-[#766B62]">
-                  Packaged in <code className="font-mono text-[10px]">spaces/sam_ai_zerogpu/</code>; requires user git push to Space repo.
+                  Citation formatting prompt rules and clickable frontend reference cards in the chat interface.
                 </div>
               </div>
 
               {/* Row 8 */}
               <div className="grid grid-cols-12 px-4 py-3 items-center">
                 <div className="col-span-5 sm:col-span-4 font-semibold text-[#28231F]">
-                  RLVR / GRPO Training
+                  Experiment 002 (CoT SFT)
                 </div>
                 <div className="col-span-4 sm:col-span-3">
-                  <span className="px-2 py-0.5 rounded-full bg-[#F5F0EA] text-[#766B62] border border-[#E8E1D9] font-semibold text-[11px]">
-                    Planned Future Phase
+                  <span className="px-2 py-0.5 rounded-full bg-[#F1F5F9] text-[#475569] border border-[#CBD5E1] font-semibold text-[11px]">
+                    Planned
                   </span>
                 </div>
                 <div className="col-span-3 sm:col-span-5 hidden sm:block text-[#766B62]">
-                  Reinforcement learning with verifiable mathematical rewards slated for Stage 5.
+                  QLoRA recipe with loss computed on reasoning tokens; gated against the frozen 84/95 baseline.
+                </div>
+              </div>
+
+              {/* Row 9 */}
+              <div className="grid grid-cols-12 px-4 py-3 items-center">
+                <div className="col-span-5 sm:col-span-4 font-semibold text-[#28231F]">
+                  Read-Only Code Workspace
+                </div>
+                <div className="col-span-4 sm:col-span-3">
+                  <span className="px-2 py-0.5 rounded-full bg-[#EBF5F0] text-[#2D6A4F] border border-[#B7E4C7] font-semibold text-[11px]">
+                    Deployed and verified
+                  </span>
+                </div>
+                <div className="col-span-3 sm:col-span-5 hidden sm:block text-[#766B62]">
+                  Isolated tree browsing; path traversal, symlink escapes, and secrets blocked.
                 </div>
               </div>
             </div>
