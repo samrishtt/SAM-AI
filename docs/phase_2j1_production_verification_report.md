@@ -29,7 +29,7 @@ Phase 2J.1 investigated the live production chat behavior at `sam-ai-lilac-six.v
 | File | Remote Space SHA-256 | Local Workspace SHA-256 | Parity Status |
 | :--- | :--- | :--- | :--- |
 | `requirements.txt` | `1d6f88d2b65159721b67fa48655eef6a65640f57c0fd147a05cae0fe9d49c598` | `1d6f88d2b65159721b67fa48655eef6a65640f57c0fd147a05cae0fe9d49c598` | **MATCH (Identical)** |
-| `app.py` | `50aa058225cf97112e7538d711be62a9804559db8ec1496d64d5096532ca2235` | `c10d63bf46118226e59beca6f8274edf9aa946e271a4ea5693976c1cec6384dc` | **PENDING SYNC** (Duration: 20s -> 60s) |
+| `app.py` | `50aa058225cf97112e7538d711be62a9804559db8ec1496d64d5096532ca2235` | `4515a8100e313509b91f932f7671d46bb2169e1cdec0467c224777608d2ba200` | **PENDING SYNC** (Duration: 20s -> 60s & greeting guard) |
 | `model_loader.py` | `54978ca51990b386115e224fd36d7a38b5fbdbb3c5b48d2accacc80ec9f719e4` | `7e96484f4483fae4ef331dfaaceec6c5ccf4c3ed1052e3f14ac446994bbd13ff` | **PENDING SYNC** (Concise prompt policy & filter guards) |
 
 ---

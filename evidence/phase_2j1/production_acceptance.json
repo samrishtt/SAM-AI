@@ -28,7 +28,7 @@
       "requirements_txt": "1d6f88d2b65159721b67fa48655eef6a65640f57c0fd147a05cae0fe9d49c598"
     },
     "local_workspace": {
-      "app_py": "c10d63bf46118226e59beca6f8274edf9aa946e271a4ea5693976c1cec6384dc",
+      "app_py": "4515a8100e313509b91f932f7671d46bb2169e1cdec0467c224777608d2ba200",
       "model_loader_py": "7e96484f4483fae4ef331dfaaceec6c5ccf4c3ed1052e3f14ac446994bbd13ff",
       "requirements_txt": "1d6f88d2b65159721b67fa48655eef6a65640f57c0fd147a05cae0fe9d49c598"
     },

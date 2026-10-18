@@ -52,6 +52,16 @@ def chat_respond(user_message, chat_history, temperature, top_p, max_tokens):
         yield chat_history, ""
         return
 
+    # Direct short-circuit for simple greetings to preserve ZeroGPU quota and guarantee clean greetings
+    cleaned_prompt = user_message.strip().lower().rstrip("!.,?")
+    greetings = {"hi", "hello", "hey", "hey there", "hello there", "hi there", "good morning", "good afternoon", "good evening", "howdy", "greetings", "what's up", "sup", "yo"}
+    if cleaned_prompt in greetings:
+        greeting_reply = "Hello! I am SAM-AI, your sovereign AI assistant powered by DeepSeek-R1-Distill-Qwen-7B. How can I help you today?"
+        history_list = [list(turn) for turn in (chat_history or [])]
+        history_list.append([user_message, greeting_reply])
+        yield history_list, ""
+        return
+
     # Build history in OpenAI-style format
     messages = []
     for turn in (chat_history or []):

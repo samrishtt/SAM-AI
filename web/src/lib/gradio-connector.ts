@@ -190,6 +190,28 @@ export function formatGradioChatHistory(
   return { userMessage: lastUserMessage, history };
 }
 
+export function isGreetingPrompt(text: string): boolean {
+  if (!text || typeof text !== "string") return false;
+  const cleaned = text.trim().toLowerCase().replace(/[!.,?]+$/, "");
+  const greetings = new Set([
+    "hi",
+    "hello",
+    "hey",
+    "hey there",
+    "hello there",
+    "hi there",
+    "good morning",
+    "good afternoon",
+    "good evening",
+    "howdy",
+    "greetings",
+    "what's up",
+    "sup",
+    "yo",
+  ]);
+  return greetings.has(cleaned);
+}
+
 /**
  * Streams chat responses from a Gradio Space formatted in Vercel AI SDK data-stream protocol.
  */
@@ -209,6 +231,19 @@ export async function streamGradioChat(options: GradioChatOptions): Promise<Read
   }
 
   const encoder = new TextEncoder();
+
+  // Direct short-circuit for simple greetings to guarantee immediate response and prevent hallucinated math
+  if (isGreetingPrompt(userMessage)) {
+    const greetingText =
+      "Hello! I am SAM-AI, your sovereign AI assistant powered by DeepSeek-R1-Distill-Qwen-7B. How can I help you today?";
+    return new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(encoder.encode(`0:${JSON.stringify(greetingText)}\n`));
+        controller.enqueue(encoder.encode(`d:{"finishReason":"stop"}\n`));
+        controller.close();
+      },
+    });
+  }
 
   return new ReadableStream<Uint8Array>({
     async start(controller) {
