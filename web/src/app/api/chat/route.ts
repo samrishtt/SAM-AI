@@ -116,6 +116,7 @@ export async function POST(req: Request) {
         messages,
         temperature,
         apiKey,
+        systemPrompt: SAM_AI_SYSTEM_PROMPT,
       });
 
       return new Response(gradioStream, {

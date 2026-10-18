@@ -116,35 +116,75 @@ export async function checkGradioHealth(baseUrl: string, apiKey?: string): Promi
 
 /**
  * Converts a standard message list into (lastUserMessage, chatHistoryPairs).
+ * Handles:
+ * - Empty, invalid, or malformed message arrays
+ * - System message filtering
+ * - Consecutive user messages (merged cleanly)
+ * - Orphaned assistant messages (discarded safely)
+ * - Zero history leaks for single-message / fresh conversations
  */
 export function formatGradioChatHistory(
   messages: Array<{ role: string; content: string }>
 ): { userMessage: string; history: Array<[string, string]> } {
-  const history: Array<[string, string]> = [];
-  let currentUser = "";
-  let lastUserMessage = "";
+  if (!Array.isArray(messages) || messages.length === 0) {
+    return { userMessage: "", history: [] };
+  }
 
-  for (let i = 0; i < messages.length; i++) {
-    const msg = messages[i];
-    if (msg.role === "system") {
-      continue;
-    }
-    if (msg.role === "user") {
-      if (i === messages.length - 1) {
-        lastUserMessage = msg.content;
-      } else {
-        currentUser = msg.content;
-      }
-    } else if (msg.role === "assistant") {
-      if (currentUser) {
-        history.push([currentUser, msg.content]);
-        currentUser = "";
-      }
+  // 1. Sanitize and retain only valid user and assistant messages
+  const sanitized: Array<{ role: "user" | "assistant"; content: string }> = [];
+  for (const m of messages) {
+    if (!m || typeof m !== "object") continue;
+    if (m.role !== "user" && m.role !== "assistant") continue;
+    if (typeof m.content !== "string") continue;
+    const trimmed = m.content.trim();
+    if (!trimmed) continue;
+    sanitized.push({ role: m.role, content: trimmed });
+  }
+
+  if (sanitized.length === 0) {
+    return { userMessage: "", history: [] };
+  }
+
+  // 2. Find the index of the latest user message
+  let lastUserIdx = -1;
+  for (let i = sanitized.length - 1; i >= 0; i--) {
+    if (sanitized[i].role === "user") {
+      lastUserIdx = i;
+      break;
     }
   }
 
-  if (!lastUserMessage && currentUser) {
-    lastUserMessage = currentUser;
+  if (lastUserIdx === -1) {
+    return { userMessage: "", history: [] };
+  }
+
+  let lastUserMessage = sanitized[lastUserIdx].content;
+
+  // 3. Process preceding turns into strictly paired [user, assistant] history
+  const history: Array<[string, string]> = [];
+  let pendingUser = "";
+
+  for (let i = 0; i < lastUserIdx; i++) {
+    const turn = sanitized[i];
+    if (turn.role === "user") {
+      if (pendingUser) {
+        // Merge consecutive user messages rather than silently dropping earlier content
+        pendingUser = `${pendingUser}\n\n${turn.content}`;
+      } else {
+        pendingUser = turn.content;
+      }
+    } else if (turn.role === "assistant") {
+      if (pendingUser) {
+        history.push([pendingUser, turn.content]);
+        pendingUser = "";
+      }
+      // If no pendingUser, this is an orphaned assistant turn; safely skip
+    }
+  }
+
+  // 4. If there was a trailing unanswered user prompt prior to the last message, merge it
+  if (pendingUser) {
+    lastUserMessage = `${pendingUser}\n\n${lastUserMessage}`;
   }
 
   return { userMessage: lastUserMessage, history };
@@ -345,4 +385,32 @@ export async function streamGradioChat(options: GradioChatOptions): Promise<Read
       }
     },
   });
+}
+
+/**
+ * Executes an on-demand non-streaming completion from the configured Gradio Space.
+ * Useful for secondary tasks (e.g. reasoning explanation generation) without altering chat turns.
+ */
+export async function generateGradioText(options: GradioChatOptions): Promise<string> {
+  const stream = await streamGradioChat(options);
+  const reader = stream.getReader();
+  const decoder = new TextDecoder();
+  let fullText = "";
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    const chunkStr = decoder.decode(value, { stream: true });
+    const lines = chunkStr.split("\n");
+    for (const line of lines) {
+      if (line.startsWith("0:")) {
+        try {
+          const content = JSON.parse(line.slice(2));
+          if (typeof content === "string") {
+            fullText += content;
+          }
+        } catch {}
+      }
+    }
+  }
+  return filterReasoningFromText(fullText);
 }

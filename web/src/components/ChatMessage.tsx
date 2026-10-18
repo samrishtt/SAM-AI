@@ -3,9 +3,10 @@
 import React, { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { User, Sparkles, Check, Copy, RotateCw } from "lucide-react";
+import { User, Sparkles, Check, Copy, RotateCw, ChevronRight, Loader2 } from "lucide-react";
 import { Message } from "@/types/chat";
 import { filterReasoningFromText } from "@/lib/reasoning-filter";
+import { getStoredPassword } from "@/lib/storage";
 
 interface ChatMessageProps {
   message: Message;
@@ -13,6 +14,7 @@ interface ChatMessageProps {
   isLastAssistant?: boolean;
   onRetry?: () => void;
   isLoading?: boolean;
+  userPrompt?: string;
 }
 
 export interface ParsedMessageContent {
@@ -84,13 +86,63 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
   isLastAssistant = false,
   onRetry,
   isLoading = false,
+  userPrompt,
 }) => {
   const isUser = message.role === "user";
   const [copied, setCopied] = useState(false);
 
+  // Accessible collapsed-by-default explanation state
+  const [isExplanationOpen, setIsExplanationOpen] = useState(false);
+  const [explanationText, setExplanationText] = useState<string | null>(null);
+  const [isLoadingExplanation, setIsLoadingExplanation] = useState(false);
+  const [explanationError, setExplanationError] = useState<string | null>(null);
+
   // Client-side defense-in-depth sanitization: strips any legacy raw reasoning traces
   const answer = isUser ? message.content : filterReasoningFromText(message.content);
   const isStreamingThis = !isUser && isLastAssistant && isLoading && !answer;
+
+  const isGreeting =
+    Boolean(userPrompt && /^(hi|hello|hey|good\s+(morning|afternoon|evening)|howdy)[\s!.]*$/i.test(userPrompt.trim())) ||
+    Boolean(answer && answer.trim().length < 30 && !answer.includes("\n"));
+
+  const handleToggleExplanation = async () => {
+    const nextState = !isExplanationOpen;
+    setIsExplanationOpen(nextState);
+
+    // Fetch on-demand only when opening for the first time without active request
+    if (nextState && explanationText === null && !isLoadingExplanation && answer) {
+      setIsLoadingExplanation(true);
+      setExplanationError(null);
+      try {
+        const storedPw = getStoredPassword();
+        const headers: Record<string, string> = { "Content-Type": "application/json" };
+        if (storedPw) {
+          headers["x-sam-ai-password"] = storedPw;
+        }
+
+        const res = await fetch("/api/chat/explain", {
+          method: "POST",
+          headers,
+          body: JSON.stringify({
+            prompt: userPrompt || "User query",
+            answer: answer,
+          }),
+        });
+
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || `Server responded with HTTP ${res.status}`);
+        }
+
+        const data = await res.json();
+        setExplanationText(data.explanation || "Explanation completed directly.");
+      } catch (err: any) {
+        setExplanationError(err?.message || "Failed to load explanation.");
+      } finally {
+        setIsLoadingExplanation(false);
+      }
+    }
+  };
 
   const handleCopy = () => {
     if (!answer) return;
@@ -242,6 +294,64 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
               >
                 {answer}
               </ReactMarkdown>
+
+              {/* Optional Collapsed Reasoning Summary / Explanation Panel */}
+              {!isUser && !isStreamingThis && answer && !isGreeting && (
+                <div className="mt-3 pt-2.5 border-t border-[#E8E1D9]/70 not-prose">
+                  <button
+                    onClick={handleToggleExplanation}
+                    aria-expanded={isExplanationOpen}
+                    aria-controls={`explanation-panel-${message.id}`}
+                    disabled={isLoadingExplanation}
+                    className="inline-flex items-center gap-1.5 text-xs text-[#766B62] hover:text-[#D97745] font-medium transition focus:outline-none focus:ring-2 focus:ring-[#D97745]/30 rounded px-1.5 py-0.5 disabled:opacity-50"
+                  >
+                    <ChevronRight
+                      className={`w-3.5 h-3.5 transition-transform duration-150 ${
+                        isExplanationOpen ? "rotate-90 text-[#D97745]" : ""
+                      }`}
+                    />
+                    <span>{isExplanationOpen ? "Hide explanation" : "View explanation"}</span>
+                  </button>
+
+                  {isExplanationOpen && (
+                    <div
+                      id={`explanation-panel-${message.id}`}
+                      role="region"
+                      aria-label="Reasoning explanation"
+                      className="mt-2.5 p-3 rounded-lg bg-[#FAF8F5] border border-[#E8E1D9] text-xs text-[#28231F] leading-relaxed shadow-xs"
+                    >
+                      <div className="flex items-center gap-1.5 font-semibold text-[11px] text-[#766B62] mb-2 uppercase tracking-wider">
+                        <Sparkles className="w-3.5 h-3.5 text-[#D97745]" />
+                        <span>Reasoning Summary</span>
+                      </div>
+
+                      {isLoadingExplanation ? (
+                        <div className="flex items-center gap-2 text-[#766B62] italic py-1">
+                          <Loader2 className="w-3.5 h-3.5 animate-spin text-[#D97745]" />
+                          <span>Generating concise explanation...</span>
+                        </div>
+                      ) : explanationError ? (
+                        <div className="text-amber-800 flex items-center justify-between text-xs py-1">
+                          <span>{explanationError}</span>
+                          <button
+                            onClick={() => {
+                              setExplanationText(null);
+                              handleToggleExplanation();
+                            }}
+                            className="text-[#D97745] hover:underline font-semibold ml-2"
+                          >
+                            Retry
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="text-[#28231F] whitespace-pre-line text-xs font-sans">
+                          {explanationText}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           ) : isStreamingThis ? (
             <div className="flex items-center gap-2 text-xs text-[#766B62] italic py-1">

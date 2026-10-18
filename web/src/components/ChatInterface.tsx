@@ -41,6 +41,7 @@ export const ChatInterface: React.FC = () => {
   });
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inFlightConvIdRef = useRef<string | null>(null);
 
   // Initialize and load conversations + backend status
   useEffect(() => {
@@ -48,11 +49,21 @@ export const ChatInterface: React.FC = () => {
     setConversations(loaded);
 
     const activeId = getActiveConversationId();
+    let currentActive: Conversation | undefined;
     if (activeId && loaded.some((c) => c.id === activeId)) {
       setActiveConvId(activeId);
+      currentActive = loaded.find((c) => c.id === activeId);
     } else if (loaded.length > 0) {
       setActiveConvId(loaded[0].id);
       setActiveConversationId(loaded[0].id);
+      currentActive = loaded[0];
+    }
+
+    // Hydrate useChat internal message state from active conversation
+    if (currentActive && Array.isArray(currentActive.messages) && currentActive.messages.length > 0) {
+      setMessages(currentActive.messages as any);
+    } else {
+      setMessages([]);
     }
 
     setStoredPasswordState(getStoredPassword());
@@ -74,6 +85,13 @@ export const ChatInterface: React.FC = () => {
       const queryPrompt = params.get("q") || params.get("prompt");
       if (queryPrompt) {
         handleInputChange({ target: { value: queryPrompt } } as any);
+        // Clean URL search parameters once consumed so refreshing never re-injects stale input
+        try {
+          const cleanUrl = new URL(window.location.href);
+          cleanUrl.searchParams.delete("q");
+          cleanUrl.searchParams.delete("prompt");
+          window.history.replaceState({}, document.title, cleanUrl.pathname + (cleanUrl.search ? cleanUrl.search : ""));
+        } catch {}
       }
     }
   }, []);
@@ -98,9 +116,11 @@ export const ChatInterface: React.FC = () => {
     },
     initialMessages: activeConversation ? (activeConversation.messages as any) : [],
     onFinish: (message) => {
-      // Sync messages to local conversation with deduplication check
+      // Save into the conversation where the in-flight request originated to prevent misfiling
+      const targetId = inFlightConvIdRef.current || activeConvId || createNewConversation(message.content).id;
+      inFlightConvIdRef.current = null;
+
       setConversations((prev) => {
-        const targetId = activeConvId || createNewConversation(message.content).id;
         const existing = prev.find((c) => c.id === targetId);
 
         // Strictly deduplicate messages by ID to prevent duplicate assistant or user turns
@@ -150,13 +170,16 @@ export const ChatInterface: React.FC = () => {
     setActiveConvId(id);
     setActiveConversationId(id);
     const conv = conversations.find((c) => c.id === id);
-    if (conv) {
+    if (conv && Array.isArray(conv.messages)) {
       setMessages((conv.messages as any) || []);
+    } else {
+      setMessages([]);
     }
   };
 
   // Create new conversation
   const handleNewConversation = () => {
+    inFlightConvIdRef.current = null;
     const newConv = createNewConversation();
     const updated = [newConv, ...conversations];
     setConversations(updated);
@@ -184,17 +207,19 @@ export const ChatInterface: React.FC = () => {
 
   // Sync title when first user message is sent
   const onFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    if (!activeConvId) {
+    let targetId = activeConvId;
+    if (!targetId) {
       const newConv = createNewConversation(input);
       const updated = [newConv, ...conversations];
       setConversations(updated);
       saveConversations(updated);
-      setActiveConvId(newConv.id);
-      setActiveConversationId(newConv.id);
+      targetId = newConv.id;
+      setActiveConvId(targetId);
+      setActiveConversationId(targetId);
     } else if (messages.length === 0 && input.trim()) {
       setConversations((prev) => {
         const updated = prev.map((c) =>
-          c.id === activeConvId
+          c.id === targetId
             ? { ...c, title: input.slice(0, 32).trim() + (input.length > 32 ? "..." : "") }
             : c
         );
@@ -202,6 +227,7 @@ export const ChatInterface: React.FC = () => {
         return updated;
       });
     }
+    inFlightConvIdRef.current = targetId;
     handleSubmit(e);
   };
 
@@ -317,6 +343,11 @@ export const ChatInterface: React.FC = () => {
                       message={m as Message}
                       modelId={status.model}
                       isLastAssistant={m.role === "assistant" && idx === lastAssistantIndex}
+                      userPrompt={
+                        m.role === "assistant" && idx > 0 && messages[idx - 1]?.role === "user"
+                          ? messages[idx - 1].content
+                          : undefined
+                      }
                       onRetry={reload}
                       isLoading={isLoading}
                     />
