@@ -159,3 +159,10 @@ Isolation Fixed   Audit & Rescore    Research Engine   SFT Retraining   Frontier
 
 - **Current Milestone (Complete):** Phase 3B Stages 1 & 2 (Web Research Engine backend & SSRF firewall) verified and passing all unit/integration tests and production builds.
 - **Immediate Next Task:** **Phase 3B Stage 3 (Citation Synthesis & Frontend Source Cards)** or **Phase 4 Preparation**.
+
+---
+
+## 6. Infrastructure & Deployment Documentation
+
+- **Domain & Hosting Strategy:** [docs/domain_and_hosting_strategy.md](docs/domain_and_hosting_strategy.md) — Registrar options, Vercel custom domain architecture, and future self-hosted reverse-proxy specifications.
+- **Self-Hosting Readiness Checklist:** [docs/self_hosting_readiness_checklist.md](docs/self_hosting_readiness_checklist.md) — Technical checklist, reverse proxy streaming requirements, and pre-cutover verification runbook.
