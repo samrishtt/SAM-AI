@@ -86,8 +86,13 @@ export class ReasoningStreamFilter {
         return null;
       }
       // If generation contained an opening <think> tag or Assistant token without </think>,
-      // it was truncated during reasoning: fail closed without leaking internal thoughts.
-      if (this.buffer.includes("<think>") || this.buffer.includes("<｜Assistant｜>")) {
+      // or starts with typical internal reasoning deliberation phrases, fail closed without leaking thoughts.
+      const reasoningMarkers = ["<think>", "<｜Assistant｜>"];
+      const reasoningPrefixes = ["Okay,", "Alright,", "Let me think", "First,", "We need", "To find", "I need to"];
+      if (
+        reasoningMarkers.some((m) => this.buffer.includes(m)) ||
+        reasoningPrefixes.some((p) => trimmed.startsWith(p))
+      ) {
         return this.interruptedMessage;
       }
       // Otherwise, the output is a plain final response with absent delimiters.
@@ -122,8 +127,14 @@ export function filterReasoningFromText(rawText: string): string {
     return "*[SAM-AI completed reasoning, but did not emit a final answer statement.]*";
   }
 
-  // If contains <think> but no closing tag, it was truncated during reasoning
-  if (rawText.includes("<think>")) {
+  // If contains <think> or starts with reasoning deliberation, fail closed
+  if (
+    rawText.includes("<think>") ||
+    rawText.trim().startsWith("Okay,") ||
+    rawText.trim().startsWith("Alright,") ||
+    rawText.trim().startsWith("Let me think") ||
+    rawText.trim().startsWith("First, I need")
+  ) {
     return "*[SAM-AI Notice: The reasoning process was interrupted before a final answer could be generated. Please retry your request.]*";
   }
 

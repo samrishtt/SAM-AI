@@ -264,62 +264,91 @@ export async function streamGradioChat(options: GradioChatOptions): Promise<Read
           const decoder = new TextDecoder();
           let buffer = "";
           let lastFullText = "";
+          let currentEventType = "";
+          let streamCompleted = false;
 
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
+          // Send keepalive heartbeats every 3.5s to prevent Vercel idle connection timeout
+          const keepaliveTimer = setInterval(() => {
+            try {
+              controller.enqueue(encoder.encode(`0:""\n`));
+            } catch {
+              // Ignore if controller closed
+            }
+          }, 3500);
 
-            buffer += decoder.decode(value, { stream: true });
-            const lines = buffer.split("\n");
-            buffer = lines.pop() || "";
+          try {
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
 
-            for (const line of lines) {
-              const trimmedLine = line.trim();
-              if (trimmedLine.startsWith("data:")) {
-                const jsonStr = trimmedLine.slice(5).trim();
-                if (!jsonStr) continue;
+              buffer += decoder.decode(value, { stream: true });
+              const lines = buffer.split("\n");
+              buffer = lines.pop() || "";
 
-                try {
-                  const parsed = JSON.parse(jsonStr);
-                  // Gradio chatbot output is [[ [user, assistant], ... ], ""]
-                  if (Array.isArray(parsed) && parsed.length > 0) {
-                    const chatHistory = parsed[0];
-                    if (Array.isArray(chatHistory) && chatHistory.length > 0) {
-                      const lastTurn = chatHistory[chatHistory.length - 1];
-                      if (Array.isArray(lastTurn) && lastTurn.length > 1) {
-                        const currentFullText = lastTurn[1] || "";
-                        if (currentFullText.length > lastFullText.length) {
-                          const delta = currentFullText.slice(lastFullText.length);
-                          lastFullText = currentFullText;
-                          const cleanChunk = reasoningFilter.processChunk(delta);
-                          if (cleanChunk) {
-                            hasEmittedTokens = true;
-                            // Emit AI SDK token chunk: 0:"<cleanChunk>"\n
-                            controller.enqueue(encoder.encode(`0:${JSON.stringify(cleanChunk)}\n`));
+              for (const line of lines) {
+                const trimmedLine = line.trim();
+                if (!trimmedLine) {
+                  currentEventType = "";
+                  continue;
+                }
+
+                if (trimmedLine.startsWith("event:")) {
+                  currentEventType = trimmedLine.slice(6).trim();
+                  if (currentEventType === "complete") {
+                    streamCompleted = true;
+                  }
+                } else if (trimmedLine.startsWith("data:")) {
+                  const jsonStr = trimmedLine.slice(5).trim();
+                  if (!jsonStr) continue;
+
+                  try {
+                    const parsed = JSON.parse(jsonStr);
+                    // Gradio chatbot output is [[ [user, assistant], ... ], ""]
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                      const chatHistory = parsed[0];
+                      if (Array.isArray(chatHistory) && chatHistory.length > 0) {
+                        const lastTurn = chatHistory[chatHistory.length - 1];
+                        if (Array.isArray(lastTurn) && lastTurn.length > 1) {
+                          const currentFullText = lastTurn[1] || "";
+                          if (currentFullText.length > lastFullText.length) {
+                            const delta = currentFullText.slice(lastFullText.length);
+                            lastFullText = currentFullText;
+                            const cleanChunk = reasoningFilter.processChunk(delta);
+                            if (cleanChunk) {
+                              hasEmittedTokens = true;
+                              // Emit AI SDK token chunk: 0:"<cleanChunk>"\n
+                              controller.enqueue(encoder.encode(`0:${JSON.stringify(cleanChunk)}\n`));
+                            }
                           }
                         }
                       }
                     }
+                  } catch {
+                    // Ignore parse errors on malformed heartbeat events
                   }
-                } catch {
-                  // Ignore parse errors on malformed heartbeat events
+
+                  if (streamCompleted) {
+                    clearInterval(keepaliveTimer);
+                    const finalNotice = reasoningFilter.finalize();
+                    if (finalNotice) {
+                      hasEmittedTokens = true;
+                      controller.enqueue(encoder.encode(`0:${JSON.stringify(finalNotice)}\n`));
+                    }
+                    controller.enqueue(encoder.encode(`d:{"finishReason":"stop"}\n`));
+                    controller.close();
+                    return;
+                  }
                 }
-              } else if (trimmedLine.startsWith("event: complete")) {
-                // Stream finished - emit any final notice or buffered answer
-                const finalNotice = reasoningFilter.finalize();
-                if (finalNotice) {
-                  controller.enqueue(encoder.encode(`0:${JSON.stringify(finalNotice)}\n`));
-                }
-                controller.enqueue(encoder.encode(`d:{"finishReason":"stop"}\n`));
-                controller.close();
-                return;
               }
             }
+          } finally {
+            clearInterval(keepaliveTimer);
           }
 
           // Finish stream if loop terminates
           const finalNotice = reasoningFilter.finalize();
           if (finalNotice) {
+            hasEmittedTokens = true;
             controller.enqueue(encoder.encode(`0:${JSON.stringify(finalNotice)}\n`));
           }
           controller.enqueue(encoder.encode(`d:{"finishReason":"stop"}\n`));

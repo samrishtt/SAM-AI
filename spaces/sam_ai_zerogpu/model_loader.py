@@ -107,8 +107,10 @@ class ReasoningStreamFilter:
             if not trimmed:
                 return None
             # If generation contained an opening <think> tag or Assistant token without </think>,
-            # it was truncated during reasoning: fail closed without leaking internal thoughts.
-            if "<think>" in self.buffer or "<｜Assistant｜>" in self.buffer:
+            # or starts with typical internal reasoning deliberation phrases, fail closed without leaking thoughts.
+            reasoning_markers = ("<think>", "<｜Assistant｜>")
+            reasoning_prefixes = ("Okay,", "Alright,", "Let me think", "First,", "We need", "To find", "I need to")
+            if any(m in self.buffer for m in reasoning_markers) or any(trimmed.startswith(p) for p in reasoning_prefixes):
                 return self.interrupted_message
             # Otherwise, the output is a plain final response with absent delimiters.
             return trimmed
@@ -129,7 +131,7 @@ def filter_reasoning_from_text(raw_text: str) -> str:
         if after:
             return after
         return "*[SAM-AI completed reasoning, but did not emit a final answer statement.]*"
-    if "<think>" in raw_text:
+    if "<think>" in raw_text or raw_text.strip().startswith(("Okay,", "Alright,", "Let me think", "First, I need")):
         return "*[SAM-AI Notice: The reasoning process was interrupted before a final answer could be generated. Please retry your request.]*"
     return raw_text.strip()
 
