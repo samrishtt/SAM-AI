@@ -64,7 +64,7 @@ def verify_notebook():
     # 5. Metadata verification
     with open(METADATA_PATH, "r", encoding="utf-8") as f:
         meta = json.load(f)
-    assert meta["id"] == "samrishb/sam-ai-multidomain-baseline"
+    assert meta["id"] == "samrishb/sam-ai-multi-domain-baseline"
     assert meta["kernel_sources"] == []
     print("[OK] Kernel metadata verified (kernel_sources=[] confirms NO adapter input).")
 

@@ -94,6 +94,17 @@ def test_extract_symbolic_math():
     assert ans == "1/9"
     assert method == "hash_marker_symbolic"
 
+    # LaTeX boxed dfrac
+    text_dfrac = "Probability is \\boxed{\\dfrac{1}{9}}"
+    ans, method = extract_symbolic_math(text_dfrac)
+    assert ans == "1/9"
+    assert method == "latex_boxed_symbolic"
+
+    text_dfrac_neg = "Tan(theta) is \\boxed{-\\dfrac{3}{4}}"
+    ans, method = extract_symbolic_math(text_dfrac_neg)
+    assert ans == "-3/4"
+    assert method == "latex_boxed_symbolic"
+
     # Fraction in text
     text3 = "The resulting probability is -3/4 as required."
     ans, method = extract_symbolic_math(text3)

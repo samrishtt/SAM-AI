@@ -464,7 +464,7 @@ print(f"[OK] Packaged results archive: {zip_path.resolve()} ({zip_path.stat().st
 
     # Kernel Metadata
     metadata_content = {
-        "id": "samrishb/sam-ai-multidomain-baseline",
+        "id": "samrishb/sam-ai-multi-domain-baseline",
         "title": "SAM-AI Multi-Domain Baseline",
         "code_file": "sam_ai_multidomain_baseline.ipynb",
         "language": "python",

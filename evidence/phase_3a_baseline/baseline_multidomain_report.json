@@ -1,0 +1,76 @@
+{
+  "benchmark_title": "SAM-AI Multi-Domain Intelligence Baseline",
+  "foundation_model": "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B",
+  "adapter_attached": null,
+  "total_samples": 95,
+  "overall_correct": 82,
+  "overall_accuracy_percent": 86.32,
+  "total_duration_seconds": 7682.25,
+  "fixtures_sha256": "bf9654a95e279984908a96f556ea6e0bc210da550af01ccf688b5ea29e1a6b07",
+  "domain_breakdown": {
+    "mathematics_gsm8k": {
+      "total_samples": 20,
+      "correct_count": 19,
+      "accuracy_percent": 95.0,
+      "avg_latency_ms": 44945.03,
+      "avg_tokens": 560.85,
+      "truncation_count": 0
+    },
+    "mathematics_math500": {
+      "total_samples": 20,
+      "correct_count": 18,
+      "accuracy_percent": 90.0,
+      "avg_latency_ms": 101046.06,
+      "avg_tokens": 1245.0,
+      "truncation_count": 1
+    },
+    "coding_humaneval": {
+      "total_samples": 20,
+      "correct_count": 17,
+      "accuracy_percent": 85.0,
+      "avg_latency_ms": 125752.73,
+      "avg_tokens": 1565.9,
+      "truncation_count": 3
+    },
+    "science_reasoning": {
+      "total_samples": 10,
+      "correct_count": 9,
+      "accuracy_percent": 90.0,
+      "avg_latency_ms": 83034.62,
+      "avg_tokens": 1048.3,
+      "truncation_count": 1
+    },
+    "logic_constraints": {
+      "total_samples": 10,
+      "correct_count": 7,
+      "accuracy_percent": 70.0,
+      "avg_latency_ms": 108294.42,
+      "avg_tokens": 1361.5,
+      "truncation_count": 3
+    },
+    "instruction_following": {
+      "total_samples": 10,
+      "correct_count": 7,
+      "accuracy_percent": 70.0,
+      "avg_latency_ms": 24859.43,
+      "avg_tokens": 310.4,
+      "truncation_count": 0
+    },
+    "multiturn_context": {
+      "total_samples": 5,
+      "correct_count": 5,
+      "accuracy_percent": 100.0,
+      "avg_latency_ms": 16770.66,
+      "avg_tokens": 208.4,
+      "truncation_count": 0
+    }
+  },
+  "hardware": {
+    "device_count": 2,
+    "device_names": [
+      "Tesla T4",
+      "Tesla T4"
+    ],
+    "peak_vram_mb": 1555.22
+  }
+}
