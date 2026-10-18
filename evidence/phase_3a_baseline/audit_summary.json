@@ -1,0 +1,140 @@
+{
+  "benchmark_title": "SAM-AI Multi-Domain Intelligence Baseline Audit",
+  "foundation_model": "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B",
+  "adapter_attached": null,
+  "total_samples": 95,
+  "original_scoring": {
+    "overall_correct": 82,
+    "overall_accuracy_percent": 86.32,
+    "domain_breakdown": {
+      "mathematics_gsm8k": {
+        "total": 20,
+        "correct": 19,
+        "accuracy_percent": 95.0
+      },
+      "mathematics_math500": {
+        "total": 20,
+        "correct": 18,
+        "accuracy_percent": 90.0
+      },
+      "coding_humaneval": {
+        "total": 20,
+        "correct": 17,
+        "accuracy_percent": 85.0
+      },
+      "science_reasoning": {
+        "total": 10,
+        "correct": 9,
+        "accuracy_percent": 90.0
+      },
+      "logic_constraints": {
+        "total": 10,
+        "correct": 7,
+        "accuracy_percent": 70.0
+      },
+      "instruction_following": {
+        "total": 10,
+        "correct": 7,
+        "accuracy_percent": 70.0
+      },
+      "multiturn_context": {
+        "total": 5,
+        "correct": 5,
+        "accuracy_percent": 100.0
+      }
+    }
+  },
+  "corrected_scoring": {
+    "overall_correct": 84,
+    "overall_accuracy_percent": 88.42,
+    "domain_breakdown": {
+      "mathematics_gsm8k": {
+        "total": 20,
+        "correct": 19,
+        "accuracy_percent": 95.0
+      },
+      "mathematics_math500": {
+        "total": 20,
+        "correct": 20,
+        "accuracy_percent": 100.0
+      },
+      "coding_humaneval": {
+        "total": 20,
+        "correct": 17,
+        "accuracy_percent": 85.0
+      },
+      "science_reasoning": {
+        "total": 10,
+        "correct": 9,
+        "accuracy_percent": 90.0
+      },
+      "logic_constraints": {
+        "total": 10,
+        "correct": 7,
+        "accuracy_percent": 70.0
+      },
+      "instruction_following": {
+        "total": 10,
+        "correct": 7,
+        "accuracy_percent": 70.0
+      },
+      "multiturn_context": {
+        "total": 5,
+        "correct": 5,
+        "accuracy_percent": 100.0
+      }
+    }
+  },
+  "reclassified_records": [
+    {
+      "example_id": "math500_05_precalc",
+      "domain": "mathematics_math500",
+      "target": "-3/4",
+      "original_extracted": "-\\dfrac{3}{4}",
+      "corrected_extracted": "-3/4",
+      "original_is_correct": false,
+      "corrected_is_correct": true,
+      "reason_for_change": "LaTeX extractor corrected for dfrac/frac handling: -\\dfrac{3}{4} -> -3/4"
+    },
+    {
+      "example_id": "math500_10_prob",
+      "domain": "mathematics_math500",
+      "target": "1/9",
+      "original_extracted": "\\dfrac{1}{9}",
+      "corrected_extracted": "1/9",
+      "original_is_correct": false,
+      "corrected_is_correct": true,
+      "reason_for_change": "LaTeX extractor corrected for dfrac/frac handling: \\dfrac{1}{9} -> 1/9"
+    }
+  ],
+  "provenance": {
+    "raw_fixtures_file_sha256": "b7fc8795fa64c82a97a871efaee68491fc7aa93f3bb557a31197b710892caf3d",
+    "compact_inlined_fixtures_sha256": "bf9654a95e279984908a96f556ea6e0bc210da550af01ccf688b5ea29e1a6b07",
+    "report_recorded_fixtures_sha256": "bf9654a95e279984908a96f556ea6e0bc210da550af01ccf688b5ea29e1a6b07",
+    "hash_reconciliation_verdict": "MATCH: Report recorded compact serialized JSON string SHA-256; identical 95 sample objects.",
+    "vram_reporting_reconciliation": "Reported 1555.22 MB is torch.cuda.max_memory_allocated() for GPU 0 active tensor allocations during 4-bit NF4 quantized inference; total cluster VRAM is dual Tesla T4 (30 GB)."
+  },
+  "humaneval_safety_audit": {
+    "execution_status": "HISTORICAL_NOT_SECURITY_VALIDATED",
+    "controls_present_in_run": [
+      "Temporary file creation with random suffix",
+      "Subprocess execution (subprocess.run) with separate Python interpreter",
+      "Execution timeout (3.0 seconds)",
+      "Environment isolation flags (HF_HUB_OFFLINE=1, TRANSFORMERS_OFFLINE=1)"
+    ],
+    "controls_absent_in_run": [
+      "Linux seccomp-bpf syscall filtering",
+      "Kernel namespace isolation (user, mount, network, pid namespaces)",
+      "Filesystem chroot / read-only bind mounts",
+      "Kernel resource limits (cgroups v2 for memory/cpu capping)",
+      "Network namespace disconnection (iptables drop or unshare -n)"
+    ],
+    "proposed_future_harness": "Containerized bubblewrap/nsjail runner or Docker container with drop-all capabilities, read-only rootfs, and unshare network."
+  },
+  "evidence_hygiene": {
+    "raw_predictions_committed_to_git": false,
+    "raw_predictions_in_gitignore": true,
+    "sanitized_audit_clean": true
+  },
+  "ready_for_training_comparison": true
+}

@@ -132,8 +132,8 @@ def extract_symbolic_math(text: str) -> Tuple[Optional[str], str]:
     boxed_candidates = extract_boxed_content(text)
     if boxed_candidates:
         cand = boxed_candidates[-1].strip()
-        # Handle latex frac/dfrac: e.g. -\frac{3}{4}, \dfrac{1}{9}, or \frac{-3}{4}
-        frac_match = re.search(r"([+-]?)\s*\\(?:d)?frac\{([+-]?\d+)\}\{([+-]?\d+)\}", cand)
+        # Handle latex frac/dfrac: e.g. -\frac{3}{4}, \dfrac{1}{9}, \dfrac{ 2 }{ 5 }, or \frac{-3}{4}
+        frac_match = re.search(r"([+-]?)\s*\\(?:d)?frac\{\s*([+-]?\d+)\s*\}\{\s*([+-]?\d+)\s*\}", cand)
         if frac_match:
             prefix_sign = frac_match.group(1)
             num_val = int(frac_match.group(2))
